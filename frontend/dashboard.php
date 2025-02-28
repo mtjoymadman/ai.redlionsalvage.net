@@ -1,4 +1,10 @@
 <?php
+// Enable error reporting to catch PHP issues
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Start session
 session_start();
 
 // Check if user is logged in
@@ -7,20 +13,27 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Include database connection
+// Include database connection (assumes this file exists)
 require_once '../includes/db_connect.php';
+echo "Database connection included<br>";
 
+// Get user ID from session
 $user_id = $_SESSION['user_id'];
+echo "User ID: " . htmlspecialchars($user_id) . "<br>";
+
+// Connect to database
 $pdo = getPDOConnection();
+echo "PDO connection established<br>";
 
 // Fetch user details
 $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+echo "User data fetched: " . ($user ? "Yes" : "No") . "<br>";
 
+// Check if user is admin
 $is_admin = ($user['role'] === 'admin');
-
-echo "PHP executed successfully<br>";
+echo "Is admin: " . ($is_admin ? "Yes" : "No") . "<br>";
 ?>
 
 <!DOCTYPE html>
@@ -101,7 +114,7 @@ echo "PHP executed successfully<br>";
         console.log('Dashboard page loaded');
 
         document.getElementById('fleet-btn').addEventListener('click', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent page reload
             console.log('Fleet Management button clicked');
 
             const tbody = document.getElementById('fleet-table-body');
