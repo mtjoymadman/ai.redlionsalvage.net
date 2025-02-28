@@ -1,24 +1,24 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-// Include database connection
 require_once '../includes/db_connect.php';
 
 $user_id = $_SESSION['user_id'];
 $pdo = getPDOConnection();
 
-// Fetch user details
 $stmt = $pdo->prepare("SELECT username, email, role FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Check if user is admin
 $is_admin = ($user['role'] === 'admin');
 ?>
 
@@ -33,48 +33,9 @@ $is_admin = ($user['role'] === 'admin');
     <style>
         #fleet-section { display: none; margin-top: 20px; }
     </style>
-    <script>
-        console.log('Script loaded in head'); // Immediate check
-        function fleetClickHandler(event) {
-            event.preventDefault();
-            console.log('Fleet button clicked inline');
-            document.getElementById('fleet-section').style.display = 'block';
-            document.getElementById('fleet-table-body').innerHTML = '<tr><td colspan="3">Test data loaded</td></tr>';
-        }
-    </script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">YardMaster</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="dashboard.php">Dashboard</a>
-                    </li>
-                    <?php if ($is_admin): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Fleet Management</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Admin Settings</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="profile.php">Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include '../includes/nav.php'; ?>
 
     <div class="container mt-4">
         <h1>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h1>
@@ -87,7 +48,7 @@ $is_admin = ($user['role'] === 'admin');
                     <h3>Admin Dashboard</h3>
                 </div>
                 <div class="card-body">
-                    <button type="button" id="fleet-btn" class="btn btn-primary" onclick="fleetClickHandler(event)">Fleet Management</button>
+                    <button type="button" id="fleet-btn" class="btn btn-primary">Fleet Management</button>
                     <button type="button" class="btn btn-secondary">User Management</button>
                 </div>
             </div>
@@ -120,13 +81,47 @@ $is_admin = ($user['role'] === 'admin');
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/script.js"></script>
     <script>
-        console.log('Body script loaded');
+        console.log('Dashboard page loaded');
+
         document.getElementById('fleet-btn').addEventListener('click', function(event) {
             event.preventDefault();
-            console.log('Fleet button clicked via listener');
+            console.log('Fleet Management button clicked');
+            const tbody = document.getElementById('fleet-table-body');
+            tbody.innerHTML = '<tr><td colspan="3">Loading fleet data...</td></tr>';
             document.getElementById('fleet-section').style.display = 'block';
-            document.getElementById('fleet-table-body').innerHTML = '<tr><td colspan="3">Test data loaded via listener</td></tr>';
+
+            fetch('/ai.redlionsalvage.net/api/fleet/get_fleet_vehicles.php?limit=10&page=1')
+                .then(response => {
+                    console.log('Fetch response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Fetch failed with status ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fleet data received:', data);
+                    if (data.success) {
+                        tbody.innerHTML = '';
+                        data.data.vehicles.forEach(vehicle => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${vehicle.vehicle_id || 'N/A'}</td>
+                                    <td>${vehicle.type || 'N/A'}</td>
+                                    <td>${vehicle.status || 'N/A'}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        console.error('API error:', data.error);
+                        tbody.innerHTML = '<tr><td colspan="3">Error: ' + data.error + '</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error.message);
+                    tbody.innerHTML = '<tr><td colspan="3">Fetch error: ' + error.message + '</td></tr>';
+                });
         });
     </script>
 </body>
