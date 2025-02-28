@@ -33,33 +33,6 @@ $is_admin = ($user['role'] === 'admin');
     <style>
         #fleet-section { display: none; margin-top: 20px; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        console.log('Script loaded in head');
-
-        function handleFleetClick() {
-            console.log('Fleet button clicked via inline');
-            document.getElementById('fleet-table-body').innerHTML = '<tr><td colspan="3">Test data loaded</td></tr>';
-            document.getElementById('fleet-section').style.display = 'block';
-            document.getElementById('fleet-btn').disabled = true;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM fully loaded');
-            const fleetBtn = document.getElementById('fleet-btn');
-            if (fleetBtn) {
-                console.log('Fleet button found');
-                fleetBtn.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Fleet button clicked via listener');
-                    handleFleetClick();
-                });
-            } else {
-                console.error('Fleet button not found');
-            }
-        });
-    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -105,7 +78,7 @@ $is_admin = ($user['role'] === 'admin');
                     <h3>Admin Dashboard</h3>
                 </div>
                 <div class="card-body">
-                    <button type="button" id="fleet-btn" class="btn btn-primary" onclick="handleFleetClick()">Fleet Management</button>
+                    <button type="button" id="fleet-btn" class="btn btn-primary">Fleet Management</button>
                     <button type="button" class="btn btn-secondary">User Management</button>
                 </div>
             </div>
@@ -136,5 +109,45 @@ $is_admin = ($user['role'] === 'admin');
             </div>
         <?php endif; ?>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        console.log('Dashboard page loaded');
+        
+        document.getElementById('fleet-btn').addEventListener('click', function(event) {
+            event.preventDefault();
+            console.log('Fleet Management button clicked');
+            // Test with static data first
+            document.getElementById('fleet-table-body').innerHTML = '<tr><td colspan="3">Loading fleet data...</td></tr>';
+            document.getElementById('fleet-section').style.display = 'block';
+
+            // Add fetch after confirming basic functionality
+            fetch('/ai.redlionsalvage.net/api/fleet/get_fleet_vehicles.php?limit=10&page=1')
+                .then(response => {
+                    console.log('Fetch response status:', response.status);
+                    if (!response.ok) throw new Error('Fetch failed');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fleet data received:', data);
+                    if (data.success) {
+                        const tbody = document.getElementById('fleet-table-body');
+                        tbody.innerHTML = '';
+                        data.data.vehicles.forEach(vehicle => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${vehicle.vehicle_id || 'N/A'}</td>
+                                    <td>${vehicle.type || 'N/A'}</td>
+                                    <td>${vehicle.status || 'N/A'}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        console.error('API error:', data.error);
+                    }
+                })
+                .catch(error => console.error('Fetch error:', error));
+        });
+    </script>
 </body>
 </html>
