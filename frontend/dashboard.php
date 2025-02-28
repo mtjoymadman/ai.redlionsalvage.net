@@ -78,8 +78,8 @@ $is_admin = ($user['role'] === 'admin');
                     <h3>Admin Dashboard</h3>
                 </div>
                 <div class="card-body">
-                    <button id="fleet-btn" class="btn btn-primary">Fleet Management</button>
-                    <button class="btn btn-secondary">User Management</button>
+                    <button type="button" id="fleet-btn" class="btn btn-primary">Fleet Management</button>
+                    <button type="button" class="btn btn-secondary">User Management</button>
                 </div>
             </div>
             <div id="fleet-section" class="card mt-4">
@@ -112,16 +112,24 @@ $is_admin = ($user['role'] === 'admin');
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('fleet-btn')?.addEventListener('click', function() {
+        document.getElementById('fleet-btn')?.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent any default behavior
+            console.log('Fleet button clicked'); // Debug log
             fetchFleetData();
             document.getElementById('fleet-section').style.display = 'block';
             this.disabled = true; // Prevent multiple clicks
         });
 
         function fetchFleetData() {
+            console.log('Fetching fleet data...'); // Debug log
             fetch('../api/fleet/get_fleet_vehicles.php?limit=10&page=1')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status); // Debug log
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Data received:', data); // Debug log
                     if (data.success) {
                         const tbody = document.getElementById('fleet-table-body');
                         tbody.innerHTML = ''; // Clear existing rows
@@ -145,7 +153,7 @@ $is_admin = ($user['role'] === 'admin');
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
-                    alert('Failed to load fleet data.');
+                    alert('Failed to load fleet data: ' + error.message);
                 })
                 .finally(() => {
                     document.getElementById('fleet-btn').disabled = false;
