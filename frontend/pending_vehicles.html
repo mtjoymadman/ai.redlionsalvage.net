@@ -1,0 +1,47 @@
+<?php
+require_once '../api/config.php';
+if (!isset($_SESSION['employee_id']) || !in_array('admin', json_decode(file_get_contents("http://{$_SERVER['HTTP_HOST']}/api/get_user_roles.php"), true))) {
+    header('Location: dashboard.php');
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pending Vehicles</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pending Vehicles</h1>
+        <table id="pendingTable" class="timeclock-table">
+            <tr><th>VIN</th><th>Make</th><th>Model</th><th>Year</th><th>Condition</th><th>Weight</th><th>Submitted By</th><th>Truck</th><th>Action</th></tr>
+        </table>
+        <div id="message" class="error"></div>
+    </div>
+    <script>
+        function updatePendingTable() {
+            fetch('/api/vehicle_pickup/get_pending_vehicles.php').then(response => response.json()).then(data => {
+                const table = document.getElementById('pendingTable');
+                table.innerHTML = '<tr><th>VIN</th><th>Make</th><th>Model</th><th>Year</th><th>Condition</th><th>Weight</th><th>Submitted By</th><th>Truck</th><th>Action</th></tr>';
+                data.forEach(vehicle => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${vehicle.vin}</td><td>${vehicle.make}</td><td>${vehicle.model}</td><td>${vehicle.year}</td><td>${vehicle.condition}</td><td>${vehicle.weight}</td><td>${vehicle.submitted_by}</td><td>${vehicle.pickup_truck_id}</td><td><button class="button" onclick="processVehicle(${vehicle.id}, 'approve')">Process</button><button class="button" onclick="processVehicle(${vehicle.id}, 'reject')">Reject</button></td>`;
+                    table.appendChild(tr);
+                });
+            });
+        }
+        function processVehicle(id, action) {
+            fetch('/api/vehicle_pickup/process_pending.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, action })
+            }).then(response => response.json()).then(data => {
+                document.getElementById('message').textContent = data.message;
+                updatePendingTable();
+            });
+        }
+        updatePendingTable();
+    </script>
+</body>
+</html>

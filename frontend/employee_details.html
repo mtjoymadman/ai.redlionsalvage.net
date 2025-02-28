@@ -1,0 +1,45 @@
+<?php
+require_once '../api/config.php';
+if (!isset($_SESSION['employee_id']) || !in_array('admin', json_decode(file_get_contents("http://{$_SERVER['HTTP_HOST']}/api/get_user_roles.php"), true))) {
+    header('Location: dashboard.php');
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Management</h1>
+        <form id="editEmployeeForm" class="vehicle-form" method="POST" action="/api/employee_management/update_employee.php">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="text" name="full_name" placeholder="Full Name" required>
+            <input type="password" name="password" placeholder="New Password">
+            <select name="roles[]" multiple>
+                <?php
+                $result = $db->query("SELECT role_name FROM roles");
+                while ($row = $result->fetch_assoc()) {
+                    echo "<option value='{$row['role_name']}'>{$row['role_name']}</option>";
+                }
+                ?>
+            </select>
+            <button type="submit" class="button">Update Employee</button>
+        </form>
+        <div id="message" class="error"></div>
+    </div>
+    <script>
+        document.getElementById('editEmployeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/employee_management/update_employee.php', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(response => response.json()).then(data => {
+                document.getElementById('message').textContent = data.message;
+            });
+        });
+    </script>
+</body>
+</html>

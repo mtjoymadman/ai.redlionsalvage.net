@@ -1,0 +1,932 @@
+Project Snapshot: YardMaster System
+Date: February 27, 2025
+Associated X Account: 
+@mtjoymadman
+
+Description: A PHP-based web application for managing a salvage yard, featuring employee login, time tracking, fleet management, and more. Currently in development mode with admin login requiring no password, styled with a dark theme and red accents per style.css.
+Directory Structure
+/
+├── api/
+│   ├── config.php
+│   ├── login.php
+│   ├── get_user_roles.php
+│   └── logout.php
+├── frontend/
+│   ├── index.php
+│   ├── dashboard.php
+│   ├── style.css
+│   └── logo.png (assumed placeholder, replace with actual logo)
+Database Schema
+Database: salvageyard_ai
+Tables: 21 total, created via phpMyAdmin import.
+Snapshot: Below is the full schema.sql as executed, including initial data.
+schema.sql
+sql
+CREATE DATABASE IF NOT EXISTS salvageyard_ai;
+USE salvageyard_ai;
+
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    suspended BOOLEAN DEFAULT FALSE,
+    last_status_change TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    email VARCHAR(100)
+);
+
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE employee_roles (
+    employee_id INT,
+    role_id INT,
+    FOREIGN KEY (employee_id) REFERENCES employees(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    PRIMARY KEY (employee_id, role_id)
+);
+
+CREATE TABLE time_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT,
+    clock_in TIMESTAMP NOT NULL,
+    clock_out TIMESTAMP,
+    extra_time INT DEFAULT 0,
+    FOREIGN KEY (employee_id) REFERENCES employees(id),
+    INDEX (clock_in)
+);
+
+CREATE TABLE breaks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    time_log_id INT,
+    start_time TIMESTAMP NOT NULL,
+    duration INT NOT NULL,
+    FOREIGN KEY (time_log_id) REFERENCES time_logs(id)
+);
+
+CREATE TABLE fleet_vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    make VARCHAR(50) NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    year INT NOT NULL,
+    license_plate VARCHAR(20),
+    vin VARCHAR(17) UNIQUE NOT NULL,
+    has_scales BOOLEAN DEFAULT FALSE,
+    current_weight DECIMAL(10,2) DEFAULT 0,
+    last_weighed_at TIMESTAMP,
+    mileage INT DEFAULT 0,
+    maintenance_due DATE DEFAULT NULL,
+    INDEX (has_scales, last_weighed_at)
+);
+
+CREATE TABLE pending_vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    stock_number VARCHAR(20) NOT NULL,
+    vin VARCHAR(17) NOT NULL,
+    make VARCHAR(50),
+    model VARCHAR(50),
+    year INT,
+    condition VARCHAR(50),
+    weight DECIMAL(10,2),
+    photo VARCHAR(255),
+    submitted_by INT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    pickup_truck_id INT,
+    FOREIGN KEY (submitted_by) REFERENCES employees(id),
+    FOREIGN KEY (pickup_truck_id) REFERENCES fleet_vehicles(id),
+    INDEX (submitted_at)
+);
+
+CREATE TABLE vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    stock_number VARCHAR(20) NOT NULL,
+    vin VARCHAR(17) UNIQUE NOT NULL,
+    make VARCHAR(50),
+    model VARCHAR(50),
+    year INT,
+    date_acquired TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (date_acquired)
+);
+
+CREATE TABLE vehicle_stripping (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    stock_number VARCHAR(20) NOT NULL,
+    vin VARCHAR(17) NOT NULL,
+    first_scan_at TIMESTAMP,
+    strip_confirmed_at TIMESTAMP,
+    cat_present BOOLEAN DEFAULT FALSE,
+    yardman_id INT,
+    vehicle_id INT,
+    FOREIGN KEY (yardman_id) REFERENCES employees(id),
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
+    INDEX (yardman_id, first_scan_at)
+);
+
+CREATE TABLE fleet_vehicle_assignments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id INT,
+    driver_id INT,
+    date_assigned TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    unassigned_at TIMESTAMP,
+    FOREIGN KEY (vehicle_id) REFERENCES fleet_vehicles(id),
+    FOREIGN KEY (driver_id) REFERENCES employees(id),
+    INDEX (vehicle_id, date_assigned)
+);
+
+CREATE TABLE parts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    interchange_info TEXT
+);
+
+CREATE TABLE vehicle_parts (
+    vehicle_id INT,
+    part_id INT,
+    quantity INT DEFAULT 1,
+    lot_number VARCHAR(50),
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
+    FOREIGN KEY (part_id) REFERENCES parts(id),
+    PRIMARY KEY (vehicle_id, part_id)
+);
+
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE sales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    employee_id INT,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (employee_id) REFERENCES employees(id),
+    INDEX (date)
+);
+
+CREATE TABLE sale_items (
+    sale_id INT,
+    part_id INT,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    exchange_returned BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sale_id) REFERENCES sales(id),
+    FOREIGN KEY (part_id) REFERENCES parts(id),
+    PRIMARY KEY (sale_id, part_id)
+);
+
+CREATE TABLE scrap_customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seller_name VARCHAR(100),
+    drivers_license_number VARCHAR(20) UNIQUE,
+    drivers_license_picture VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE scrap_metal_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    metal_type VARCHAR(50) UNIQUE NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE scrap_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    truck_id INT,
+    metal_type VARCHAR(50),
+    weight DECIMAL(10,2),
+    price DECIMAL(10,2),
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_by INT,
+    FOREIGN KEY (customer_id) REFERENCES scrap_customers(id),
+    FOREIGN KEY (truck_id) REFERENCES fleet_vehicles(id),
+    FOREIGN KEY (processed_by) REFERENCES employees(id),
+    INDEX (transaction_date)
+);
+
+CREATE TABLE fleet_maintenance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    truck_id INT,
+    maintenance_date DATE,
+    maintenance_type VARCHAR(50),
+    notes TEXT,
+    mileage_interval INT,
+    scheduled_by INT,
+    completed_at TIMESTAMP,
+    FOREIGN KEY (truck_id) REFERENCES fleet_vehicles(id),
+    FOREIGN KEY (scheduled_by) REFERENCES employees(id),
+    INDEX (maintenance_date)
+);
+
+CREATE TABLE fleet_maintenance_receipts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    truck_id INT,
+    receipt_path VARCHAR(255),
+    service_type VARCHAR(50),
+    service_date DATE,
+    amount DECIMAL(10,2),
+    needs_reimbursement BOOLEAN DEFAULT FALSE,
+    notes TEXT,
+    uploaded_by INT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    approved_by INT,
+    approved_at TIMESTAMP NULL,
+    FOREIGN KEY (truck_id) REFERENCES fleet_vehicles(id),
+    FOREIGN KEY (uploaded_by) REFERENCES employees(id),
+    FOREIGN KEY (approved_by) REFERENCES employees(id),
+    INDEX (uploaded_at)
+);
+
+CREATE TABLE fleet_vehicle_documents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    truck_id INT,
+    document_path VARCHAR(255),
+    document_type VARCHAR(50),
+    expiration_date DATE NOT NULL,
+    notes TEXT,
+    uploaded_by INT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    approved_by INT,
+    approved_at TIMESTAMP NULL,
+    expiration_notified BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (truck_id) REFERENCES fleet_vehicles(id),
+    FOREIGN KEY (uploaded_by) REFERENCES employees(id),
+    FOREIGN KEY (approved_by) REFERENCES employees(id),
+    INDEX (uploaded_at, status)
+);
+
+INSERT INTO roles (role_name) VALUES ('admin');
+INSERT INTO roles (role_name) VALUES ('baby admin');
+INSERT INTO roles (role_name) VALUES ('office');
+INSERT INTO roles (role_name) VALUES ('driver');
+INSERT INTO roles (role_name) VALUES ('yardman');
+INSERT INTO roles (role_name) VALUES ('fleet');
+INSERT INTO roles (role_name) VALUES ('employee');
+
+INSERT INTO employees (username, full_name, password, email) 
+VALUES ('admin', 'Administrator', '', 'mtjoymadman@gmail.com');
+
+INSERT INTO employee_roles (employee_id, role_id) VALUES (1, 1);
+
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Copper #1 Bare Bright', 3.50);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Copper #1', 3.20);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Copper #2', 2.90);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Copper Burnt Wire', 2.50);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Brass Yellow', 1.80);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Brass Red', 2.00);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Brass Dirty', 1.50);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Aluminum Clean Cast', 0.60);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Aluminum Extruded', 0.70);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Aluminum Breakage', 0.40);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Steel #1 Prepared', 0.10);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Steel #2 Prepared', 0.08);
+INSERT INTO scrap_metal_types (metal_type, price) VALUES ('Steel Unprepared', 0.06);
+Description: Creates 21 tables for employee management, time tracking, vehicle/fleet operations, parts/sales, and scrap transactions. Initial data includes 7 roles, admin user (no password), and 13 scrap metal types.
+Status: Imported successfully via phpMyAdmin, all 21 tables present with initial data.
+Backend Files
+/api/config.php
+php
+<?php
+session_start();
+define('DB_HOST', 'mysql.us.cloudlogin.co');
+define('DB_USER', 'salvageyard_ai');
+define('DB_PASS', '7361dead');
+define('DB_NAME', 'salvageyard_ai');
+define('DEVELOPMENT_MODE', true);
+define('TIMEZONE', 'America/New_York');
+define('NOTIFICATION_EMAIL', 'mtjoymadman@gmail.com');
+
+$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+if ($db->connect_error) {
+    die("Connection failed: " . $db->connect_error);
+}
+date_default_timezone_set(TIMEZONE);
+?>
+Description: Configures database connection to mysql.us.cloudlogin.co, sets development mode (enables no-password login for admin), and initializes timezone.
+/api/login.php
+php
+<?php
+require_once 'config.php';
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'] ?? '';
+    $password = isset($_POST['password']) ? $_POST['password'] : null;
+
+    $stmt = $db->prepare("SELECT id, password, suspended FROM employees WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if (defined('DEVELOPMENT_MODE') && DEVELOPMENT_MODE && $username === 'admin' && $user && $user['password'] === '' && !$user['suspended'] && ($password === null || $password === '')) {
+        $_SESSION['employee_id'] = $user['id'];
+        $stmt = $db->prepare("INSERT INTO time_logs (employee_id, clock_in) VALUES (?, NOW())");
+        $stmt->bind_param("i", $user['id']);
+        $stmt->execute();
+        echo json_encode(['success' => true]);
+    } elseif ($user && $password !== null && password_verify($password, $user['password']) && !$user['suspended']) {
+        $_SESSION['employee_id'] = $user['id'];
+        $stmt = $db->prepare("INSERT INTO time_logs (employee_id, clock_in) VALUES (?, NOW())");
+        $stmt->bind_param("i", $user['id']);
+        $stmt->execute();
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Invalid credentials or account suspended']);
+    }
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+}
+?>
+Description: Handles login via POST. In DEVELOPMENT_MODE, allows admin with no password ('') if input is blank or absent. Otherwise, uses password_verify() for hashed passwords. Sets session and logs clock-in.
+/api/get_user_roles.php
+php
+<?php
+require_once 'config.php';
+header('Content-Type: application/json');
+
+$employee_id = $_GET['employee_id'] ?? $_SESSION['employee_id'];
+if (!$employee_id) {
+    echo json_encode([]);
+    exit;
+}
+
+$stmt = $db->prepare("SELECT r.role_name FROM employee_roles er JOIN roles r ON er.role_id = r.id WHERE er.employee_id = ?");
+$stmt->bind_param("i", $employee_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$roles = [];
+while ($row = $result->fetch_assoc()) {
+    $roles[] = $row['role_name'];
+}
+echo json_encode($roles);
+?>
+Description: Returns JSON array of roles for an employee (used by dashboard.php to show role-based buttons).
+/api/logout.php
+php
+<?php
+require_once 'config.php';
+if (isset($_SESSION['employee_id'])) {
+    $stmt = $db->prepare("UPDATE time_logs SET clock_out = NOW() WHERE employee_id = ? AND clock_out IS NULL");
+    $stmt->bind_param("i", $_SESSION['employee_id']);
+    $stmt->execute();
+    session_destroy();
+}
+header('Location: /frontend/index.php');
+exit;
+?>
+Description: Logs out the user, clocks out their time log, destroys the session, and redirects to login.
+Frontend Files
+/frontend/index.php
+php
+<?php
+require_once '../api/config.php';
+if (isset($_SESSION['employee_id'])) {
+    header('Location: dashboard.php');
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YardMaster Login</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+    <header>
+        <img src="/frontend/logo.png" alt="YardMaster Logo" class="logo">
+        <a href="/frontend/index.php" class="home-btn">Home</a>
+    </header>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="loginForm" class="vehicle-form" method="POST" action="/api/login.php">
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password (optional in dev mode)">
+            </div>
+            <button type="submit" class="button">Login</button>
+        </form>
+        <div id="message" class="error"></div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/login.php', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.href = '/frontend/dashboard.php';
+                } else {
+                    document.getElementById('message').textContent = data.message;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+Description: Login page with dark theme, red accents, and logo in header. Password field visible but optional for admin. Submits via AJAX to /api/login.php.
+/frontend/dashboard.php
+php
+<?php
+require_once '../api/config.php';
+if (!isset($_SESSION['employee_id'])) {
+    header('Location: index.php');
+    exit;
+}
+$roles = json_decode(file_get_contents("http://{$_SERVER['HTTP_HOST']}/api/get_user_roles.php?employee_id=" . $_SESSION['employee_id']), true);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YardMaster Dashboard</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+    <header>
+        <img src="/frontend/logo.png" alt="YardMaster Logo" class="logo">
+        <a href="/frontend/dashboard.php" class="home-btn">Home</a>
+        <a href="/api/logout.php" class="logout-btn">Logout</a>
+    </header>
+    <div class="container">
+        <h1>Dashboard</h1>
+        <div class="button-grid">
+            <?php if (in_array('admin', $roles) || in_array('baby admin', $roles)): ?>
+                <a href="employee_details.php" class="button">Employee Management</a>
+                <a href="reporting.php" class="button">Reporting</a>
+                <a href="pending_vehicles.php" class="button">Pending Vehicles</a>
+            <?php endif; ?>
+            <?php if (in_array('employee', $roles) || in_array('yardman', $roles) || in_array('admin', $roles) || in_array('baby admin', $roles)): ?>
+                <a href="timeclock.php" class="button">Timeclock</a>
+            <?php endif; ?>
+            <?php if (in_array('driver', $roles) || in_array('pickup', $roles) || in_array('admin', $roles) || in_array('baby admin', $roles)): ?>
+                <a href="pickup.php" class="button">Vehicle Pickup</a>
+            <?php endif; ?>
+            <?php if (in_array('fleet', $roles) || in_array('driver', $roles) || in_array('admin', $roles) || in_array('baby admin', $roles)): ?>
+                <a href="fleet.php" class="button">Fleet Management</a>
+            <?php endif; ?>
+            <?php if (in_array('office', $roles) || in_array('admin', $roles) || in_array('baby admin', $roles)): ?>
+                <a href="pos.php" class="button">Inventory & POS</a>
+                <a href="scrap.php" class="button">Scrap Purchases</a>
+            <?php endif; ?>
+            <?php if (in_array('driver', $roles) || in_array('admin', $roles) || in_array('baby admin', $roles)): ?>
+                <a href="scrap_driver.php" class="button">Scrap Driver</a>
+            <?php endif; ?>
+            <?php if (in_array('yardman', $roles)): ?>
+                <a href="yardman.php" class="button">Yardman Operations</a>
+            <?php endif; ?>
+        </div>
+    </div>
+</body>
+</html>
+Description: Dashboard with role-based navigation buttons, dark theme, red accents, and logo in header.
+/frontend/style.css
+css
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #000000 0%, #1A1A1A 100%);
+    color: #FFFFFF;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    padding: 2vw;
+}
+
+header {
+    background: #000000;
+    border-bottom: 4px solid #FF0000;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 6px 12px rgba(255, 0, 0, 0.4), inset 0 -1px 5px rgba(255, 0, 0, 0.2);
+    position: relative;
+}
+
+.logo {
+    max-height: 200px;
+    display: inline-block;
+    margin-bottom: 1rem;
+    border: 6px solid #C0C0C0;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5), -3px -3px 6px rgba(255, 255, 255, 0.2) inset;
+}
+
+header a {
+    color: #C0C0C0;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+header a:hover {
+    color: #FF0000;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+}
+
+.container, .login-container {
+    max-width: 90%;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(26, 26, 26, 0.95);
+    border: 3px solid #C0C0C0;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 5px rgba(192, 192, 192, 0.1);
+}
+
+.login-container {
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container .logo {
+    display: block;
+    margin: 0 auto 1rem;
+}
+
+form {
+    margin: 1.5rem 0;
+}
+
+input, button, select {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: 2px solid #C0C0C0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+input:focus, select:focus {
+    border-color: #FF0000;
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.6), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+button {
+    background: linear-gradient(to bottom, #FF0000, #B30000);
+    color: #FFFFFF;
+    border: 2px solid #C0C0C0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: linear-gradient(to bottom, #C0C0C0, #A9A9A9);
+    color: #000000;
+    border-color: #FF0000;
+    box-shadow: 0 4px 12px rgba(192, 192, 192, 0.6);
+}
+
+.error {
+    color: #FF0000;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    text-shadow: 0 0 3px rgba(255, 0, 0, 0.5);
+}
+
+h1, h2, h3 {
+    color: #FFFFFF;
+    border-bottom: 2px solid #FF0000;
+    padding-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.4);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.button-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.button {
+    display: inline-block;
+    padding: 1.2rem 2.5rem;
+    background: linear-gradient(to bottom, #FF0000, #B30000);
+    color: #FFFFFF;
+    text-decoration: none;
+    border: 3px solid #C0C0C0;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 180px;
+    text-align: center;
+}
+
+.button:hover {
+    background: linear-gradient(to bottom, #C0C0C0, #A9A9A9);
+    color: #000000;
+    border-color: #FF0000;
+    box-shadow: 0 8px 16px rgba(192, 192, 192, 0.7);
+}
+
+.timeclock-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.timeclock-buttons button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background: #FF0000;
+    color: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    flex: 1 1 80px;
+    max-width: 100px;
+}
+
+.timeclock-buttons button:hover {
+    background: #C0C0C0;
+    color: #000000;
+}
+
+.worked-time {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #C0C0C0;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.timeclock-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(26, 26, 26, 0.95);
+    border: 1px solid #C0C0C0;
+}
+
+.timeclock-table th,
+.timeclock-table td {
+    padding: 0.4rem;
+    text-align: center;
+    border-bottom: 1px solid #C0C0C0;
+    font-size: 0.9rem;
+}
+
+.timeclock-table th {
+    background: #FF0000;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.timeclock-table tr:nth-child(even) {
+    background: rgba(50, 50, 50, 0.5);
+}
+
+.correction-form {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.correction-form input[type="text"],
+.correction-form input[type="date"],
+.correction-form input[type="time"] {
+    width: 100px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+}
+
+.correction-form input[type="number"] {
+    width: 60px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+}
+
+.correction-form button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+.date-input {
+    width: 80px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+}
+
+.time-input {
+    width: 80px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+}
+
+.number-input {
+    width: 60px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+}
+
+.readonly-input {
+    width: 100%;
+    padding: 0.4rem;
+    font-size: 0.9rem;
+    background: #1A1A1A;
+    color: #C0C0C0;
+    border: 1px solid #C0C0C0;
+    border-radius: 5px;
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    body { padding: 1vw; }
+    header, .container { padding: 1rem; }
+    .logo { max-height: 160px; }
+    .timeclock-table th, .timeclock-table td { font-size: 0.8rem; padding: 0.3rem; }
+    .correction-form input[type="text"],
+    .correction-form input[type="date"],
+    .correction-form input[type="time"] { width: 90px; }
+    .date-input, .time-input { width: 70px; }
+}
+
+@media (max-width: 480px) {
+    header a { display: block; margin-top: 0.5rem; }
+    h2, h3 { font-size: 1.3rem; }
+    .logo { max-height: 120px; }
+    .timeclock-buttons { flex-direction: column; gap: 0.3rem; }
+    .timeclock-buttons button { width: 100%; max-width: none; }
+    .correction-form { flex-direction: column; gap: 0.3rem; }
+    .correction-form input[type="text"],
+    .correction-form input[type="date"],
+    .correction-form input[type="time"] { width: 100%; }
+    .date-input, .time-input { width: 100%; }
+}
+
+.home-btn, .logout-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #FF0000, #B30000);
+    color: #FFFFFF;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    border: 3px solid #C0C0C0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.home-btn {
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.logout-btn {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.home-btn:hover, .logout-btn:hover {
+    background: linear-gradient(to bottom, #C0C0C0, #A9A9A9);
+    color: #000000;
+    border-color: #FF0000;
+    box-shadow: 0 6px 12px rgba(192, 192, 192, 0.6);
+}
+
+@media (max-width: 480px) {
+    .home-btn, .logout-btn {
+        position: static;
+        transform: none;
+        margin: 0.5rem auto;
+        width: fit-content;
+    }
+}
+
+.change-password-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.change-password-form label {
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.change-password-form select {
+    width: 50%;
+    max-width: 300px;
+}
+
+.message {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    color: #FF0000;
+    text-shadow: 0 0 3px rgba(255, 0, 0, 0.5);
+}
+
+.vehicle-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    flex: 1 1 200px;
+    max-width: 250px;
+}
+
+.vehicle-update-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.vehicle-update-form button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.edit-btn {
+    background: linear-gradient(to bottom, #FF0000, #B30000);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.save-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+Description: Dark-themed CSS with red gradients, silver borders, and responsive design. Styles headers, forms, buttons, tables, and more per your baseline.
+/frontend/logo.png
+Description: Placeholder for your logo image. Must be uploaded to /frontend/logo.png (e.g., /var/www/html/frontend/logo.png).
+Status: Not included here—replace with your actual logo file (PNG/JPG, styled by .logo class: max-height: 200px, silver border, shadows).
+Project Notes
+Associated X Account: 
+@mtjoymadman
+—reference this in your new chat tomorrow.
+Status: As of February 27, 2025:
+Schema: 21 tables, fully loaded with initial data (admin password: '').
+Login: admin works with optional password (blank field) in DEVELOPMENT_MODE.
+Styling: Dark theme, red accents, logo in headers (assuming /frontend/logo.png exists).
+Next Steps: Extend styling to other pages (employee_details.php, timeclock.php, etc.) or fix MySQL Workbench connection (Error Code: 1064 issue).
