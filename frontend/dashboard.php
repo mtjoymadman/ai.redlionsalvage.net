@@ -14,12 +14,13 @@ $user_id = $_SESSION['user_id'];
 $pdo = getPDOConnection();
 
 // Fetch user details
-$stmt = $pdo->prepare("SELECT username, email, role FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Check if user is admin
 $is_admin = ($user['role'] === 'admin');
+
+echo "PHP executed to this point<br>";
 ?>
 
 <!DOCTYPE html>
@@ -30,6 +31,9 @@ $is_admin = ($user['role'] === 'admin');
     <title>Dashboard - YardMaster</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script>
+        console.log('Head script loaded');
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -65,9 +69,8 @@ $is_admin = ($user['role'] === 'admin');
     </nav>
 
     <div class="container mt-4">
-        <h1>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h1>
-        <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
-        <p>Role: <?php echo htmlspecialchars($user['role']); ?></p>
+        <h1>Dashboard</h1>
+        <p>User: <?php echo htmlspecialchars($user['username']); ?></p>
 
         <?php if ($is_admin): ?>
             <div class="card mt-4">
@@ -76,12 +79,11 @@ $is_admin = ($user['role'] === 'admin');
                 </div>
                 <div class="card-body">
                     <button type="button" id="fleet-btn" class="btn btn-primary">Fleet Management</button>
-                    <button type="button" id="inventory-pos-btn" class="btn btn-success">Inventory&POS</button>
-                    <button type="button" class="btn btn-secondary">User Management</button>
+                    <button class="btn btn-secondary">User Management</button>
                 </div>
             </div>
 
-            <table class="table table-striped mt-4">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Vehicle ID</th>
@@ -93,17 +95,13 @@ $is_admin = ($user['role'] === 'admin');
                 </tbody>
             </table>
         <?php else: ?>
-            <div class="card mt-4">
-                <div class="card-body">
-                    <p>This is your user dashboard. Check your profile or contact an admin for more details.</p>
-                </div>
-            </div>
+            <p>This is your user dashboard. Check your profile or contact an admin for more details.</p>
         <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        console.log('Dashboard page loaded');
+        console.log('Body script loaded');
 
         document.getElementById('fleet-btn').addEventListener('click', function(event) {
             event.preventDefault();
@@ -142,12 +140,6 @@ $is_admin = ($user['role'] === 'admin');
                     console.error('Fetch error:', error.message);
                     tbody.innerHTML = '<tr><td colspan="3">Fetch error: ' + error.message + '</td></tr>';
                 });
-        });
-
-        document.getElementById('inventory-pos-btn').addEventListener('click', function(event) {
-            event.preventDefault();
-            console.log('Inventory&POS button clicked');
-            // No table for this in repo version; assuming it works similarly elsewhere
         });
     </script>
 </body>
