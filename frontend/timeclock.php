@@ -7,7 +7,89 @@ if (!isset($_SESSION['employee_id'])) {
 $employee_id = $_SESSION['employee_id'];
 error_log("timeclock.php: Session employee_id: " . $employee_id);
 
-// Fetch roles directly from database
+// Fetch roles di<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+require_once "../api/config.php";
+
+// Fetch time logs for the current user
+$userId = $_SESSION['user_id'];
+$sql = "SELECT tl.log_date, tl.clock_in_time, tl.clock_out_time, 
+               b.start_time AS break_start, b.end_time AS break_end
+        FROM time_logs tl
+        LEFT JOIN breaks b ON tl.id = b.time_log_id
+        WHERE tl.employee_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timeclock</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Timeclock</h1>
+    <button id="clockInBtn">Clock In</button>
+    <button id="clockOutBtn">Clock Out</button>
+    <div id="status"></div>
+
+    <h2>Your Time Logs</h2>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Clock In</th>
+            <th>Clock Out</th>
+            <th>Break Start</th>
+            <th>Break End</th>
+        </tr>
+        <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+                <td><?php echo $row['log_date']; ?></td>
+                <td><?php echo $row['clock_in_time']; ?></td>
+                <td><?php echo $row['clock_out_time'] ?? 'Not clocked out'; ?></td>
+                <td><?php echo $row['break_start'] ?? 'N/A'; ?></td>
+                <td><?php echo $row['break_end'] ?? 'N/A'; ?></td>
+            </tr>
+        <?php endwhile; ?>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#clockInBtn").click(function() {
+                $.post("../api/timeclock.php", { action: "clock_in" }, function(data) {
+                    $("#status").html(data.message);
+                    location.reload(); // Refresh to show new log
+                }, "json");
+            });
+
+            $("#clockOutBtn").click(function() {
+                $.post("../api/timeclock.php", { action: "clock_out" }, function(data) {
+                    $("#status").html(data.message);
+                    location.reload();
+                }, "json");
+            });
+        });
+    </script>
+</body>
+</html>
+<?php
+$stmt->close();
+$conn->close();
+?>rectly from database
 $stmt = $db->prepare("SELECT r.role_name FROM employee_roles er JOIN roles r ON er.role_id = r.id WHERE er.employee_id = ?");
 $stmt->bind_param("i", $employee_id);
 $stmt->execute();
