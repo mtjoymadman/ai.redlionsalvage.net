@@ -20,7 +20,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $is_admin = ($user['role'] === 'admin');
 
-echo "PHP executed to this point<br>";
+echo "PHP executed successfully<br>";
 ?>
 
 <!DOCTYPE html>
@@ -31,9 +31,6 @@ echo "PHP executed to this point<br>";
     <title>Dashboard - YardMaster</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <script>
-        console.log('Head script loaded');
-    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -101,7 +98,7 @@ echo "PHP executed to this point<br>";
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        console.log('Body script loaded');
+        console.log('Dashboard page loaded');
 
         document.getElementById('fleet-btn').addEventListener('click', function(event) {
             event.preventDefault();
@@ -110,7 +107,7 @@ echo "PHP executed to this point<br>";
             const tbody = document.getElementById('fleet-table-body');
             tbody.innerHTML = '<tr><td colspan="3">Loading fleet data...</td></tr>';
 
-            fetch('/api/fleet/get_fleet_vehicles.php?limit=10&page=1')
+            fetch('../api/fleet/get_fleet_vehicles.php?limit=10&page=1')
                 .then(response => {
                     console.log('Fetch response status:', response.status);
                     if (!response.ok) {
