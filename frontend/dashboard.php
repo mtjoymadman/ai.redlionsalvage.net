@@ -112,65 +112,22 @@ $is_admin = ($user['role'] === 'admin');
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Ensure DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            const fleetBtn = document.getElementById('fleet-btn');
-            if (fleetBtn) {
-                console.log('Fleet button found, attaching listener');
-                fleetBtn.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation(); // Stop any bubbling that might trigger reload
-                    console.log('Fleet button clicked');
-                    fetchFleetData();
-                    document.getElementById('fleet-section').style.display = 'block';
-                    this.disabled = true;
-                });
-            } else {
-                console.error('Fleet button not found');
-            }
-        });
+        console.log('Script loaded successfully'); // Immediate check
 
-        function fetchFleetData() {
-            console.log('Attempting to fetch fleet data');
-            fetch('../api/fleet/get_fleet_vehicles.php?limit=10&page=1')
-                .then(response => {
-                    console.log('Fetch response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Data received:', data);
-                    if (data.success) {
-                        const tbody = document.getElementById('fleet-table-body');
-                        tbody.innerHTML = '';
-                        data.data.vehicles.forEach(vehicle => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${vehicle.vehicle_id || 'N/A'}</td>
-                                <td>${vehicle.type || 'N/A'}</td>
-                                <td>${vehicle.status || 'N/A'}</td>
-                            `;
-                            tbody.appendChild(row);
-                        });
-                        const pagination = data.data.pagination;
-                        document.getElementById('fleet-pagination').innerHTML = `
-                            Page ${pagination.current_page} of ${pagination.total_pages} 
-                            (Total Vehicles: ${pagination.total_vehicles})
-                        `;
-                    } else {
-                        alert('Error from API: ' + data.error);
-                        console.error('API error:', data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    alert('Failed to load fleet data: ' + error.message);
-                })
-                .finally(() => {
-                    document.getElementById('fleet-btn').disabled = false;
-                });
+        const fleetBtn = document.getElementById('fleet-btn');
+        if (fleetBtn) {
+            console.log('Fleet button found');
+            fleetBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Fleet button clicked');
+                // Temporary test to avoid fetch issues
+                document.getElementById('fleet-table-body').innerHTML = '<tr><td colspan="3">Test data loaded</td></tr>';
+                document.getElementById('fleet-section').style.display = 'block';
+                this.disabled = true;
+            });
+        } else {
+            console.error('Fleet button not found');
         }
     </script>
 </body>
