@@ -9,11 +9,20 @@ if (!isset($_SESSION['user_id'])) {
 require_once '../../includes/db_connect.php';
 
 $user_id = $_SESSION['user_id'];
+echo "<p style='color: red;'>Debug: User ID is $user_id</p>";
+
 $pdo = getPDOConnection();
+echo "<p style='color: red;'>Debug: PDO connection established</p>";
 
 $stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+    die("<p style='color: red;'>Debug: User not found in database for ID: $user_id</p>");
+}
+
+echo "<p style='color: red;'>Debug: User role is '{$user['role']}'</p>";
 
 $is_admin = in_array($user['role'], ['admin', 'baby_admin']);
 $is_driver = ($user['role'] === 'driver');
@@ -47,6 +56,11 @@ $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <li class="nav-item">
                         <a class="nav-link active" href="#">Fleet Management</a>
                     </li>
+                    <?php if ($is_driver): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="pretrip_form.php">Pre-Trip Inspection</a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>

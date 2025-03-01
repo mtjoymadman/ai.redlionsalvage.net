@@ -96,7 +96,7 @@ $is_driver = ($user['role'] === 'driver');
             <div class="card mt-4">
                 <div class="card-body">
                     <p>Your driver dashboard. View fleet details or submit your pre-trip inspection below.</p>
-                    <a href="fleet/dashboard.php" class="btn btn-primary">View Fleet Management</a>
+                    <a href="fleet/dashboard.php" class="btn btn-primary">Fleet Management</a>
                     <a href="fleet/pretrip_form.php" class="btn btn-primary">Submit Pre-Trip Inspection</a>
                 </div>
             </div>
