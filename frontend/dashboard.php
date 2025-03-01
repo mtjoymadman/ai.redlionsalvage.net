@@ -20,9 +20,10 @@ if (!$user) {
 }
 
 // Define role-based access
-$is_admin = ($user['role'] === 'admin' || $user['role'] === 'baby_admin');
+$is_admin = in_array($user['role'], ['admin', 'baby_admin']);
 $is_driver = ($user['role'] === 'driver');
 
+// Debug role
 echo "<!-- Debug: User role is '{$user['role']}' -->";
 ?>
 
@@ -113,7 +114,7 @@ echo "<!-- Debug: User role is '{$user['role']}' -->";
         <?php elseif ($is_driver): ?>
             <div class="card mt-4">
                 <div class="card-body">
-                    <p>Your driver dashboard. Submit your pre-trip inspection below.</p>
+                    <p>Your driver dashboard. Use the navigation to access pre-trip inspection.</p>
                     <a href="fleet/pretrip_form.php" class="btn btn-primary">Submit Pre-Trip Inspection</a>
                 </div>
             </div>
@@ -129,6 +130,7 @@ echo "<!-- Debug: User role is '{$user['role']}' -->";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         console.log('Dashboard page loaded');
+
         <?php if ($is_admin): ?>
         document.getElementById('fleet-btn').addEventListener('click', function(event) {
             event.preventDefault();
@@ -168,6 +170,8 @@ echo "<!-- Debug: User role is '{$user['role']}' -->";
                     tbody.innerHTML = '<tr><td colspan="3">Fetch error: ' + error.message + '</td></tr>';
                 });
         });
+        <?php else: ?>
+        console.log('User is not admin; no fleet button functionality loaded');
         <?php endif; ?>
     </script>
 </body>
