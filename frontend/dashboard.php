@@ -1,39 +1,25 @@
 <?php
-// Enable error reporting to catch PHP issues
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// Start session
 session_start();
 
-// Check if user is logged in
+// Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-// Include database connection (assumes this file exists)
+// Include database connection
 require_once '../includes/db_connect.php';
-echo "Database connection included<br>";
 
-// Get user ID from session
 $user_id = $_SESSION['user_id'];
-echo "User ID: " . htmlspecialchars($user_id) . "<br>";
-
-// Connect to database
 $pdo = getPDOConnection();
-echo "PDO connection established<br>";
 
 // Fetch user details
-$stmt = $pdo->prepare("SELECT username, role FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT username, email, role FROM employees WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-echo "User data fetched: " . ($user ? "Yes" : "No") . "<br>";
 
-// Check if user is admin
-$is_admin = ($user['role'] === 'admin');
-echo "Is admin: " . ($is_admin ? "Yes" : "No") . "<br>";
+// Role-based access
+$is_admin = in_array($user['role'], ['admin', 'baby_admin']);
 ?>
 
 <!DOCTYPE html>
@@ -59,10 +45,12 @@ echo "Is admin: " . ($is_admin ? "Yes" : "No") . "<br>";
                     </li>
                     <?php if ($is_admin): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Fleet Management</a>
+                            <a class="nav-link" href="fleet/dashboard.php">Fleet Management</a>
                         </li>
+                    <?php endif; ?>
+                    <?php if ($user['role'] === 'driver'): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Admin Settings</a>
+                            <a class="nav-link" href="fleet/pretrip_form.php">Pre-Trip Inspection</a>
                         </li>
                     <?php endif; ?>
                 </ul>
@@ -79,8 +67,9 @@ echo "Is admin: " . ($is_admin ? "Yes" : "No") . "<br>";
     </nav>
 
     <div class="container mt-4">
-        <h1>Dashboard</h1>
-        <p>User: <?php echo htmlspecialchars($user['username']); ?></p>
+        <h1>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h1>
+        <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+        <p>Role: <?php echo htmlspecialchars($user['role']); ?></p>
 
         <?php if ($is_admin): ?>
             <div class="card mt-4">
@@ -88,69 +77,22 @@ echo "Is admin: " . ($is_admin ? "Yes" : "No") . "<br>";
                     <h3>Admin Dashboard</h3>
                 </div>
                 <div class="card-body">
-                    <button type="button" id="fleet-btn" class="btn btn-primary">Fleet Management</button>
-                    <button class="btn btn-secondary">User Management</button>
+                    <a href="fleet/dashboard.php" class="btn btn-primary">Manage Fleet</a>
+                    <button type="button" class="btn btn-secondary">User Management</button>
                 </div>
             </div>
-
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Vehicle ID</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="fleet-table-body">
-                </tbody>
-            </table>
         <?php else: ?>
-            <p>This is your user dashboard. Check your profile or contact an admin for more details.</p>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <p>Your dashboard. Use the navigation to access available features.</p>
+                    <?php if ($user['role'] === 'driver'): ?>
+                        <a href="fleet/pretrip_form.php" class="btn btn-primary">Submit Pre-Trip Inspection</a>
+                    <?php endif; ?>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        console.log('Dashboard page loaded');
-
-        document.getElementById('fleet-btn').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent page reload
-            console.log('Fleet Management button clicked');
-
-            const tbody = document.getElementById('fleet-table-body');
-            tbody.innerHTML = '<tr><td colspan="3">Loading fleet data...</td></tr>';
-
-            fetch('../api/fleet/get_fleet_vehicles.php?limit=10&page=1')
-                .then(response => {
-                    console.log('Fetch response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error('Fetch failed with status ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Fleet data received:', data);
-                    if (data.success) {
-                        tbody.innerHTML = '';
-                        data.data.vehicles.forEach(vehicle => {
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td>${vehicle.vehicle_id || 'N/A'}</td>
-                                    <td>${vehicle.type || 'N/A'}</td>
-                                    <td>${vehicle.status || 'N/A'}</td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        console.error('API error:', data.error);
-                        tbody.innerHTML = '<tr><td colspan="3">Error: ' + data.error + '</td></tr>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error.message);
-                    tbody.innerHTML = '<tr><td colspan="3">Fetch error: ' + error.message + '</td></tr>';
-                });
-        });
-    </script>
 </body>
 </html>
