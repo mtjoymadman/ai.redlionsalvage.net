@@ -36,9 +36,6 @@ $is_driver = ($user['role'] === 'driver');
     <title>Dashboard - YardMaster</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <style>
-        #fleet-section { display: none; margin-top: 20px; }
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -52,10 +49,12 @@ $is_driver = ($user['role'] === 'driver');
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.php">Dashboard</a>
                     </li>
-                    <?php if ($is_admin): ?>
+                    <?php if ($is_admin || $is_driver): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="fleet/dashboard.php">Fleet Management</a>
                         </li>
+                    <?php endif; ?>
+                    <?php if ($is_admin): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Admin Settings</a>
                         </li>
@@ -89,33 +88,15 @@ $is_driver = ($user['role'] === 'driver');
                     <h3>Admin Dashboard</h3>
                 </div>
                 <div class="card-body">
-                    <a href="fleet/dashboard.php" class="btn btn-primary" id="fleet-btn">Fleet Management</a>
+                    <a href="fleet/dashboard.php" class="btn btn-primary">Fleet Management</a>
                     <button type="button" class="btn btn-secondary">User Management</button>
-                </div>
-            </div>
-            <div id="fleet-section" class="card mt-4">
-                <div class="card-header">
-                    <h4>Fleet Vehicles</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Vehicle ID</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fleet-table-body">
-                        </tbody>
-                    </table>
-                    <div id="fleet-pagination"></div>
                 </div>
             </div>
         <?php elseif ($is_driver): ?>
             <div class="card mt-4">
                 <div class="card-body">
-                    <p>Your driver dashboard. Submit your pre-trip inspection below.</p>
+                    <p>Your driver dashboard. View fleet details or submit your pre-trip inspection below.</p>
+                    <a href="fleet/dashboard.php" class="btn btn-primary">View Fleet Management</a>
                     <a href="fleet/pretrip_form.php" class="btn btn-primary">Submit Pre-Trip Inspection</a>
                 </div>
             </div>
@@ -131,49 +112,6 @@ $is_driver = ($user['role'] === 'driver');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         console.log('Dashboard page loaded');
-
-        <?php if ($is_admin): ?>
-        document.getElementById('fleet-btn').addEventListener('click', function(event) {
-            event.preventDefault();
-            console.log('Fleet Management button clicked');
-            const tbody = document.getElementById('fleet-table-body');
-            tbody.innerHTML = '<tr><td colspan="3">Loading fleet data...</td></tr>';
-            document.getElementById('fleet-section').style.display = 'block';
-
-            fetch('../api/fleet/get_fleet_vehicles.php?limit=10&page=1')
-                .then(response => {
-                    console.log('Fetch response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error('Fetch failed with status ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Fleet data received:', data);
-                    if (data.success) {
-                        tbody.innerHTML = '';
-                        data.data.vehicles.forEach(vehicle => {
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td>${vehicle.vehicle_id || 'N/A'}</td>
-                                    <td>${vehicle.type || 'N/A'}</td>
-                                    <td>${vehicle.status || 'N/A'}</td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        console.error('API error:', data.error);
-                        tbody.innerHTML = '<tr><td colspan="3">Error: ' + data.error + '</td></tr>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error.message);
-                    tbody.innerHTML = '<tr><td colspan="3">Fetch error: ' + error.message + '</td></tr>';
-                });
-        });
-        <?php else: ?>
-        console.log('User is not admin; no fleet button functionality loaded');
-        <?php endif; ?>
     </script>
 </body>
 </html>
