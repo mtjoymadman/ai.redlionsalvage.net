@@ -16,3 +16,8 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         localDir: ./
         remoteDir: /ai.redlionsalvage.net/
+    - name: Install lftp
+      run: sudo apt-get update && sudo apt-get install -y lftp
+    - name: Remove Old Folder
+      run: |
+        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ai.redlionsalvage.net -e "rm -r /ai.redlionsalvage.net/ai.redlionsalvage.net || true; bye"
