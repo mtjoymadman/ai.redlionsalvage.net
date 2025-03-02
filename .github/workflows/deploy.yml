@@ -20,4 +20,4 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y lftp
     - name: Remove Old Folder
       run: |
-        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "set ssl:verify-certificate no; rm -r /ai.redlionsalvage.net/ai.redlionsalvage.net || true; bye" ai.redlionsalvage.net
+        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ai.redlionsalvage.net -e "set ssl:verify-certificate no; rm -rf /ai.redlionsalvage.net/ai.redlionsalvage.net; bye"
