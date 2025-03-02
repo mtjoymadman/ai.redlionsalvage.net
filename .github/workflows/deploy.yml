@@ -8,20 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Deploy via FTP to Temp Dir
+    - name: Deploy via FTP
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
         server: ai.redlionsalvage.net
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: /ai.redlionsalvage.net/temp/
+        server-dir: /ai.redlionsalvage.net/
+        timeout: 120000  # 120s to handle slow server
         exclude: |
           **/.git/**
           **/.github/**
           **/node_modules/**
-    - name: Move Files Up and Clean Up
-      if: success()
-      run: |
-        sudo apt-get update && sudo apt-get install lftp
-        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ai.redlionsalvage.net -e "cd /ai.redlionsalvage.net/temp; glob -a mv * /ai.redlionsalvage.net/; cd /ai.redlionsalvage.net; rm -r temp; rm -r ai.redlionsalvage.net; bye"
