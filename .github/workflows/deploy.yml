@@ -15,8 +15,18 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: /ai.redlionsalvage.net/
+        server-dir: /ai.redlionsalvage.net
         exclude: |
-          **/.git*
+          **/.git/**
           **/.github/**
           **/node_modules/**
+    - name: Delete Old Nested Folder
+      run: |
+        echo "Deleting /ai.redlionsalvage.net/ai.redlionsalvage.net/"
+        ftp -inv ${{ secrets.FTP_HOST }} <<EOF
+        user ${{ secrets.FTP_USERNAME }} ${{ secrets.FTP_PASSWORD }}
+        rmdir /ai.redlionsalvage.net/ai.redlionsalvage.net
+        bye
+        EOF
+      env:
+        FTP_HOST: ai.redlionsalvage.net
