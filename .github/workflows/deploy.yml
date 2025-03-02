@@ -9,15 +9,26 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Deploy via FTP
-      uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      uses: SamKirkland/FTP-Deploy-Action@4.3.4  # Upgrade for timeout support
       with:
         server: ai.redlionsalvage.net
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: /ai.redlionsalvage.net/
-        timeout: 120000  # 120s to handle slow server
+        server-dir: /ai.redlionsalvage.net/temp/  # Temp dir to avoid nesting confusion
+        timeout: 120000
         exclude: |
           **/.git/**
           **/.github/**
           **/node_modules/**
+    - name: Install lftp
+      if: success()
+      run: sudo apt-get update && sudo apt-get install -y lftp
+    - name: Move Files Up and Clean Up
+      if: success()
+      run: |
+        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ai.redlionsalvage.net -e "cd /ai.redlionsalvage.net/temp; mirror -R . /ai.redlionsalvage.net/; cd /ai.redlionsalvage.net; rm -r temp; rm -r ai.redlionsalvage.net.bak || true; bye"
+    - name: Rename Old Folder
+      if: success()
+      run: |
+        lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ai.redlionsalvage.net -e "rename /ai.redlionsalvage.net/ai.redlionsalvage.net /ai.redlionsalvage.net/ai.redlionsalvage.net.bak || true; bye"
