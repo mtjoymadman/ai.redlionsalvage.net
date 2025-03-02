@@ -9,13 +9,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Deploy via FTP
-      uses: SamKirkland/FTP-Deploy-Action@4.3.4  # Upgrade for timeout support
+      uses: SamKirkland/FTP-Deploy-Action@4.3.4  # Fixed case
       with:
         server: ai.redlionsalvage.net
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: /ai.redlionsalvage.net/temp/  # Temp dir to avoid nesting confusion
+        server-dir: /ai.redlionsalvage.net/temp/
         timeout: 120000
         exclude: |
           **/.git/**
