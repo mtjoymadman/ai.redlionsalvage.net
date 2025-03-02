@@ -3,7 +3,7 @@
 ## Overview
 YardMaster is a web-based system for managing employee timeclocks and fleet operations. The new fleet management section allows tracking of vehicles, documents, maintenance schedules, and pre-trip inspections, integrated seamlessly with the existing system.
 
-## Features
+## Features 
 - **Timeclock**: Track employee clock-in and clock-out times.
 - **Fleet Management**:
   - Manage vehicle details and assignments.
