@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Deploy via FTP
-      uses: SamKirkland/FTP-Deploy-Action@4.3.4  # Fixed case
+      uses: SamKirkland/FTP-Deploy-Action@4.3.4  # Correct case
       with:
         server: ai.redlionsalvage.net
         username: ${{ secrets.FTP_USERNAME }}
