@@ -1,0 +1,52 @@
+/RedLionSalvageAi/
+├── /api/
+│   ├── config.php                  # Database connection
+│   ├── login.php                  # *Updated: Plain text password, error handling
+│   ├── logout.php                 # Logout with clock-out
+│   ├── get_user_roles.php         # Fetch user roles
+│   ├── /employee_management/
+│   │   ├── get_employees.php
+│   │   ├── add_employee.php
+│   │   ├── update_employee.php
+│   │   ├── suspend_employee.php
+│   ├── /timeclock/
+│   │   ├── get_time_log.php
+│   │   ├── start_break.php
+│   │   ├── end_break.php
+│   │   ├── log_extra_time.php
+│   │   ├── get_extra_time.php
+│   ├── /fleet/
+│   │   ├── get_fleet_vehicles.php
+│   │   ├── add_fleet_vehicle.php
+│   │   ├── assign_driver.php
+│   │   ├── check_expirations.php
+│   ├── /vehicle_pickup/
+│   │   ├── submit_pending.php
+│   │   ├── get_pending.php
+│   │   ├── process_pending.php
+│   ├── /inventory/
+│   │   ├── get_vehicles.php
+│   │   ├── get_parts.php
+│   ├── /pos/
+│   │   ├── record_sale.php
+├── /frontend/
+│   ├── index.html                 # *Updated: Logo, error display
+│   ├── dashboard.html             # *Updated: Role-based buttons, styling
+│   ├── employee_management.html
+│   ├── timeclock.html
+│   ├── pickup.html
+│   ├── fleet.html
+│   ├── pending_vehicles.html
+│   ├── vehicle_search.html
+│   ├── pos.html
+├── /assets/
+│   ├── /css/
+│   │   └── style.css             # Styling (assumed unchanged, based on prior version)
+│   ├── /images/
+│   │   └── logo.png              # Placeholder logo
+│   ├── /uploads/
+│   │   ├── /drivers_licenses/
+│   │   ├── /vehicle_documents/
+├── /database/
+│   └── schema.sql                # *Updated: Full DB setup with plain text passwords
+├── README.md                     # Deployment instructions

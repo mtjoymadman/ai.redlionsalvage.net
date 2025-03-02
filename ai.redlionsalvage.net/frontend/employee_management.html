@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Lion Salvage AI - Employee Management</title>
+    <link rel="stylesheet" href="/RedLionSalvageAi/assets/css/style.css">
+</head>
+<body>
+    <header>
+        <img src="/RedLionSalvageAi/assets/images/logo.png" alt="Red Lion Salvage Logo" class="logo">
+        <a href="/RedLionSalvageAi/frontend/dashboard.html" class="home-btn">Back to Dashboard</a>
+        <h1>Employee Management</h1>
+        <a href="/RedLionSalvageAi/api/logout.php" class="logout-btn">Logout</a>
+    </header>
+    <div class="container" style="display: flex; gap: 2rem;">
+        <div style="flex: 1;">
+            <h2>Add/Edit Employee</h2>
+            <form id="employeeForm" class="vehicle-form">
+                <div class="form-group">
+                    <input type="text" id="username" name="username" placeholder="Username" required>
+                    <input type="password" id="password" name="password" placeholder="Password (optional)">
+                    <input type="hidden" id="employee_id" name="employee_id">
+                </div>
+                <div class="form-group">
+                    <select id="roles" name="roles" multiple>
+                        <option value="admin">Admin</option>
+                        <option value="baby_admin">Baby Admin</option>
+                        <option value="office">Office</option>
+                        <option value="yardman">Yardman</option>
+                        <option value="driver">Driver</option>
+                    </select>
+                    <label><input type="checkbox" id="suspended" name="suspended"> Suspended</label>
+                </div>
+                <button type="submit">Save Employee</button>
+            </form>
+            <div id="message" class="error"></div>
+        </div>
+        <div style="flex: 1;">
+            <h2>Employee List</h2>
+            <table id="employeeTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Roles</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        let isAdmin = false;
+
+        function loadUserRoles() {
+            fetch('/RedLionSalvageAi/api/get_user_roles.php', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.roles.includes('admin')) {
+                    isAdmin = true;
+                    document.getElementById('employeeForm').style.display = 'block';
+                } else {
+                    document.getElementById('employeeForm').style.display = 'none';
+                }
+                loadEmployees();
+            });
+        }
+
+        function loadEmployees() {
+            fetch('/RedLionSalvageAi/api/employee_management/get_employees.php')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#employeeTable tbody');
+                    tbody.innerHTML = '';
+                    if (data.success && data.employees) {
+                        data.employees.forEach(employee => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${employee.id}</td>
+                                <td>${employee.username}</td>
+                                <td>${employee.roles ? employee.roles.join(', ') : 'None'}</td>
+                                <td>${employee.suspended ? 'Suspended' : 'Active'}</td>
+                                <td>
+                                    ${isAdmin ? `<button onclick="editEmployee(${employee.id}, '${employee.username}', '${employee.roles ? employee.roles.join(',') : ''}', ${employee.suspended})">Edit</button>` : ''}
+                                    ${isAdmin ? `<button onclick="deleteEmployee(${employee.id})">Delete</button>` : ''}
+                                </td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5">No employees found</td></tr>';
+                    }
+                });
+        }
+
+        document.getElementById('employeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = {
+                employee_id: formData.get('employee_id') || null,
+                username: formData.get('username'),
+                password: formData.get('password') || '',
+                roles: Array.from(document.getElementById('roles').selectedOptions).map(option => option.value),
+                suspended: document.getElementById('suspended').checked ? 1 : 0
+            };
+            fetch('/RedLionSalvageAi/api/employee_management/add_employee.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok: ' + response.statusText);
+                return response.json();
+            })
+            .then(data => {
+                const messageDiv = document.getElementById('message');
+                if (data.success) {
+                    messageDiv.textContent = 'Employee saved successfully';
+                    this.reset();
+                    document.getElementById('employee_id').value = '';
+                    document.getElementById('suspended').checked = false;
+                    loadEmployees();
+                } else {
+                    messageDiv.textContent = data.error || 'Failed to save employee';
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            });
+        });
+
+        function editEmployee(id, username, roles, suspended) {
+            document.getElementById('employee_id').value = id;
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = '';
+            const roleSelect = document.getElementById('roles');
+            Array.from(roleSelect.options).forEach(option => {
+                option.selected = roles.split(',').includes(option.value);
+            });
+            document.getElementById('suspended').checked = suspended;
+        }
+
+        function deleteEmployee(id) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                fetch('/RedLionSalvageAi/api/employee_management/delete_employee.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ employee_id: id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) loadEmployees();
+                });
+            }
+        }
+
+        function toggleSuspend(id, isSuspended) {
+            fetch('/RedLionSalvageAi/api/employee_management/' + (isSuspended ? 'update_employee.php' : 'suspend_employee.php'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employee_id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) loadEmployees();
+            });
+        }
+
+        loadUserRoles();
+    </script>
+</body>
+</html>
