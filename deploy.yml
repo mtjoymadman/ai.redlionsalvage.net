@@ -1,0 +1,22 @@
+name: Deploy to Shared Host
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch if it’s not ‘main’ (e.g., ‘master’)
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      with:
+        server: ai_salvageyard  # Replace with your FTP host
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./  ai.redlionsalvage,net (root by default)
+        server-dir: /ai.redlionsalvage.net/  # Destination folder on your server
+        exclude: |
+          **/.git*
+          **/.github/**
+          **/node_modules/**

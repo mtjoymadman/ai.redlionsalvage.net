@@ -1,36 +1,38 @@
-# /README.md
+# YardMaster Fleet Management System
 
-## Red Lion Salvage AI Deployment
+## Overview
+YardMaster is a web-based system for managing employee timeclocks and fleet operations. The new fleet management section allows tracking of vehicles, documents, maintenance schedules, and pre-trip inspections, integrated seamlessly with the existing system.
 
-### Prerequisites
-- Shared hosting with PHP 7.4+ and MySQL 5.7+
-- cPanel or similar control panel
-- FTP client (e.g., FileZilla)
+## Features
+- **Timeclock**: Track employee clock-in and clock-out times.
+- **Fleet Management**:
+  - Manage vehicle details and assignments.
+  - Upload and track documents with expiration notifications.
+  - Schedule and monitor vehicle maintenance.
+  - Submit DOT-compliant pre-trip inspections (drivers only).
+- **Role-Based Access**: Admins manage everything; drivers access limited features.
+- **Notifications**: Email alerts for expiring documents and maintenance due dates.
 
-### Steps
-1. **Database Setup**
-   - Create a MySQL database via cPanel named `red_lion_salvage_ai`.
-   - Import `database/schema.sql` using phpMyAdmin or MySQL CLI.
-   - Update the initial admin password hash in the `employees` table.
+## Setup Instructions
+1. **Database**:
+   - Create a MySQL database named `your_database`.
+   - Run `schema.sql` to set up tables and triggers.
+2. **Configuration**:
+   - Update `includes/db_connect.php` with your database credentials.
+3. **Dependencies**:
+   - Ensure PHP and MySQL are installed.
+   - Bootstrap 5.3.0 is included via CDN.
+4. **Deployment**:
+   - Upload files to your web server.
+   - Test access at `http://your-domain.com/frontend/dashboard.php`.
 
-2. **File Upload**
-   - Upload the entire `RedLionSalvageAi` folder to your web root (e.g., `/public_html`) via FTP.
+## Usage
+- **Admins**: Log in, navigate to "Fleet Management" from the dashboard to manage vehicles and settings.
+- **Drivers**: Log in, use "Pre-Trip Inspection" to submit daily reports.
+- **API**: Access fleet data via RESTful endpoints in `api/fleet/`.
 
-3. **Configuration**
-   - Edit `api/config.php`:
-     - Set `$user` and `$pass` to your MySQL credentials.
-     - Set `$notification_email` to your notification email.
-
-4. **Cron Job**
-   - In cPanel, set up a cron job to run `api/fleet/check_expirations.php` daily:
-     ```
-     php /home/yourusername/public_html/RedLionSalvageAi/api/fleet/check_expirations.php
-     ```
-
-5. **Testing**
-   - Visit `http://yourdomain.com/RedLionSalvageAi/frontend/index.html`.
-   - Log in with `admin` and your set password.
-
-### Notes
-- Ensure the `/assets/uploads/` directory is writable (chmod 755).
-- Replace `yourdomain.com` with your actual domain.
+## Directory Structure
+- `api/`: API endpoints for backend operations.
+- `frontend/`: User interface files.
+- `includes/`: Shared functions and configurations.
+- `assets/`: CSS and JS files for styling and interactivity.
