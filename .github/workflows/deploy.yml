@@ -15,4 +15,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           localDir: "."
           remoteDir: "/public_html"
-          forceSsl: "true"  # Ensure secure connection
+          forceSsl: "false"  # Disable SSL if server doesn't support it
+          options: "--verbose"  # Add logging for debugging
