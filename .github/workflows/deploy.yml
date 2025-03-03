@@ -5,24 +5,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:name: Deploy to Server
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy via FTP
-        uses: sebastianpopp/ftp-action@releases/v2
-        with:
-          host: ${{ secrets.FTP_HOST }}
-          user: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          localDir: "."
-          remoteDir: "/"
-          forceSsl: "false"
       - uses: actions/checkout@v3
       - name: Deploy via FTP
         uses: sebastianpopp/ftp-action@releases/v2
