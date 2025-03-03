@@ -1,7 +1,7 @@
 <?php
 require_once '../api/config.php';
 if (isset($_SESSION['employee_id'])) {
-    header('Location: /frontend/dashboard.php');  // Adjusted to match deployed location
+    header('Location: /frontend/dashboard.php');  // Point to frontend folder
     exit;
 }
 ?>
@@ -39,7 +39,7 @@ if (isset($_SESSION['employee_id'])) {
                 body: new FormData(this)
             }).then(response => response.json()).then(data => {
                 if (data.success) {
-                    window.location.href = '/frontend/dashboard.php';  // Adjusted to match deployed location
+                    window.location.href = '/frontend/dashboard.php';  // Point to frontend folder
                 } else {
                     document.getElementById('message').textContent = data.message;
                 }
