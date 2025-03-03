@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// Temporarily comment out config to isolate timeout
 // require_once '/api/config.php';
 // session_start();
 
@@ -14,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (!empty($username)) {
-        // Simulate success without DB
         $response['success'] = true;
     } else {
         $response['message'] = 'Username is required';
