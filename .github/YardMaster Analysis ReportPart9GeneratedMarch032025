@@ -1,0 +1,561 @@
+YardMaster Analysis ReportPart9GeneratedMarch032025
+Generated: March 03, 2025  
+Repository Structure
+ai.redlionsalvage.net/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── composer.json
+├── composer.lock
+├── index.php
+├── .github/
+│   ├── workflows/
+│   │   ├── deploy.yml
+│   ├── YardMaster_Analysis_Report.md
+├── ai.redlionsalvage.net/
+│   ├── api/
+│   │   ├── employee_management/
+│   │   │   ├── add_employee.php
+│   │   │   ├── delete_employee.php
+│   │   │   ├── get_employees.php
+│   │   │   ├── suspend_employee.php
+│   │   │   ├── update_employee.php
+│   │   ├── fleet/
+│   │   │   ├── add_vehicle.php
+│   │   │   ├── assign_driver.php
+│   │   │   ├── check expirations.php
+│   │   │   ├── get_driver_history.php
+│   │   │   ├── get_fleet_vehicles.php
+│   │   │   ├── ocr_receipt.py
+│   │   │   ├── update_mileage.php
+│   │   │   ├── upload_document.php
+│   │   │   ├── upload_receipt.php
+│   │   ├── inventory/
+│   │   │   ├── get_parts.php
+│   │   │   ├── get_vehicles.php
+│   │   ├── pos/
+│   │   │   ├── open_drawer.php
+│   │   │   ├── print_receipt.php
+│   │   │   ├── record_sale.php
+│   │   ├── scrap/
+│   │   │   ├── record_purchase.php
+│   │   ├── timeclock/
+│   │   │   ├── add_extra_time.php
+│   │   │   ├── end_break.php
+│   │   │   ├── get_employee_status.php
+│   │   │   ├── get_extra_time.php
+│   │   │   ├── get_time_log.php
+│   │   │   ├── get_time_status.php
+│   │   │   ├── get_yardman_stats.php
+│   │   │   ├── log_extra_time.php
+│   │   │   ├── start_break.php
+│   │   ├── vehicle_pickup/
+│   │   │   ├── get_pending_vehicles.php
+│   │   │   ├── process_pending.php
+│   │   │   ├── submit_pending.php
+│   │   ├── config.php
+│   │   ├── employee.php
+│   │   ├── get_user_roles.php
+│   │   ├── login.php
+│   │   ├── logout.php
+│   │   ├── timeclock.php
+│   │   ├── vehicle_mangement.php
+├── api/
+│   ├── employee_management/
+│   │   ├── add_employee.php
+│   │   ├── delete_employee.php
+│   │   ├── get_employees.php
+│   │   ├── suspend_employee.php
+│   │   ├── update_employee.php
+│   ├── fleet/
+│   │   ├── add_vehicle.php
+│   │   ├── assign_driver.php
+│   │   ├── check expirations.php
+│   │   ├── documents.php
+│   │   ├── get_driver_history.php
+│   │   ├── get_fleet_vehicles.php
+│   │   ├── ocr_receipt.py
+│   │   ├── update_mileage.php
+│   │   ├── upload_document.php
+│   │   ├── upload_receipt.php
+│   │   ├── vehicles.php
+├── database/
+│   ├── schema.sql
+[Truncated—full structure as you provided]  
+File Contents
+File: frontend/pos.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/pos.php]
+<?php  
+session_start();  
+if (!isset($_SESSION['user_id'])) {  
+    header("Location: index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Point of Sale</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Point of Sale</h1>  
+    <form id="record-sale">  
+        <input type="number" name="part_id" placeholder="Part ID" required>  
+        <input type="number" name="sale_price" placeholder="Sale Price" step="0.01" required>  
+        <select name="payment_method">  
+            <option value="cash">Cash</option>  
+            <option value="card">Card</option>  
+            <option value="check">Check</option>  
+        </select>  
+        <button type="submit">Record Sale</button>  
+    </form>  
+    <button id="open-drawer">Open Drawer</button>  
+    <div id="parts-list"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/inventory/get_parts.php', function(data) {  
+                const parts = JSON.parse(data);  
+                let html = '<ul>';  
+                parts.forEach(p => {  
+                    html += `<li>${p.part_name} (VIN: ${p.vin}) - $${p.price} (Stock: ${p.stock})</li>`;  
+                });  
+                html += '</ul>';  
+                $('#parts-list').html(html);  
+            });  
+        $('#record-sale').submit(function(e) {  
+            e.preventDefault();  
+            $.post('../api/pos/record_sale.php', $(this).serialize(), function(data) {  
+                const response = JSON.parse(data);  
+                alert(response.success || response.error);  
+                if (response.success) {  
+                    $.post('../api/pos/print_receipt.php', { sale_id: response.sale_id }, function(printData) {  
+                        alert(JSON.parse(printData).success || JSON.parse(printData).error);  
+                    });  
+                }  
+                location.reload();  
+            });  
+        });  
+
+        $('#open-drawer').click(function() {  
+            $.post('../api/pos/open_drawer.php', function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+            });  
+        });  
+    });  
+</script>  
+
+</body>  
+</html>  
+---  
+File: frontend/pickup.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/pickup.php]
+<?php  
+session_start();  
+if (!isset($_SESSION['user_id'])) {  
+    header("Location: index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Vehicle Pickup</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Vehicle Pickup</h1>  
+    <form id="submit-pending">  
+        <input type="text" name="vin" placeholder="VIN" required>  
+        <input type="text" name="make" placeholder="Make" required>  
+        <input type="text" name="model" placeholder="Model" required>  
+        <input type="number" name="year" placeholder="Year" required>  
+        <button type="submit">Submit Pending</button>  
+    </form>  
+    <div id="pending-list"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/vehicle_pickup/get_pending_vehicles.php', function(data) {  
+                const vehicles = JSON.parse(data);  
+                let html = '<ul>';  
+                vehicles.forEach(v => {  
+                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) <button onclick="processVehicle(${v.id})">Process</button></li>`;  
+                });  
+                html += '</ul>';  
+                $('#pending-list').html(html);  
+            });  
+        $('#submit-pending').submit(function(e) {  
+            e.preventDefault();  
+            $.post('../api/vehicle_pickup/submit_pending.php', $(this).serialize(), function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+    });  
+
+    function processVehicle(id) {  
+        $.post('../api/vehicle_pickup/process_pending.php', { vehicle_id: id }, function(data) {  
+            alert(JSON.parse(data).success || JSON.parse(data).error);  
+            location.reload();  
+        });  
+    }  
+</script>  
+
+</body>  
+</html>  
+---  
+File: frontend/index.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/index.php]
+<?php  
+session_start();  
+if (isset($_SESSION['user_id'])) {  
+    header("Location: dashboard.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YardMaster Login</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>YardMaster Login</h1>
+    <form id="login-form">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <script>
+        $('#login-form').submit(function(e) {
+            e.preventDefault();
+            $.post('../api/login.php', $(this).serialize(), function(data) {
+                const response = JSON.parse(data);
+                if (response.error) {
+                    alert(response.error);
+                } else {
+                    window.location.href = 'dashboard.php';
+                }
+            });
+        });
+    </script>
+</body>
+</html>  
+File: frontend/fleet.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet.php]
+<?php  
+session_start();  
+if (!isset($_SESSION['user_id'])) {  
+    header("Location: index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Fleet Management</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Fleet Management</h1>  
+    <form id="add-vehicle">  
+        <input type="text" name="vin" placeholder="VIN" required>  
+        <input type="text" name="make" placeholder="Make" required>  
+        <input type="text" name="model" placeholder="Model" required>  
+        <input type="number" name="year" placeholder="Year" required>  
+        <input type="text" name="license_plate" placeholder="License Plate">  
+        <button type="submit">Add Vehicle</button>  
+    </form>  
+    <div id="fleet-list"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/fleet/get_fleet_vehicles.php', function(data) {  
+                const vehicles = JSON.parse(data);  
+                let html = '<ul>';  
+                vehicles.forEach(v => {  
+                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</li>`;  
+                });  
+                html += '</ul>';  
+                $('#fleet-list').html(html);  
+            });  
+        $('#add-vehicle').submit(function(e) {  
+            e.preventDefault();  
+            $.post('../api/fleet/add_vehicle.php', $(this).serialize(), function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+    });  
+</script>  
+
+</body>  
+</html>  
+---  
+File: frontend/employee_management.html
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/employee_management.html]
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Employee Management</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Employee Management</h1>  
+    <form id="add-employee">  
+        <input type="text" name="username" placeholder="Username" required>  
+        <input type="password" name="password" placeholder="Password" required>  
+        <input type="text" name="first_name" placeholder="First Name" required>  
+        <input type="text" name="last_name" placeholder="Last Name" required>  
+        <input type="email" name="email" placeholder="Email" required>  
+        <input type="tel" name="phone" placeholder="Phone" required>  
+        <select name="role">  
+            <option value="admin">Admin</option>  
+            <option value="employee">Employee</option>  
+            <option value="driver">Driver</option>  
+        </select>  
+        <button type="submit">Add Employee</button>  
+    </form>  
+    <div id="employees-list"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/employee_management/get_employees.php', function(data) {  
+                const employees = JSON.parse(data);  
+                let html = '<ul>';  
+                employees.forEach(e => {  
+                    html += `<li>${e.first_name} ${e.last_name} - ${e.role} (<a href="employee_details.html?id=${e.id}">Details</a>)</li>`;  
+                });  
+                html += '</ul>';  
+                $('#employees-list').html(html);  
+            });  
+        $('#add-employee').submit(function(e) {  
+            e.preventDefault();  
+            $.post('../api/employee_management/add_employee.php', $(this).serialize(), function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+    });  
+</script>  
+
+</body>  
+</html>  
+---  
+File: frontend/employee_details.html
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/employee_details.html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Details</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Employee Details</h1>
+    <div id="employee-details"></div>
+    <a href="dashboard.php">Back to Dashboard</a>
+    <script>
+        function getEmployeeDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const employeeId = urlParams.get('id');
+            $.get(../api/employee.php?id=${employeeId}, function(data) {
+                const employee = JSON.parse(data);
+                $('#employee-details').html(                      <p>Name: ${employee.first_name} ${employee.last_name}</p>                       <p>Email: ${employee.email}</p>                       <p>Phone: ${employee.phone}</p>                       <p>Role: ${employee.role}</p>                  );
+            });
+        }
+        $(document).ready(getEmployeeDetails);
+    </script>
+</body>
+</html>  
+File: frontend/dashboard.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/dashboard.php]
+<?php
+session_start();
+require_once '../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT first_name, role FROM employees WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YardMaster Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <h1>Welcome, <?php echo htmlspecialchars($user['first_name']); ?></h1>
+    <p>Role: <?php echo htmlspecialchars($user['role']); ?></p>
+    <nav>
+        <a href="employee_management.html">Employee Management</a>
+        <a href="fleet.php">Fleet Management</a>
+        <a href="pickup.php">Vehicle Pickup</a>
+        <a href="pos.php">Point of Sale</a>
+        <a href="scrap.php">Scrap Purchases</a>
+        <a href="timeclock.php">Time Clock</a>
+        <a href="../api/logout.php">Logout</a>
+    </nav>
+</body>
+</html>  
+File: frontend/style.css
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/style.css]
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+h1 {
+    color: #333;
+}
+form {
+    margin-bottom: 20px;
+}
+input, select, button {
+    margin: 5px;
+    padding: 5px;
+}
+ul {
+    list-style: none;
+    padding: 0;
+}
+li {
+    margin: 5px 0;
+}
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}  
+File: assets/js/fleet.js
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/assets/js/fleet.js]
+$(document).ready(function() {
+    $('.process-vehicle').click(function() {
+        const vehicleId = $(this).data('id');
+        $.post('../api/vehicle_pickup/process_pending.php', { vehicle_id: vehicleId }, function(data) {
+            const response = JSON.parse(data);
+            alert(response.success || response.error);
+            if (response.success) {
+                $(#vehicle-${vehicleId}).removeClass('pending').addClass('processed');
+            }
+        });
+    });
+});  
+File: assets/css/style.css
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/assets/css/style.css]
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+}
+h1 {
+    color: #2c3e50;
+}
+nav {
+    margin: 20px 0;
+}
+nav a {
+    margin-right: 15px;
+    color: #2980b9;
+    text-decoration: none;
+}
+nav a:hover {
+    color: #3498db;
+}
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+input, select, button {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 10px 0;
+    padding: 8px;
+}
+button {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #3498db;
+}
+ul {
+    list-style: none;
+    padding: 0;
+}
+li {
+    background: #fff;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}  
+File: assets/css/fleet.css
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/assets/css/fleet.css]
+.fleet-vehicle {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+.fleet-vehicle.pending {
+    background: #fff3cd;
+}
+.fleet-vehicle.processed {
+    background: #d4edda;
+}
+.fleet-vehicle button {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.fleet-vehicle button:hover {
+    background: #c82333;
+}  
+File: RedLionSalvageAi/Composer-Setup.exe
+(Note: This is a binary executable file, not a text file. Including a placeholder as content cannot be displayed.)
+[Binary File Placeholder: Composer-Setup.exe]
+This is a binary executable file for installing Composer, a dependency manager for PHP. The actual content is not text-based and cannot be displayed here. To use, download from the official Composer website or the repository and run on a Windows system.  
+File: test.txt
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/test.txt]
+This is a test file for the Red Lion Salvage YardMaster AI system.  
+File: test.html
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/test.html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>Test Page for YardMaster AI</h1>
+    <p>This is a test HTML page for the Red Lion Salvage system.</p>
+</body>
+</html>  
+[End of Report - All Files Processed]  
+
