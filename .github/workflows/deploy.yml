@@ -8,20 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Clean Remote Directory
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          script: |
-            rm -rf /www/ai.redlionsalvage.net/*
       - name: Deploy via FTP
         uses: sebastianpopp/ftp-action@releases/v2
         with:
           host: ${{ secrets.FTP_HOST }}
           user: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          localDir: "./"  # Trailing slash deploys contents directly
+          localDir: "./"  # Deploy contents directly
           remoteDir: "/www/ai.redlionsalvage.net/"
           forceSsl: "false"
