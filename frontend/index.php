@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 // Temporarily comment out config to isolate timeout
 // require_once '/api/config.php';
 // if (isset($_SESSION['employee_id'])) {
-//     header('Location: /dashboard.php');
+//     header('Location: /frontend/dashboard.php');
 //     exit;
 // }
 ?>
@@ -47,7 +47,7 @@ error_reporting(E_ALL);
                 return response.json();
             }).then(data => {
                 if (data.success) {
-                    window.location.href = '/dashboard.php';
+                    window.location.href = '/frontend/dashboard.php';
                 } else {
                     document.getElementById('message').textContent = data.message || 'Login failed';
                 }
