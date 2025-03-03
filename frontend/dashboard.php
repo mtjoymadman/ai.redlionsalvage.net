@@ -1,9 +1,14 @@
 <?php
-require_once '/api/config.php';  // Absolute path from root
-if (!isset($_SESSION['employee_id'])) {
-    header('Location: /frontend/index.php');
-    exit;
-}
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporti
+ng(E_ALL);
+// require_once '/api/config.php';
+// session_start();
+// if (!isset($_SESSION['employee_id'])) {
+//     header('Location: /frontend/index.php');
+//     exit;
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,8 +25,8 @@ if (!isset($_SESSION['employee_id'])) {
         <a href="/api/logout.php" class="logout-btn">Logout</a>
     </header>
     <div class="dashboard-container">
-        <h1>Welcome, <?php echo htmlspecialchars($_SESSION['employee_name'] ?? 'User'); ?></h1>
-        <!-- Dashboard content here -->
+        <h1>Welcome to Dashboard</h1>
+        <!-- Static content for testing -->
     </div>
 </body>
 </html>
