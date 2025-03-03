@@ -8,12 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Stage Files
+        run: |
+          mkdir -p temp
+          find . -maxdepth 1 -not -path './temp' -not -path '.' -exec cp -r {} temp/ \;  # Copy all except temp
       - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: sebastianpopp/ftp-action@releases/v2
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
+          host: ${{ secrets.FTP_HOST }}
+          user: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: "./"  # Deploy contents directly
-          server-dir: "/www/ai.redlionsalvage.net/"
-          dangerous-clean-slate: true  # Clear server-dir before deploy
+          localDir: "temp/"
+          remoteDir: "/www/ai.redlionsalvage.net/"
+          forceSsl: "false"
