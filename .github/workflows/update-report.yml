@@ -2,7 +2,7 @@ name: Update YardMaster Report
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+    - cron: '0 10 * * *'  # Runs daily at 10 AM UTC (6 AM EDT, 5 AM EST)
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
