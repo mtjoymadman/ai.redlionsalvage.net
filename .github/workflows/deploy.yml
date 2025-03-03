@@ -8,23 +8,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Test FTP Connection to web26.us.cloudlogin.co
+      - name: Test and Deploy to Server via FTP
         env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_REMOTE_DIR: /home/username/public_html/ai.redlionsalvage.net  # Replace 'username'
         run: |
-          echo "Testing FTP connection to web26.us.cloudlogin.co"
-          curl -v ftp://web26.us.cloudlogin.co -u "$FTP_USERNAME:$FTP_PASSWORD" --ftp-method singlecwd || {
-            echo "FTP test to web26.us.cloudlogin.co failed: $?";
+          echo "Testing FTP connection to $FTP_HOST"
+          curl --verbose ftp://"$FTP_HOST" --user "$FTP_USERNAME:$FTP_PASSWORD" --ftp-method singlecwd && echo "FTP test succeeded" || {
+            echo "FTP test failed: $?";
             exit 1;
           }
-          echo "FTP connection to web26.us.cloudlogin.co succeeded"
-      # Original SSH deployment (commented out for reference)
-      # - name: Deploy to Server
-      #   env:
-      #     DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-      #   run: |
-      #     echo "$DEPLOY_KEY" > deploy_key
-      #     chmod 600 deploy_key
-      #     rsync -avz --exclude '.git' -e "ssh -i deploy_key -o StrictHostKeyChecking=no" ./ user@ai.redlionsalvage.net:/var/www/ai.redlionsalvage.net
-      #     rm deploy_key
+          echo "Deploying with lftp"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "$FTP_HOST" <<EOF
+          set ftp:passive-mode true
+          mirror -R --exclude-glob .git* --exclude-glob .github/ --exclude .gitignore --exclude composer.lock ./ $FTP_REMOTE_DIR
+          quit
+          EOF
+          echo "Deployment complete"
