@@ -8,22 +8,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Test and Deploy to Server via FTP
+      - name: Debug Secrets and Test FTP Connection
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_REMOTE_DIR: /home/username/public_html/ai.redlionsalvage.net  # Replace 'username'
         run: |
-          echo "Testing FTP connection to $FTP_HOST"
-          curl --verbose ftp://"$FTP_HOST" --user "$FTP_USERNAME:$FTP_PASSWORD" --ftp-method singlecwd && echo "FTP test succeeded" || {
+          echo "FTP_HOST is set to: $FTP_HOST"  # Will mask if sensitive
+          echo "FTP_USERNAME length: ${#FTP_USERNAME}"  # Shows length, not value
+          echo "FTP_PASSWORD length: ${#FTP_PASSWORD}"  # Shows length, not value
+          if [ -z "$FTP_HOST" ] || [ -z "$FTP_USERNAME" ] || [ -z "$FTP_PASSWORD" ]; then
+            echo "One or more secrets are empty - please check GitHub Secrets"
+            exit 1
+          fi
+          echo "Testing FTP connection to web26.us.cloudlogin.co (hardcoded)"
+          curl --verbose ftp://web26.us.cloudlogin.co --user "$FTP_USERNAME:$FTP_PASSWORD" --ftp-method singlecwd && echo "FTP test succeeded" || {
             echo "FTP test failed: $?";
             exit 1;
           }
-          echo "Deploying with lftp"
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "$FTP_HOST" <<EOF
-          set ftp:passive-mode true
-          mirror -R --exclude-glob .git* --exclude-glob .github/ --exclude .gitignore --exclude composer.lock ./ $FTP_REMOTE_DIR
-          quit
-          EOF
-          echo "Deployment complete"
+          echo "Test complete - secrets and connection verified"
