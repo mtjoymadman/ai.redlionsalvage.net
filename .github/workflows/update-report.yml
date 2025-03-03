@@ -5,6 +5,9 @@ on:
     - cron: '0 10 * * *'  # Runs daily at 10 AM UTC (6 AM EDT, 5 AM EST)
   workflow_dispatch:  # Allows manual trigger
 
+permissions:
+  contents: write  # Grants write access to repository contents
+
 jobs:
   update-report:
     runs-on: ubuntu-latest
