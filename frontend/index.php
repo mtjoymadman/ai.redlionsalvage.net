@@ -1,7 +1,12 @@
 <?php
 require_once '../api/config.php';
 if (isset($_SESSION['employee_id'])) {
-    header('Location: /dashboard.php');  // Corrected to root, where dashboard.php should be
+    // Check if dashboard.php exists at root or frontend
+    if (file_exists('/dashboard.php')) {
+        header('Location: /dashboard.php');
+    } else {
+        header('Location: /frontend/dashboard.php');
+    }
     exit;
 }
 ?>
@@ -39,7 +44,16 @@ if (isset($_SESSION['employee_id'])) {
                 body: new FormData(this)
             }).then(response => response.json()).then(data => {
                 if (data.success) {
-                    window.location.href = '/dashboard.php';  // Corrected to root
+                    // Match PHP logic for consistency
+                    fetch('/dashboard.php').then(res => {
+                        if (res.ok) {
+                            window.location.href = '/dashboard.php';
+                        } else {
+                            window.location.href = '/frontend/dashboard.php';
+                        }
+                    }).catch(() => {
+                        window.location.href = '/frontend/dashboard.php';
+                    });
                 } else {
                     document.getElementById('message').textContent = data.message;
                 }
