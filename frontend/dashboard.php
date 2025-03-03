@@ -9,11 +9,11 @@
 <body>
     <header>
         <img src="logo.png" alt="YardMaster Logo" class="logo">
-        <a href="/index.xhtml" class="home-btn">Home</a>
+        <a href="index.php" class="home-btn">Home</a>
     </header>
     <div class="dashboard-container">
         <h1>Welcome to Your Dashboard</h1>
-        <p>Static dashboard content.</p>
+        <p>This is your YardMaster dashboard.</p>
     </div>
 </body>
 </html>
