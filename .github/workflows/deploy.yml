@@ -15,5 +15,5 @@ jobs:
           user: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           localDir: "."
-          remoteDir: "/www"
+          remoteDir: "/home/redlions/public_html/ai.redlionsalvage.net/"
           forceSsl: "false"
