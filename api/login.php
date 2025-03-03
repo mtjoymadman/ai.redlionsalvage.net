@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $response['message'] = 'Invalid credentials';
     }
+} else {
+    $response['message'] = 'Invalid request method';
 }
 
 echo json_encode($response);
