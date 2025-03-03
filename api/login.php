@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// require_once 'config.php';  // Relative path within api/
+// require_once 'config.php';
 
 $response = ['success' => false, 'message' => ''];
 
