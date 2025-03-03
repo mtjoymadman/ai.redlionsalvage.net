@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (!empty($username)) {
-        $_SESSION['employee_id'] = 1; // Placeholder ID
+        $_SESSION['employee_id'] = 1; // Placeholder
         $_SESSION['employee_name'] = $username;
         $response['success'] = true;
     } else {
