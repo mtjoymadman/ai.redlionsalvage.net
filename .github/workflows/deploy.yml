@@ -7,13 +7,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy via FTP
-        uses: airvzxf/ftp-deployment@v1.2
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          remote-root: "/www/ai.redlionsalvage.net/"
-          local-root: "./"  # Deploy contents directly
-          delete: "true"  # Clear remote-root before deploy
+      - uses: actions/checkout@v2
+      - name: Test FTP Connection to web26.us.cloudlogin.co
+        env:
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          echo "Testing FTP connection to web26.us.cloudlogin.co"
+          curl -v ftp://web26.us.cloudlogin.co -u "$FTP_USERNAME:$FTP_PASSWORD" --ftp-method singlecwd || {
+            echo "FTP test to web26.us.cloudlogin.co failed: $?";
+            exit 1;
+          }
+          echo "FTP connection to web26.us.cloudlogin.co succeeded"
+      # Original SSH deployment (commented out for reference)
+      # - name: Deploy to Server
+      #   env:
+      #     DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      #   run: |
+      #     echo "$DEPLOY_KEY" > deploy_key
+      #     chmod 600 deploy_key
+      #     rsync -avz --exclude '.git' -e "ssh -i deploy_key -o StrictHostKeyChecking=no" ./ user@ai.redlionsalvage.net:/var/www/ai.redlionsalvage.net
+      #     rm deploy_key
