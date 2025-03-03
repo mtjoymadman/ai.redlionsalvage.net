@@ -16,7 +16,7 @@ if (isset($_SESSION['employee_id'])) {
 <body>
     <header>
         <img src="logo.png" alt="YardMaster Logo" class="logo">
-        <a href="/index.xhtml" class="home-btn">Home</a>
+        <a href="index.php" class="home-btn">Home</a>
     </header>
     <div class="login-container">
         <h1>Login</h1>
