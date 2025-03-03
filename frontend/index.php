@@ -1,30 +1,19 @@
-<?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-// Temporarily comment out config to isolate timeout
-// require_once '/api/config.php';
-// if (isset($_SESSION['employee_id'])) {
-//     header('Location: /frontend/dashboard.php');
-//     exit;
-// }
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YardMaster Login</title>
-    <link rel="stylesheet" href="/frontend/style.css">
+    <link rel="stylesheet" href="style.css">  <!-- Relative path within frontend/ -->
 </head>
 <body>
     <header>
-        <img src="/frontend/logo.png" alt="YardMaster Logo" class="logo">
-        <a href="/frontend/index.php" class="home-btn">Home</a>
+        <img src="logo.png" alt="YardMaster Logo" class="logo">  <!-- Relative path -->
+        <a href="index.php" class="home-btn">Home</a>
     </header>
     <div class="login-container">
-        <h1>Login</h1>
-        <form id="loginForm" class="vehicle-form" method="POST" action="/api/login.php">
+        <h1>Login Test</h1>
+        <form id="loginForm" class="vehicle-form" method="POST" action="../api/login.php">
             <div class="form-group">
                 <input type="text" name="username" placeholder="Username" required>
             </div>
@@ -38,16 +27,12 @@ error_reporting(E_ALL);
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            fetch('/api/login.php', {
+            fetch('../api/login.php', {
                 method: 'POST',
-                body: new FormData(this),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            }).then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            }).then(data => {
+                body: new FormData(this)
+            }).then(response => response.json()).then(data => {
                 if (data.success) {
-                    window.location.href = '/frontend/dashboard.php';
+                    window.location.href = 'dashboard.php';  // Relative to frontend/
                 } else {
                     document.getElementById('message').textContent = data.message || 'Login failed';
                 }
