@@ -1,9 +1,13 @@
 <?php
-require_once '/api/config.php';  // Adjusted to absolute path from root
-if (isset($_SESSION['employee_id'])) {
-    header('Location: /dashboard.php');
-    exit;
-}
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+// Temporarily comment out config to isolate timeout
+// require_once '/api/config.php';
+// if (isset($_SESSION['employee_id'])) {
+//     header('Location: /dashboard.php');
+//     exit;
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,13 +40,19 @@ if (isset($_SESSION['employee_id'])) {
             e.preventDefault();
             fetch('/api/login.php', {
                 method: 'POST',
-                body: new FormData(this)
-            }).then(response => response.json()).then(data => {
+                body: new FormData(this),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            }).then(data => {
                 if (data.success) {
                     window.location.href = '/dashboard.php';
                 } else {
-                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').textContent = data.message || 'Login failed';
                 }
+            }).catch(error => {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
             });
         });
     </script>
