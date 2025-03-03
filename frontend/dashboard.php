@@ -12,7 +12,7 @@
         <a href="/index.xhtml" class="home-btn">Home</a>
     </header>
     <div class="dashboard-container">
-        <h1>Dashboard Test</h1>
+        <h1>Welcome to Your Dashboard</h1>
         <p>Static dashboard content.</p>
     </div>
 </body>
