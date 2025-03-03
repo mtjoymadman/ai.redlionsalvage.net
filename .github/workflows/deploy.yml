@@ -14,6 +14,6 @@ jobs:
           host: ${{ secrets.FTP_HOST }}
           user: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          localDir: "."
-          remoteDir: "/home/redlions/public_html/ai.redlionsalvage.net/"
+          localDir: "./"  # Trailing slash deploys contents directly
+          remoteDir: "/www/ai.redlionsalvage.net/"
           forceSsl: "false"
