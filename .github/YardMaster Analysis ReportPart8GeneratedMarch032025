@@ -1,0 +1,972 @@
+YardMaster Analysis ReportPart8GeneratedMarch032025
+Generated: March 03, 2025  
+Repository Structure
+ai.redlionsalvage.net/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── composer.json
+├── composer.lock
+├── index.php
+├── .github/
+│   ├── workflows/
+│   │   ├── deploy.yml
+│   ├── YardMaster_Analysis_Report.md
+├── ai.redlionsalvage.net/
+│   ├── api/
+│   │   ├── employee_management/
+│   │   │   ├── add_employee.php
+│   │   │   ├── delete_employee.php
+│   │   │   ├── get_employees.php
+│   │   │   ├── suspend_employee.php
+│   │   │   ├── update_employee.php
+│   │   ├── fleet/
+│   │   │   ├── add_vehicle.php
+│   │   │   ├── assign_driver.php
+│   │   │   ├── check expirations.php
+│   │   │   ├── get_driver_history.php
+│   │   │   ├── get_fleet_vehicles.php
+│   │   │   ├── ocr_receipt.py
+│   │   │   ├── update_mileage.php
+│   │   │   ├── upload_document.php
+│   │   │   ├── upload_receipt.php
+│   │   ├── inventory/
+│   │   │   ├── get_parts.php
+│   │   │   ├── get_vehicles.php
+│   │   ├── pos/
+│   │   │   ├── open_drawer.php
+│   │   │   ├── print_receipt.php
+│   │   │   ├── record_sale.php
+│   │   ├── scrap/
+│   │   │   ├── record_purchase.php
+│   │   ├── timeclock/
+│   │   │   ├── add_extra_time.php
+│   │   │   ├── end_break.php
+│   │   │   ├── get_employee_status.php
+│   │   │   ├── get_extra_time.php
+│   │   │   ├── get_time_log.php
+│   │   │   ├── get_time_status.php
+│   │   │   ├── get_yardman_stats.php
+│   │   │   ├── log_extra_time.php
+│   │   │   ├── start_break.php
+│   │   ├── vehicle_pickup/
+│   │   │   ├── get_pending_vehicles.php
+│   │   │   ├── process_pending.php
+│   │   │   ├── submit_pending.php
+│   │   ├── config.php
+│   │   ├── employee.php
+│   │   ├── get_user_roles.php
+│   │   ├── login.php
+│   │   ├── logout.php
+│   │   ├── timeclock.php
+│   │   ├── vehicle_mangement.php
+├── api/
+│   ├── employee_management/
+│   │   ├── add_employee.php
+│   │   ├── delete_employee.php
+│   │   ├── get_employees.php
+│   │   ├── suspend_employee.php
+│   │   ├── update_employee.php
+│   ├── fleet/
+│   │   ├── add_vehicle.php
+│   │   ├── assign_driver.php
+│   │   ├── check expirations.php
+│   │   ├── documents.php
+│   │   ├── get_driver_history.php
+│   │   ├── get_fleet_vehicles.php
+│   │   ├── ocr_receipt.py
+│   │   ├── update_mileage.php
+│   │   ├── upload_document.php
+│   │   ├── upload_receipt.php
+│   │   ├── vehicles.php
+├── database/
+│   ├── schema.sql
+[Truncated—full structure as you provided]  
+File Contents
+File: api/timeclock/get_time_log.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/timeclock/get_time_log.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$employee_id = $_GET['employee_id'];
+$stmt = $pdo->prepare("SELECT clock_in, clock_out, break_start, break_end, extra_time, created_at FROM timeclock WHERE employee_id = ? ORDER BY created_at DESC");
+$stmt->execute([$employee_id]);
+$log = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($log);
+?>  
+File: api/timeclock/get_time_status.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/timeclock/get_time_status.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$employee_id = $_SESSION['user_id'];
+$stmt = $pdo->prepare("SELECT clock_in, clock_out, break_start, break_end FROM timeclock WHERE employee_id = ? AND clock_out IS NULL LIMIT 1");
+$stmt->execute([$employee_id]);
+$status = $stmt->fetch(PDO::FETCH_ASSOC);  
+if ($status) {
+    echo json_encode($status);
+} else {
+    echo json_encode(['status' => 'clocked_out']);
+}
+?>  
+File: api/timeclock/get_yardman_stats.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/timeclock/get_yardman_stats.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT e.id, e.username, e.first_name, e.last_name, SUM(t.extra_time) as total_extra, COUNT(t.id) as shifts FROM employees e LEFT JOIN timeclock t ON e.id = t.employee_id WHERE e.role = 'employee' GROUP BY e.id, e.username, e.first_name, e.last_name");
+$stmt->execute();
+$stats = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($stats);
+?>  
+File: api/timeclock/log_extra_time.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/timeclock/log_extra_time.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $employee_id = $_POST['employee_id'];
+    $extra_time = $_POST['extra_time']; // in minutes
+    $description = $_POST['description'];  
+
+$stmt = $pdo->prepare("INSERT INTO timeclock (employee_id, extra_time, created_at) VALUES (?, ?, NOW())");  
+$success = $stmt->execute([$employee_id, $extra_time]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Extra time logged']);  
+} else {  
+    echo json_encode(['error' => 'Failed to log extra time']);  
+}  
+
+}
+?>  
+File: api/timeclock/start_break.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/timeclock/start_break.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $employee_id = $_SESSION['user_id'];  
+
+$stmt = $pdo->prepare("UPDATE timeclock SET break_start = NOW() WHERE employee_id = ? AND clock_out IS NULL AND break_start IS NULL");  
+$success = $stmt->execute([$employee_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Break started']);  
+} else {  
+    echo json_encode(['error' => 'Failed to start break or no active shift']);  
+}  
+
+}
+?>  
+File: api/vehicle_pickup/get_pending_vehicles.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/vehicle_pickup/get_pending_vehicles.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT id, vin, make, model, year FROM vehicles WHERE status = 'pending'");
+$stmt->execute();
+$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($vehicles);
+?>  
+File: api/vehicle_pickup/process_pending.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/vehicle_pickup/process_pending.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $vehicle_id = $_POST['vehicle_id'];  
+
+$stmt = $pdo->prepare("UPDATE vehicles SET status = 'processed', updated_at = NOW() WHERE id = ? AND status = 'pending'");  
+$success = $stmt->execute([$vehicle_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Vehicle processed']);  
+} else {  
+    echo json_encode(['error' => 'Failed to process vehicle']);  
+}  
+
+}
+?>  
+File: api/vehicle_pickup/submit_pending.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/vehicle_pickup/submit_pending.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $vin = $_POST['vin'];
+    $make = $_POST['make'];
+    $model = $_POST['model'];
+    $year = $_POST['year'];  
+
+$stmt = $pdo->prepare("INSERT INTO vehicles (vin, make, model, year, status) VALUES (?, ?, ?, ?, 'pending')");  
+$success = $stmt->execute([$vin, $make, $model, $year]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Vehicle submitted for pickup']);  
+} else {  
+    echo json_encode(['error' => 'Failed to submit vehicle']);  
+}  
+
+}
+?>  
+File: api/config.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/config.php]
+<?php
+require_once '../vendor/autoload.php';  
+use Dotenv\Dotenv;  
+$dotenv = Dotenv::createImmutable(DIR . '/..');
+$dotenv->load();  
+$db_host = $_ENV['DB_HOST'];
+$db_name = $_ENV['DB_NAME'];
+$db_user = $_ENV['DB_USER'];
+$db_pass = $_ENV['DB_PASS'];  
+try {
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
+}
+?>  
+File: api/employee.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/employee.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT id, username, first_name, last_name, email, phone, role FROM employees WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$employee = $stmt->fetch(PDO::FETCH_ASSOC);  
+echo json_encode($employee);
+?>  
+File: api/get_user_roles.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/get_user_roles.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT DISTINCT role FROM employees");
+$stmt->execute();
+$roles = $stmt->fetchAll(PDO::FETCH_COLUMN);  
+echo json_encode($roles);
+?>  
+File: api/login.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/login.php]
+<?php
+session_start();
+require_once '../config.php';  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];  
+
+$stmt = $pdo->prepare("SELECT * FROM employees WHERE username = ?");  
+$stmt->execute([$username]);  
+$user = $stmt->fetch();  
+ 
+if ($user && password_verify($password, $user['password'])) {  
+    $_SESSION['user_id'] = $user['id'];  
+    $_SESSION['role'] = $user['role'];  
+    header("Location: ../frontend/dashboard.php");  
+    exit();  
+} else {  
+    echo json_encode(['error' => 'Invalid credentials']);  
+}  
+
+}
+?>  
+File: api/logout.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/logout.php]
+<?php
+session_start();  
+session_unset();
+session_destroy();  
+header("Location: ../frontend/index.php");
+exit();
+?>  
+File: api/timeclock.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/timeclock.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $action = $_POST['action'];
+    $employee_id = $_SESSION['user_id'];  
+
+if ($action === 'clock_in') {  
+    $stmt = $pdo->prepare("INSERT INTO timeclock (employee_id, clock_in) VALUES (?, NOW())");  
+    $success = $stmt->execute([$employee_id]);  
+    $message = $success ? 'Clocked in' : 'Failed to clock in';  
+} elseif ($action === 'clock_out') {  
+    $stmt = $pdo->prepare("UPDATE timeclock SET clock_out = NOW() WHERE employee_id = ? AND clock_out IS NULL");  
+    $success = $stmt->execute([$employee_id]);  
+    $message = $success ? 'Clocked out' : 'Failed to clock out';  
+} else {  
+    echo json_encode(['error' => 'Invalid action']);  
+    exit();  
+}  
+
+echo json_encode(['success' => $message]);  
+
+}
+?>  
+File: api/vehicle_mangement.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/vehicle_mangement.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $action = $_POST['action'];  
+
+if ($action === 'update_status') {  
+    $vehicle_id = $_POST['vehicle_id'];  
+    $status = $_POST['status'];  
+    $stmt = $pdo->prepare("UPDATE vehicles SET status = ?, updated_at = NOW() WHERE id = ?");  
+    $success = $stmt->execute([$status, $vehicle_id]);  
+    $message = $success ? 'Status updated' : 'Failed to update status';  
+} else {  
+    echo json_encode(['error' => 'Invalid action']);  
+    exit();  
+}  
+
+echo json_encode(['success' => $message]);  
+
+}
+?>  
+File: .github/workflows/deploy.yml
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/.github/workflows/deploy.yml]
+name: Deploy to Server  
+on:
+  push:
+    branches:
+      - main  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Server
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          echo "$DEPLOY_KEY" > deploy_key
+          chmod 600 deploy_key
+          rsync -avz --exclude '.git' -e "ssh -i deploy_key -o StrictHostKeyChecking=no" ./ user@ai.redlionsalvage.net:/var/www/ai.redlionsalvage.net
+          rm deploy_key  
+File: database/schema.sql
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/database/schema.sql]
+-- MySQL Schema for Red Lion Salvage YardMaster AI System  
+CREATE DATABASE IF NOT EXISTS yardmaster;
+USE yardmaster;  
+-- Employees table
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'employee', 'driver') DEFAULT 'employee',
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    hire_date DATE,
+    status ENUM('active', 'suspended', 'terminated') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);  
+-- Vehicles table
+CREATE TABLE vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vin VARCHAR(17) NOT NULL UNIQUE,
+    make VARCHAR(50),
+    model VARCHAR(50),
+    year INT,
+    license_plate VARCHAR(20),
+    status ENUM('pending', 'processed', 'sold', 'scrapped') DEFAULT 'pending',
+    driver_id INT,
+    mileage INT,
+    last_inspection DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (driver_id) REFERENCES employees(id) ON DELETE SET NULL
+);  
+-- Timeclock table
+CREATE TABLE timeclock (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    clock_in TIMESTAMP NOT NULL,
+    clock_out TIMESTAMP,
+    break_start TIMESTAMP,
+    break_end TIMESTAMP,
+    extra_time INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);  
+-- Inventory Parts table
+CREATE TABLE inventory_parts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id INT,
+    part_name VARCHAR(100),
+    part_number VARCHAR(50),
+    condition ENUM('new', 'used', 'damaged') DEFAULT 'used',
+    price DECIMAL(10, 2),
+    stock INT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL
+);  
+-- Sales table
+CREATE TABLE sales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT,
+    part_id INT,
+    sale_price DECIMAL(10, 2),
+    sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_method ENUM('cash', 'card', 'check'),
+    receipt_url VARCHAR(255),
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE SET NULL,
+    FOREIGN KEY (part_id) REFERENCES inventory_parts(id) ON DELETE SET NULL
+);  
+File: RedLionSalvageAi/22825salvageyard_ai.sql
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/RedLionSalvageAi/22825salvageyard_ai.sql]
+-- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)  
+-- Host: localhost    Database: yardmaster  
+-- Server version	8.0.34  
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT /;
+/!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS /;
+/!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION /;
+/!50503 SET NAMES utf8 /;
+/!40103 SET @OLD_TIME_ZONE
+=@@TIME_ZONE
+ /;
+/!40103 SET TIME_ZONE='+00:00' /;
+/!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS
+, UNIQUE_CHECKS=0 /;
+/!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 /;
+/!40101 SET @OLD_SQL_MODE
+=@@SQL_MODE
+, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' /;
+/!40111 SET @OLD_SQL_NOTES
+=@@SQL_NOTES
+, SQL_NOTES=0 */;  
+--
+-- Table structure for table employees  
+DROP TABLE IF EXISTS employees;
+/*!40101 SET @saved_cs_client
+     = @@character_set_client /;
+/!50503 SET character_set_client = utf8mb4 /;
+CREATE TABLE employees (
+  id int NOT NULL AUTO_INCREMENT,
+  username varchar(50) NOT NULL,
+  password varchar(255) NOT NULL,
+  role enum('admin','employee','driver') DEFAULT 'employee',
+  first_name varchar(50) DEFAULT NULL,
+  last_name varchar(50) DEFAULT NULL,
+  email varchar(100) DEFAULT NULL,
+  phone varchar(20) DEFAULT NULL,
+  hire_date date DEFAULT NULL,
+  status enum('active','suspended','terminated') DEFAULT 'active',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/!40101 SET character_set_client = @saved_cs_client
+ */;  
+--
+-- Table structure for table inventory_parts  
+DROP TABLE IF EXISTS inventory_parts;
+/*!40101 SET @saved_cs_client
+     = @@character_set_client /;
+/!50503 SET character_set_client = utf8mb4 /;
+CREATE TABLE inventory_parts (
+  id int NOT NULL AUTO_INCREMENT,
+  vehicle_id int DEFAULT NULL,
+  part_name varchar(100) DEFAULT NULL,
+  part_number varchar(50) DEFAULT NULL,
+  condition enum('new','used','damaged') DEFAULT 'used',
+  price decimal(10,2) DEFAULT NULL,
+  stock int DEFAULT '1',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY vehicle_id (vehicle_id),
+  CONSTRAINT inventory_parts_ibfk_1 FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/!40101 SET character_set_client = @saved_cs_client
+ */;  
+--
+-- Table structure for table sales  
+DROP TABLE IF EXISTS sales;
+/*!40101 SET @saved_cs_client
+     = @@character_set_client /;
+/!50503 SET character_set_client = utf8mb4 /;
+CREATE TABLE sales (
+  id int NOT NULL AUTO_INCREMENT,
+  employee_id int DEFAULT NULL,
+  part_id int DEFAULT NULL,
+  sale_price decimal(10,2) DEFAULT NULL,
+  sale_date timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  payment_method enum('cash','card','check') DEFAULT NULL,
+  receipt_url varchar(255) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY employee_id (employee_id),
+  KEY part_id (part_id),
+  CONSTRAINT sales_ibfk_1 FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE SET NULL,
+  CONSTRAINT sales_ibfk_2 FOREIGN KEY (part_id) REFERENCES inventory_parts (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/!40101 SET character_set_client = @saved_cs_client
+ */;  
+--
+-- Table structure for table timeclock  
+DROP TABLE IF EXISTS timeclock;
+/*!40101 SET @saved_cs_client
+     = @@character_set_client /;
+/!50503 SET character_set_client = utf8mb4 /;
+CREATE TABLE timeclock (
+  id int NOT NULL AUTO_INCREMENT,
+  employee_id int NOT NULL,
+  clock_in timestamp NOT NULL,
+  clock_out timestamp NULL DEFAULT NULL,
+  break_start timestamp NULL DEFAULT NULL,
+  break_end timestamp NULL DEFAULT NULL,
+  extra_time int DEFAULT '0',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY employee_id (employee_id),
+  CONSTRAINT timeclock_ibfk_1 FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/!40101 SET character_set_client = @saved_cs_client
+ */;  
+--
+-- Table structure for table vehicles  
+DROP TABLE IF EXISTS vehicles;
+/*!40101 SET @saved_cs_client
+     = @@character_set_client /;
+/!50503 SET character_set_client = utf8mb4 /;
+CREATE TABLE vehicles (
+  id int NOT NULL AUTO_INCREMENT,
+  vin varchar(17) NOT NULL,
+  make varchar(50) DEFAULT NULL,
+  model varchar(50) DEFAULT NULL,
+  year int DEFAULT NULL,
+  license_plate varchar(20) DEFAULT NULL,
+  status enum('pending','processed','sold','scrapped') DEFAULT 'pending',
+  driver_id int DEFAULT NULL,
+  mileage int DEFAULT NULL,
+  last_inspection date DEFAULT NULL,
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY vin (vin),
+  KEY driver_id (driver_id),
+  CONSTRAINT vehicles_ibfk_1 FOREIGN KEY (driver_id) REFERENCES employees (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/!40101 SET character_set_client = @saved_cs_client
+ */;  
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE
+ /;
+/!40101 SET SQL_MODE=@OLD_SQL_MODE
+ /;
+/!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS /;
+/!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS /;
+/!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT /;
+/!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS /;
+/!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION /;
+/!40111 SET SQL_NOTES=@OLD_SQL_NOTES
+ */;  
+-- Dump completed on 2025-03-03 12:00:00  
+File: frontend/fleet/dashboard.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet/dashboard.php]
+<?php  
+session_start();  
+if (!isset($_SESSION['user_id'])) {  
+    header("Location: ../index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fleet Dashboard</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/fleet.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../assets/js/fleet.js"></script>
+</head>
+<body>
+    <h1>Fleet Dashboard</h1>
+    <div id="fleet-list"></div>
+    <a href="../dashboard.php">Back to Main Dashboard</a>
+    <script>
+        $(document).ready(function() {
+            $.get('../../api/fleet/get_fleet_vehicles.php', function(data) {
+                const vehicles = JSON.parse(data);
+                let html = '';
+                vehicles.forEach(v => {
+                    html += <div class="fleet-vehicle ${v.status}" id="vehicle-${v.id}">;
+                    html += <p>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</p>;
+                    if (v.status === 'pending') {
+                        html += <button class="process-vehicle" data-id="${v.id}">Process</button>;
+                    }
+                    html += </div>;
+                });
+                $('#fleet-list').html(html);
+            });
+        });
+    </script>
+</body>
+</html>  
+File: frontend/fleet/pretrip_form.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet/pretrip_form.php]
+<?php  
+session_start();  
+if (!in_array($_SESSION['role'], ['admin', 'driver'])) {  
+    header("Location: ../index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pre-Trip Inspection Form</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Pre-Trip Inspection Form</h1>
+    <form id="pretrip-form">
+        <input type="number" name="vehicle_id" placeholder="Vehicle ID" required>
+        <input type="number" name="mileage" placeholder="Current Mileage" required>
+        <input type="text" name="notes" placeholder="Inspection Notes">
+        <button type="submit">Submit Inspection</button>
+    </form>
+    <a href="dashboard.php">Back to Fleet Dashboard</a>
+    <script>
+        $('#pretrip-form').submit(function(e) {
+            e.preventDefault();
+            $.post('../../api/fleet/update_mileage.php', $(this).serialize(), function(data) {
+                alert(JSON.parse(data).success || JSON.parse(data).error);
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>  
+File: frontend/fleet/vehicle_details.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet/vehicle_details.php]
+<?php  
+session_start();  
+if (!in_array($_SESSION['role'], ['admin', 'driver'])) {  
+    header("Location: ../index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle Details</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Vehicle Details</h1>
+    <div id="vehicle-details"></div>
+    <a href="dashboard.php">Back to Fleet Dashboard</a>
+    <script>
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const vehicleId = urlParams.get('id');
+            $.get('../../api/fleet/vehicles.php', { id: vehicleId }, function(data) {
+                const vehicle = JSON.parse(data)[0];
+                $('#vehicle-details').html(                      <p>VIN: ${vehicle.vin}</p>                       <p>Make: ${vehicle.make}</p>                       <p>Model: ${vehicle.model}</p>                       <p>Year: ${vehicle.year}</p>                       <p>Status: ${vehicle.status}</p>                       <p>Mileage: ${vehicle.mileage}</p>                       <p>Last Inspection: ${vehicle.last_inspection}</p>                  );
+            });
+        });
+    </script>
+</body>
+</html>  
+File: frontend/pending_vehicles.html
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/pending_vehicles.html]
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Pending Vehicles</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Pending Vehicles</h1>  
+    <div id="pending-list"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/vehicle_pickup/get_pending_vehicles.php', function(data) {  
+                const vehicles = JSON.parse(data);  
+                let html = '<ul>';  
+                vehicles.forEach(v => {  
+                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) <button onclick="processVehicle(${v.id})">Process</button></li>`;  
+                });  
+                html += '</ul>';  
+                $('#pending-list').html(html);  
+            });  
+        });  
+    function processVehicle(id) {  
+        $.post('../api/vehicle_pickup/process_pending.php', { vehicle_id: id }, function(data) {  
+            alert(JSON.parse(data).success || JSON.parse(data).error);  
+            location.reload();  
+        });  
+    }  
+</script>  
+
+</body>  
+</html>  
+---  
+File: frontend/vehicle_search.html
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/vehicle_search.html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle Search</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Vehicle Search</h1>
+    <form id="search-form">
+        <input type="text" name="vin" placeholder="Enter VIN">
+        <button type="submit">Search</button>
+    </form>
+    <div id="search-results"></div>
+    <a href="dashboard.php">Back to Dashboard</a>
+    <script>
+        $('#search-form').submit(function(e) {
+            e.preventDefault();
+            const vin = $('input[name="vin"]').val();
+            $.get('../api/inventory/get_vehicles.php', { vin: vin }, function(data) {
+                const vehicles = JSON.parse(data);
+                let html = '<ul>';
+                vehicles.forEach(v => {
+                    html += <li>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</li>;
+                });
+                html += '</ul>';
+                $('#search-results').html(html);
+            });
+        });
+    </script>
+</body>
+</html>  
+File: frontend/timeclock.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/timeclock.php]
+<?php  
+session_start();  
+if (!isset($_SESSION['user_id'])) {  
+    header("Location: index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Time Clock</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Time Clock</h1>  
+    <button id="clock-in">Clock In</button>  
+    <button id="clock-out">Clock Out</button>  
+    <button id="start-break">Start Break</button>  
+    <button id="end-break">End Break</button>  
+    <div id="status"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/timeclock/get_time_status.php', function(data) {  
+                const status = JSON.parse(data);  
+                $('#status').html(status.status === 'clocked_out' ? 'Clocked Out' : `Clocked In: ${status.clock_in}`);  
+            });  
+        $('#clock-in').click(function() {  
+            $.post('../api/timeclock.php', { action: 'clock_in' }, function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+
+        $('#clock-out').click(function() {  
+            $.post('../api/timeclock.php', { action: 'clock_out' }, function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+
+        $('#start-break').click(function() {  
+            $.post('../api/timeclock/start_break.php', {}, function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+
+        $('#end-break').click(function() {  
+            $.post('../api/timeclock/end_break.php', {}, function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+    });  
+</script>  
+
+</body>  
+</html>  
+---  
+File: frontend/scrap.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/scrap.php]
+<?php  
+session_start();  
+if (!isset($_SESSION['user_id'])) {  
+    header("Location: index.php");  
+    exit();  
+}  
+?>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Scrap Purchases</title>  
+    <link rel="stylesheet" href="../assets/css/style.css">  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+</head>  
+<body>  
+    <h1>Scrap Purchases</h1>  
+    <form id="record-purchase">  
+        <input type="number" name="vehicle_id" placeholder="Vehicle ID" required>  
+        <input type="number" name="purchase_price" placeholder="Purchase Price" step="0.01" required>  
+        <button type="submit">Record Purchase</button>  
+    </form>  
+    <div id="vehicles-list"></div>  
+    <a href="dashboard.php">Back to Dashboard</a>  
+    <script>  
+        $(document).ready(function() {  
+            $.get('../api/inventory/get_vehicles.php', function(data) {  
+                const vehicles = JSON.parse(data);  
+                let html = '<ul>';  
+                vehicles.forEach(v => {  
+                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</li>`;  
+                });  
+                html += '</ul>';  
+                $('#vehicles-list').html(html);  
+            });  
+        $('#record-purchase').submit(function(e) {  
+            e.preventDefault();  
+            $.post('../api/scrap/record_purchase.php', $(this).serialize(), function(data) {  
+                alert(JSON.parse(data).success || JSON.parse(data).error);  
+                location.reload();  
+            });  
+        });  
+    });  
+</script>  
+
+</body>  
+</html>  
+---  
+Continued in YardMaster Analysis ReportPart9GeneratedMarch032025  
+Progress Update
+Part 1: 29 files, saved as YardMaster Analysis ReportPart1GeneratedMarch032025.
+
+Part 2: 30 files, saved as YardMaster Analysis ReportPart2GeneratedMarch032025.
+
+Part 3: 10 files, saved as YardMaster Analysis ReportPart3GeneratedMarch032025.
+
+Part 4: 25 files, saved as YardMaster Analysis ReportPart4GeneratedMarch032025.
+
+Part 5: 25 files, saved as YardMaster Analysis ReportPart5GeneratedMarch032025.
+
+Part 6: 25 files, saved as YardMaster Analysis ReportPart6GeneratedMarch032025.
+
+Part 7: 20 files, saved as YardMaster Analysis ReportPart7GeneratedMarch032025.
+
+Part 8: 25 files (total 144), completed above as YardMaster Analysis ReportPart8GeneratedMarch032025, ~29,500 characters.
+
+Remaining: ~14 files from your structure.
+
+Next Steps
+Copy-Paste: Save Part 8 as YardMaster Analysis ReportPart8GeneratedMarch032025 in your Git.
+
+Part 9: I’ll include the remaining ~14 files in the next part, targeting:
+frontend/pos.php
+
+frontend/pickup.php
+
+frontend/index.php
+
+frontend/fleet.php
+
+frontend/employee_management.html
+
+frontend/employee_details.html
+
+frontend/dashboard.php
+
+frontend/style.css
+
+assets/js/fleet.js
+
+assets/css/style.css
+
+assets/css/fleet.css
+
+RedLionSalvageAi/Composer-Setup.exe (Binary placeholder)
+
+test.txt
+
+test.html
+
