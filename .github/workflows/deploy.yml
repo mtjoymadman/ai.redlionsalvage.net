@@ -6,13 +6,47 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy via FTP
-        uses: sebastianpopp/ftp-action@releases/v2
-        with:
-          host: ${{ secrets.FTP_HOST }}
-          user: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          localDir: "."
-          remoteDir: "/"
-          forceSsl: "false"
+    - uses: actions/checkout@v3
+    - name: Deploy via FTP
+      uses: sebastianpopp/ftp-action@releases/v2
+      with:
+        host: ${{ secrets.FTP_HOST }}
+        user: ${{ secrets.FTP_USER }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        localDir: "."
+        remoteDir: "/"
+        forceSsl: "false"
+
+GitHub Editor Steps
+Edit frontend/index.php:
+Go to github.com/mtjoymadman/ai.redlionsalvage.net.
+
+Open frontend/index.php, click the pencil icon.
+
+Paste the content from File 1.
+
+Commit to main with message: "Keep redirect to /frontend/dashboard.php".
+
+Edit .github/workflows/deploy.yml:
+Open .github/workflows/deploy.yml, click the pencil icon.
+
+Paste the content from File 2.
+
+Commit to main with message: "Fix YAML syntax error".
+
+Notes
+YAML Fix: Retyped with proper indentation (2 spaces, no tabs) to avoid syntax errors. Line 9 is uses: sebastianpopp/ftp-action@releases/v2—ensured it aligns under steps.
+
+Redirect: Kept /frontend/dashboard.php since frontend/index.php works at the root, and we’re testing if dashboard.php deployed correctly.
+
+Test: After committing, check:
+ai.redlionsalvage.net/frontend/index.php (should load).
+
+ai.redlionsalvage.net/frontend/dashboard.php (should load post-login).
+
+If the workflow fails again or the 404 persists, share the new log or test results!
+
+Explain YAML syntax rules
+
+GitHub Actions workflows
+
