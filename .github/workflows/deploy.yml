@@ -8,16 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Stage Files
-        run: |
-          mkdir -p temp
-          cp -r * temp/  # Copy all files to temp, excluding repo folder name
       - name: Deploy via FTP
-        uses: sebastianpopp/ftp-action@releases/v2
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.FTP_HOST }}
-          user: ${{ secrets.FTP_USER }}
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          localDir: "temp/"  # Deploy from temp to avoid nesting
-          remoteDir: "/www/ai.redlionsalvage.net/"
-          forceSsl: "false"
+          local-dir: "./"  # Deploy contents directly
+          server-dir: "/www/ai.redlionsalvage.net/"
+          dangerous-clean-slate: true  # Clear server-dir before deploy
