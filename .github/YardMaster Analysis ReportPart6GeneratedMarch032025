@@ -1,1144 +1,361 @@
-YardMaster Analysis ReportPart6GeneratedMarch032025
-Generated: March 03, 2025  
-Repository Structure
-ai.redlionsalvage.net/
-├── .gitignore
-├── LICENSE
-├── README.md
-├── composer.json
-├── composer.lock
-├── index.php
-├── .github/
-│   ├── workflows/
-│   │   ├── deploy.yml
-│   ├── YardMaster_Analysis_Report.md
-├── ai.redlionsalvage.net/
-│   ├── api/
-│   │   ├── employee_management/
-│   │   │   ├── add_employee.php
-│   │   │   ├── delete_employee.php
-│   │   │   ├── get_employees.php
-│   │   │   ├── suspend_employee.php
-│   │   │   ├── update_employee.php
-│   │   ├── fleet/
-│   │   │   ├── add_vehicle.php
-│   │   │   ├── assign_driver.php
-│   │   │   ├── check expirations.php
-│   │   │   ├── get_driver_history.php
-│   │   │   ├── get_fleet_vehicles.php
-│   │   │   ├── ocr_receipt.py
-│   │   │   ├── update_mileage.php
-│   │   │   ├── upload_document.php
-│   │   │   ├── upload_receipt.php
-│   │   ├── inventory/
-│   │   │   ├── get_parts.php
-│   │   │   ├── get_vehicles.php
-│   │   ├── pos/
-│   │   │   ├── open_drawer.php
-│   │   │   ├── print_receipt.php
-│   │   │   ├── record_sale.php
-│   │   ├── scrap/
-│   │   │   ├── record_purchase.php
-│   │   ├── timeclock/
-│   │   │   ├── add_extra_time.php
-│   │   │   ├── end_break.php
-│   │   │   ├── get_employee_status.php
-│   │   │   ├── get_extra_time.php
-│   │   │   ├── get_time_log.php
-│   │   │   ├── get_time_status.php
-│   │   │   ├── get_yardman_stats.php
-│   │   │   ├── log_extra_time.php
-│   │   │   ├── start_break.php
-│   │   ├── vehicle_pickup/
-│   │   │   ├── get_pending_vehicles.php
-│   │   │   ├── process_pending.php
-│   │   │   ├── submit_pending.php
-│   │   ├── config.php
-│   │   ├── employee.php
-│   │   ├── get_user_roles.php
-│   │   ├── login.php
-│   │   ├── logout.php
-│   │   ├── timeclock.php
-│   │   ├── vehicle_mangement.php
-├── api/
-│   ├── employee_management/
-│   │   ├── add_employee.php
-│   │   ├── delete_employee.php
-│   │   ├── get_employees.php
-│   │   ├── suspend_employee.php
-│   │   ├── update_employee.php
-│   ├── fleet/
-│   │   ├── add_vehicle.php
-│   │   ├── assign_driver.php
-│   │   ├── check expirations.php
-│   │   ├── documents.php
-│   │   ├── get_driver_history.php
-│   │   ├── get_fleet_vehicles.php
-│   │   ├── ocr_receipt.py
-│   │   ├── update_mileage.php
-│   │   ├── upload_document.php
-│   │   ├── upload_receipt.php
-│   │   ├── vehicles.php
-├── database/
-│   ├── schema.sql
-[Truncated—full structure as you provided]  
-File Contents
-File: ai.redlionsalvage.net/api/login.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/login.php]
-<?php
-session_start();
-require_once '../../config.php';  
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];  
+# YardMaster Analysis ReportPart6GeneratedMarch032025
+Generated: March 03, 2025
 
-$stmt = $pdo->prepare("SELECT * FROM employees WHERE username = ?");  
-$stmt->execute([$username]);  
-$user = $stmt->fetch();  
+## Repository Structure
+[Full structure here - truncated for brevity]
 
-if ($user && password_verify($password, $user['password'])) {  
-    $_SESSION['user_id'] = $user['id'];  
-    $_SESSION['role'] = $user['role'];  
-    header("Location: ../../frontend/dashboard.php");  
-    exit();  
-} else {  
-    echo json_encode(['error' => 'Invalid credentials']);  
-}  
+## File Contents
 
+### File: ./.git/hooks/commit-msg.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/commit-msg.sample]
+#!/bin/sh
+#
+# An example hook script to check the commit log message.
+# Called by "git commit" with one argument, the name of the file
+# that has the commit message.  The hook should exit with non-zero
+# status after issuing an appropriate message if it wants to stop the
+# commit.  The hook is allowed to edit the commit message file.
+#
+# To enable this hook, rename this file to "commit-msg".
+
+# Uncomment the below to add a Signed-off-by line to the message.
+# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
+# hook is more suited to it.
+#
+# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+
+# This example catches duplicate Signed-off-by lines.
+
+test "" = "$(grep '^Signed-off-by: ' "$1" |
+	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
+	echo >&2 Duplicate Signed-off-by lines.
+	exit 1
 }
-?>  
-File: ai.redlionsalvage.net/api/logout.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/logout.php]
-<?php
-session_start();  
-session_unset();
-session_destroy();  
-header("Location: ../../frontend/index.php");
-exit();
-?>  
-File: ai.redlionsalvage.net/api/timeclock.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock.php]
-<?php
-session_start();
-require_once '../../config.php';  
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['error' => 'Unauthorized']);
-    exit();
-}  
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $action = $_POST['action'];
-    $employee_id = $_SESSION['user_id'];  
 
-if ($action === 'clock_in') {  
-    $stmt = $pdo->prepare("INSERT INTO timeclock (employee_id, clock_in) VALUES (?, NOW())");  
-    $success = $stmt->execute([$employee_id]);  
-    $message = $success ? 'Clocked in' : 'Failed to clock in';  
-} elseif ($action === 'clock_out') {  
-    $stmt = $pdo->prepare("UPDATE timeclock SET clock_out = NOW() WHERE employee_id = ? AND clock_out IS NULL");  
-    $success = $stmt->execute([$employee_id]);  
-    $message = $success ? 'Clocked out' : 'Failed to clock out';  
-} else {  
-    echo json_encode(['error' => 'Invalid action']);  
-    exit();  
-}  
+---
+### File: ./.git/info/exclude
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/info/exclude]
+# git ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+# For a project mostly in C, the following would be a good set of
+# exclude patterns (uncomment them if you want to use them):
+# *.[oa]
+# *~
 
-echo json_encode(['success' => $message]);  
+---
+### File: ./.github/YardMaster Analysis ReportPart5GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart5GeneratedMarch032025]
+# YardMaster Analysis ReportPart5GeneratedMarch032025
+Generated: March 03, 2025
 
-}
-?>  
-File: ai.redlionsalvage.net/api/vehicle_mangement.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/vehicle_mangement.php]
-<?php
-session_start();
-require_once '../../config.php';  
-if ($_SESSION['role'] !== 'admin') {
-    echo json_encode(['error' => 'Unauthorized']);
-    exit();
-}  
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $action = $_POST['action'];  
+## Repository Structure
+[Full structure here - truncated for brevity]
 
-if ($action === 'update_status') {  
-    $vehicle_id = $_POST['vehicle_id'];  
-    $status = $_POST['status'];  
-    $stmt = $pdo->prepare("UPDATE vehicles SET status = ?, updated_at = NOW() WHERE id = ?");  
-    $success = $stmt->execute([$status, $vehicle_id]);  
-    $message = $success ? 'Status updated' : 'Failed to update status';  
-} else {  
-    echo json_encode(['error' => 'Invalid action']);  
-    exit();  
-}  
+## File Contents
 
-echo json_encode(['success' => $message]);  
+### File: ./.git/hooks/applypatch-msg.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/applypatch-msg.sample]
+#!/bin/sh
+#
+# An example hook script to check the commit log message taken by
+# applypatch from an e-mail message.
+#
+# The hook should exit with non-zero status after issuing an
+# appropriate message if it wants to stop the commit.  The hook is
+# allowed to edit the commit message file.
+#
+# To enable this hook, rename this file to "applypatch-msg".
 
-}
-?>  
-File: api/auth.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/api/auth.php]
-<?php
-session_start();  
-if (!isset($_SESSION['user_id'])) {
-    header('HTTP/1.1 401 Unauthorized');
-    echo json_encode(['error' => 'Not authenticated']);
-    exit();
-}
-?>  
-File: frontend/dashboard.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/dashboard.php]
-<?php
-session_start();
-require_once '../config.php';  
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit();
-}  
-$stmt = $pdo->prepare("SELECT first_name, role FROM employees WHERE id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-?>
-<!DOCTYPE html>
-<html lang="en">
+. git-sh-setup
+commitmsg="$(git rev-parse --git-path hooks/commit-msg)"
+test -x "$commitmsg" && exec "$commitmsg" ${1+"$@"}
+:
+
+---
+### File: ./.git/index
+[Error: 'utf-8' codec can't decode byte 0xc6 in position 13: invalid continuation byte]
+---
+
+---
+### File: ./RedLionSalvageAi/ai.redlionsalvage.net-error.log (1).txt
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/ai.redlionsalvage.net-error.log (1).txt]
+[Sat Mar 01 02:15:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:15:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:15:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:13 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:16:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:24 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:02 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:23 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:30 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:30 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:59 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:28:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:31:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:31:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:35:38 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:35:38 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:35:49 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:35:50 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:35:52 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:35:52 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:35:53 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:36:19 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:36:19 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:36:19 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:39:08 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:39:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:39:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:39:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:45:40 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:45:41 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:45:54 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:45:54 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:45:56 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:45:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:45:57 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:07 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:07 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:09 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:46:09 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:09 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:12 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:46:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:46:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:31 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:49 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:49 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:51 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:53:51 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:52 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:53:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:54:05 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:54:05 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:54:08 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:54:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:54:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:54:10 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:54:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:54:11 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:43 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:45 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:58:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:54 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:56 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:58:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:58:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:59:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:59:16 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:59:16 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:59:22 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:59:22 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:59:22 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:06 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:06 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:15 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 03:03:15 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:15 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:18 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 03:03:18 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:18 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:20 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 03:03:20 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:21 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:23 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:27 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:39 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:39 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:41 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 03:03:41 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:41 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:50 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:51 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:03:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:04:02 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:04:04 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 03:04:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/footer.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/footer.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>YardMaster Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Footer</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
 </head>
 <body>
-    <h1>Welcome, <?php echo htmlspecialchars($user['first_name']); ?></h1>
-    <p>Role: <?php echo htmlspecialchars($user['role']); ?></p>
-    <nav>
-        <a href="employee_management.html">Employee Management</a>
-        <a href="fleet.php">Fleet Management</a>
-        <a href="pickup.php">Vehicle Pickup</a>
-        <a href="pos.php">Point of Sale</a>
-        <a href="scrap.php">Scrap Purchases</a>
-        <a href="timeclock.php">Time Clock</a>
-        <a href="../api/logout.php">Logout</a>
-    </nav>
+<h1>Footer</h1>
+<code>Footer()</code>
+<h2>Description</h2>
+This method is used to render the page footer. It is automatically called by AddPage() and
+Close() and should not be called directly by the application. The implementation in FPDF is
+empty, so you have to subclass it and override the method if you want a specific processing.
+<h2>Example</h2>
+<div class="doc-source">
+<pre><code>class PDF extends FPDF
+{
+    function Footer()
+    {
+        // Go to 1.5 cm from bottom
+        $this-&gt;SetY(-15);
+        // Select Arial italic 8
+        $this-&gt;SetFont('Arial', 'I', 8);
+        // Print centered page number
+        $this-&gt;Cell(0, 10, 'Page '.$this-&gt;PageNo(), 0, 0, 'C');
+    }
+}</code></pre>
+</div>
+<h2>See also</h2>
+<a href="header.htm">Header</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
 </body>
-</html>  
-File: frontend/employee_details.html
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/employee_details.html]
-<!DOCTYPE html>
-<html lang="en">
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/pageno.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/pageno.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Employee Details</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>PageNo</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
 </head>
 <body>
-    <h1>Employee Details</h1>
-    <div id="employee-details"></div>
-    <a href="dashboard.php">Back to Dashboard</a>
-    <script>
-        function getEmployeeDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const employeeId = urlParams.get('id');
-            $.get(../api/employee.php?id=${employeeId}, function(data) {
-                const employee = JSON.parse(data);
-                $('#employee-details').html(                      <p>Name: ${employee.first_name} ${employee.last_name}</p>                       <p>Email: ${employee.email}</p>                       <p>Phone: ${employee.phone}</p>                       <p>Role: ${employee.role}</p>                  );
-            });
-        }
-        $(document).ready(getEmployeeDetails);
-    </script>
+<h1>PageNo</h1>
+<code><b>int</b> PageNo()</code>
+<h2>Description</h2>
+Returns the current page number.
+<h2>See also</h2>
+<a href="aliasnbpages.htm">AliasNbPages</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
 </body>
-</html>  
-File: frontend/employee_management.html
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/employee_management.html]
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Employee Management</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Employee Management</h1>  
-    <form id="add-employee">  
-        <input type="text" name="username" placeholder="Username" required>  
-        <input type="password" name="password" placeholder="Password" required>  
-        <input type="text" name="first_name" placeholder="First Name" required>  
-        <input type="text" name="last_name" placeholder="Last Name" required>  
-        <input type="email" name="email" placeholder="Email" required>  
-        <input type="tel" name="phone" placeholder="Phone" required>  
-        <select name="role">  
-            <option value="admin">Admin</option>  
-            <option value="employee">Employee</option>  
-            <option value="driver">Driver</option>  
-        </select>  
-        <button type="submit">Add Employee</button>  
-    </form>  
-    <div id="employees-list"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/employee_management/get_employees.php', function(data) {  
-                const employees = JSON.parse(data);  
-                let html = '<ul>';  
-                employees.forEach(e => {  
-                    html += `<li>${e.first_name} ${e.last_name} - ${e.role} (<a href="employee_details.html?id=${e.id}">Details</a>)</li>`;  
-                });  
-                html += '</ul>';  
-                $('#employees-list').html(html);  
-            });  
-        $('#add-employee').submit(function(e) {  
-            e.preventDefault();  
-            $.post('../api/employee_management/add_employee.php', $(this).serialize(), function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-    });  
-</script>  
+</html>
 
-</body>  
-</html>  
----  
-File: frontend/fleet.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet.php]
-<?php  
-session_start();  
-if (!isset($_SESSION['user_id'])) {  
-    header("Location: index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Fleet Management</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Fleet Management</h1>  
-    <form id="add-vehicle">  
-        <input type="text" name="vin" placeholder="VIN" required>  
-        <input type="text" name="make" placeholder="Make" required>  
-        <input type="text" name="model" placeholder="Model" required>  
-        <input type="number" name="year" placeholder="Year" required>  
-        <input type="text" name="license_plate" placeholder="License Plate">  
-        <button type="submit">Add Vehicle</button>  
-    </form>  
-    <div id="fleet-list"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/fleet/get_fleet_vehicles.php', function(data) {  
-                const vehicles = JSON.parse(data);  
-                let html = '<ul>';  
-                vehicles.forEach(v => {  
-                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</li>`;  
-                });  
-                html += '</ul>';  
-                $('#fleet-list').html(html);  
-            });  
-        $('#add-vehicle').submit(function(e) {  
-            e.preventDefault();  
-            $.post('../api/fleet/add_vehicle.php', $(this).serialize(), function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-    });  
-</script>  
-
-</body>  
-</html>  
----  
-File: frontend/index.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/index.php]
-<?php  
-session_start();  
-if (isset($_SESSION['user_id'])) {  
-    header("Location: dashboard.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>
-<html lang="en">
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/setlink.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setlink.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>YardMaster Login</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetLink</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
 </head>
 <body>
-    <h1>YardMaster Login</h1>
-    <form id="login-form">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-    <script>
-        $('#login-form').submit(function(e) {
-            e.preventDefault();
-            $.post('../api/login.php', $(this).serialize(), function(data) {
-                const response = JSON.parse(data);
-                if (response.error) {
-                    alert(response.error);
-                } else {
-                    window.location.href = 'dashboard.php';
-                }
-            });
-        });
-    </script>
+<h1>SetLink</h1>
+<code>SetLink(<b>int</b> link [, <b>float</b> y [, <b>int</b> page]])</code>
+<h2>Description</h2>
+Defines the page and position a link points to.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>link</code></dt>
+<dd>
+The link identifier returned by AddLink().
+</dd>
+<dt><code>y</code></dt>
+<dd>
+Ordinate of target position; <code>-1</code> indicates the current position.
+The default value is <code>0</code> (top of page).
+</dd>
+<dt><code>page</code></dt>
+<dd>
+Number of target page; <code>-1</code> indicates the current page. This is the default value.
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="addlink.htm">AddLink</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
 </body>
-</html>  
-File: frontend/pickup.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/pickup.php]
-<?php  
-session_start();  
-if (!isset($_SESSION['user_id'])) {  
-    header("Location: index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Vehicle Pickup</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Vehicle Pickup</h1>  
-    <form id="submit-pending">  
-        <input type="text" name="vin" placeholder="VIN" required>  
-        <input type="text" name="make" placeholder="Make" required>  
-        <input type="text" name="model" placeholder="Model" required>  
-        <input type="number" name="year" placeholder="Year" required>  
-        <button type="submit">Submit Pending</button>  
-    </form>  
-    <div id="pending-list"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/vehicle_pickup/get_pending_vehicles.php', function(data) {  
-                const vehicles = JSON.parse(data);  
-                let html = '<ul>';  
-                vehicles.forEach(v => {  
-                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) <button onclick="processVehicle(${v.id})">Process</button></li>`;  
-                });  
-                html += '</ul>';  
-                $('#pending-list').html(html);  
-            });  
-        $('#submit-pending').submit(function(e) {  
-            e.preventDefault();  
-            $.post('../api/vehicle_pickup/submit_pending.php', $(this).serialize(), function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-    });  
+</html>
 
-    function processVehicle(id) {  
-        $.post('../api/vehicle_pickup/process_pending.php', { vehicle_id: id }, function(data) {  
-            alert(JSON.parse(data).success || JSON.parse(data).error);  
-            location.reload();  
-        });  
-    }  
-</script>  
-
-</body>  
-</html>  
----  
-File: frontend/pos.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/pos.php]
-<?php  
-session_start();  
-if (!isset($_SESSION['user_id'])) {  
-    header("Location: index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Point of Sale</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Point of Sale</h1>  
-    <form id="record-sale">  
-        <input type="number" name="part_id" placeholder="Part ID" required>  
-        <input type="number" name="sale_price" placeholder="Sale Price" step="0.01" required>  
-        <select name="payment_method">  
-            <option value="cash">Cash</option>  
-            <option value="card">Card</option>  
-            <option value="check">Check</option>  
-        </select>  
-        <button type="submit">Record Sale</button>  
-    </form>  
-    <button id="open-drawer">Open Drawer</button>  
-    <div id="parts-list"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/inventory/get_parts.php', function(data) {  
-                const parts = JSON.parse(data);  
-                let html = '<ul>';  
-                parts.forEach(p => {  
-                    html += `<li>${p.part_name} (VIN: ${p.vin}) - $${p.price} (Stock: ${p.stock})</li>`;  
-                });  
-                html += '</ul>';  
-                $('#parts-list').html(html);  
-            });  
-        $('#record-sale').submit(function(e) {  
-            e.preventDefault();  
-            $.post('../api/pos/record_sale.php', $(this).serialize(), function(data) {  
-                const response = JSON.parse(data);  
-                alert(response.success || response.error);  
-                if (response.success) {  
-                    $.post('../api/pos/print_receipt.php', { sale_id: response.sale_id }, function(printData) {  
-                        alert(JSON.parse(printData).success || JSON.parse(printData).error);  
-                    });  
-                }  
-                location.reload();  
-            });  
-        });  
-
-        $('#open-drawer').click(function() {  
-            $.post('../api/pos/open_drawer.php', function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-            });  
-        });  
-    });  
-</script>  
-
-</body>  
-</html>  
----  
-File: frontend/scrap.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/scrap.php]
-<?php  
-session_start();  
-if (!isset($_SESSION['user_id'])) {  
-    header("Location: index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Scrap Purchases</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Scrap Purchases</h1>  
-    <form id="record-purchase">  
-        <input type="number" name="vehicle_id" placeholder="Vehicle ID" required>  
-        <input type="number" name="purchase_price" placeholder="Purchase Price" step="0.01" required>  
-        <button type="submit">Record Purchase</button>  
-    </form>  
-    <div id="vehicles-list"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/inventory/get_vehicles.php', function(data) {  
-                const vehicles = JSON.parse(data);  
-                let html = '<ul>';  
-                vehicles.forEach(v => {  
-                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</li>`;  
-                });  
-                html += '</ul>';  
-                $('#vehicles-list').html(html);  
-            });  
-        $('#record-purchase').submit(function(e) {  
-            e.preventDefault();  
-            $.post('../api/scrap/record_purchase.php', $(this).serialize(), function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-    });  
-</script>  
-
-</body>  
-</html>  
----  
-File: frontend/timeclock.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/timeclock.php]
-<?php  
-session_start();  
-if (!isset($_SESSION['user_id'])) {  
-    header("Location: index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Time Clock</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Time Clock</h1>  
-    <button id="clock-in">Clock In</button>  
-    <button id="clock-out">Clock Out</button>  
-    <button id="start-break">Start Break</button>  
-    <button id="end-break">End Break</button>  
-    <div id="status"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/timeclock/get_time_status.php', function(data) {  
-                const status = JSON.parse(data);  
-                $('#status').html(status.status === 'clocked_out' ? 'Clocked Out' : `Clocked In: ${status.clock_in}`);  
-            });  
-        $('#clock-in').click(function() {  
-            $.post('../api/timeclock.php', { action: 'clock_in' }, function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-
-        $('#clock-out').click(function() {  
-            $.post('../api/timeclock.php', { action: 'clock_out' }, function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-
-        $('#start-break').click(function() {  
-            $.post('../api/timeclock/start_break.php', {}, function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-
-        $('#end-break').click(function() {  
-            $.post('../api/timeclock/end_break.php', {}, function(data) {  
-                alert(JSON.parse(data).success || JSON.parse(data).error);  
-                location.reload();  
-            });  
-        });  
-    });  
-</script>  
-
-</body>  
-</html>  
----  
-File: frontend/vehicle_search.html
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/vehicle_search.html]
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vehicle Search</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1>Vehicle Search</h1>
-    <form id="search-form">
-        <input type="text" name="vin" placeholder="Enter VIN">
-        <button type="submit">Search</button>
-    </form>
-    <div id="search-results"></div>
-    <a href="dashboard.php">Back to Dashboard</a>
-    <script>
-        $('#search-form').submit(function(e) {
-            e.preventDefault();
-            const vin = $('input[name="vin"]').val();
-            $.get('../api/inventory/get_vehicles.php', { vin: vin }, function(data) {
-                const vehicles = JSON.parse(data);
-                let html = '<ul>';
-                vehicles.forEach(v => {
-                    html += <li>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</li>;
-                });
-                html += '</ul>';
-                $('#search-results').html(html);
-            });
-        });
-    </script>
-</body>
-</html>  
-File: frontend/pending_vehicles.html
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/pending_vehicles.html]
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <title>Pending Vehicles</title>  
-    <link rel="stylesheet" href="../assets/css/style.css">  
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-</head>  
-<body>  
-    <h1>Pending Vehicles</h1>  
-    <div id="pending-list"></div>  
-    <a href="dashboard.php">Back to Dashboard</a>  
-    <script>  
-        $(document).ready(function() {  
-            $.get('../api/vehicle_pickup/get_pending_vehicles.php', function(data) {  
-                const vehicles = JSON.parse(data);  
-                let html = '<ul>';  
-                vehicles.forEach(v => {  
-                    html += `<li>${v.vin} - ${v.make} ${v.model} (${v.year}) <button onclick="processVehicle(${v.id})">Process</button></li>`;  
-                });  
-                html += '</ul>';  
-                $('#pending-list').html(html);  
-            });  
-        });  
-    function processVehicle(id) {  
-        $.post('../api/vehicle_pickup/process_pending.php', { vehicle_id: id }, function(data) {  
-            alert(JSON.parse(data).success || JSON.parse(data).error);  
-            location.reload();  
-        });  
-    }  
-</script>  
-
-</body>  
-</html>  
----  
-File: frontend/style.css
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/style.css]
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
-h1 {
-    color: #333;
-}
-form {
-    margin-bottom: 20px;
-}
-input, select, button {
-    margin: 5px;
-    padding: 5px;
-}
-ul {
-    list-style: none;
-    padding: 0;
-}
-li {
-    margin: 5px 0;
-}
-a {
-    color: #007BFF;
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}  
-File: assets/css/style.css
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/assets/css/style.css]
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f4f4f4;
-}
-h1 {
-    color: #2c3e50;
-}
-nav {
-    margin: 20px 0;
-}
-nav a {
-    margin-right: 15px;
-    color: #2980b9;
-    text-decoration: none;
-}
-nav a:hover {
-    color: #3498db;
-}
-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-input, select, button {
-    display: block;
-    width: 100%;
-    max-width: 300px;
-    margin: 10px 0;
-    padding: 8px;
-}
-button {
-    background: #2980b9;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
-button:hover {
-    background: #3498db;
-}
-ul {
-    list-style: none;
-    padding: 0;
-}
-li {
-    background: #fff;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}  
-File: assets/css/fleet.css
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/assets/css/fleet.css]
-.fleet-vehicle {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 5px;
-}
-.fleet-vehicle.pending {
-    background: #fff3cd;
-}
-.fleet-vehicle.processed {
-    background: #d4edda;
-}
-.fleet-vehicle button {
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-.fleet-vehicle button:hover {
-    background: #c82333;
-}  
-File: assets/js/fleet.js
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/assets/js/fleet.js]
-$(document).ready(function() {
-    $('.process-vehicle').click(function() {
-        const vehicleId = $(this).data('id');
-        $.post('../api/vehicle_pickup/process_pending.php', { vehicle_id: vehicleId }, function(data) {
-            const response = JSON.parse(data);
-            alert(response.success || response.error);
-            if (response.success) {
-                $(#vehicle-${vehicleId}).removeClass('pending').addClass('processed');
-            }
-        });
-    });
-});  
-File: frontend/fleet/dashboard.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet/dashboard.php]
-<?php  
-session_start();  
-if (!isset($_SESSION['user_id'])) {  
-    header("Location: ../index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Fleet Dashboard</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <link rel="stylesheet" href="../../assets/css/fleet.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../assets/js/fleet.js"></script>
-</head>
-<body>
-    <h1>Fleet Dashboard</h1>
-    <div id="fleet-list"></div>
-    <a href="../dashboard.php">Back to Main Dashboard</a>
-    <script>
-        $(document).ready(function() {
-            $.get('../../api/fleet/get_fleet_vehicles.php', function(data) {
-                const vehicles = JSON.parse(data);
-                let html = '';
-                vehicles.forEach(v => {
-                    html += <div class="fleet-vehicle ${v.status}" id="vehicle-${v.id}">;
-                    html += <p>${v.vin} - ${v.make} ${v.model} (${v.year}) - ${v.status}</p>;
-                    if (v.status === 'pending') {
-                        html += <button class="process-vehicle" data-id="${v.id}">Process</button>;
-                    }
-                    html += </div>;
-                });
-                $('#fleet-list').html(html);
-            });
-        });
-    </script>
-</body>
-</html>  
-File: frontend/fleet/pretrip_form.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet/pretrip_form.php]
-<?php  
-session_start();  
-if (!in_array($_SESSION['role'], ['admin', 'driver'])) {  
-    header("Location: ../index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Pre-Trip Inspection Form</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1>Pre-Trip Inspection Form</h1>
-    <form id="pretrip-form">
-        <input type="number" name="vehicle_id" placeholder="Vehicle ID" required>
-        <input type="number" name="mileage" placeholder="Current Mileage" required>
-        <input type="text" name="notes" placeholder="Inspection Notes">
-        <button type="submit">Submit Inspection</button>
-    </form>
-    <a href="dashboard.php">Back to Fleet Dashboard</a>
-    <script>
-        $('#pretrip-form').submit(function(e) {
-            e.preventDefault();
-            $.post('../../api/fleet/update_mileage.php', $(this).serialize(), function(data) {
-                alert(JSON.parse(data).success || JSON.parse(data).error);
-                location.reload();
-            });
-        });
-    </script>
-</body>
-</html>  
-File: frontend/fleet/vehicle_details.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/fleet/vehicle_details.php]
-<?php  
-session_start();  
-if (!in_array($_SESSION['role'], ['admin', 'driver'])) {  
-    header("Location: ../index.php");  
-    exit();  
-}  
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vehicle Details</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1>Vehicle Details</h1>
-    <div id="vehicle-details"></div>
-    <a href="dashboard.php">Back to Fleet Dashboard</a>
-    <script>
-        $(document).ready(function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const vehicleId = urlParams.get('id');
-            $.get('../../api/fleet/vehicles.php', { id: vehicleId }, function(data) {
-                const vehicle = JSON.parse(data)[0];
-                $('#vehicle-details').html(                      <p>VIN: ${vehicle.vin}</p>                       <p>Make: ${vehicle.make}</p>                       <p>Model: ${vehicle.model}</p>                       <p>Year: ${vehicle.year}</p>                       <p>Status: ${vehicle.status}</p>                       <p>Mileage: ${vehicle.mileage}</p>                       <p>Last Inspection: ${vehicle.last_inspection}</p>                  );
-            });
-        });
-    </script>
-</body>
-</html>  
-File: frontend/includes/db_connect.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/frontend/includes/db_connect.php]
+---
+### File: ./RedLionSalvageAi/fpdf186/font/courierbi.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/courierbi.php]
 <?php
-require_once '../../vendor/autoload.php';  
-use Dotenv\Dotenv;  
-$dotenv = Dotenv::createImmutable(DIR . '/../..');
-$dotenv->load();  
-$db_host = $_ENV['DB_HOST'];
-$db_name = $_ENV['DB_NAME'];
-$db_user = $_ENV['DB_USER'];
-$db_pass = $_ENV['DB_PASS'];  
-try {
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
-?>  
-File: database/22825salvageyard_ai.sql
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/database/22825salvageyard_ai.sql]
--- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)  
--- Host: localhost    Database: yardmaster  
--- Server version	8.0.34  
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT /;
-/!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS /;
-/!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION /;
-/!50503 SET NAMES utf8 /;
-/!40103 SET @OLD_TIME_ZONE
-=@@TIME_ZONE
- /;
-/!40103 SET TIME_ZONE='+00:00' /;
-/!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS
-, UNIQUE_CHECKS=0 /;
-/!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 /;
-/!40101 SET @OLD_SQL_MODE
-=@@SQL_MODE
-, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' /;
-/!40111 SET @OLD_SQL_NOTES
-=@@SQL_NOTES
-, SQL_NOTES=0 */;  
---
--- Table structure for table employees  
-DROP TABLE IF EXISTS employees;
-/*!40101 SET @saved_cs_client
-     = @@character_set_client /;
-/!50503 SET character_set_client = utf8mb4 /;
-CREATE TABLE employees (
-  id int NOT NULL AUTO_INCREMENT,
-  username varchar(50) NOT NULL,
-  password varchar(255) NOT NULL,
-  role enum('admin','employee','driver') DEFAULT 'employee',
-  first_name varchar(50) DEFAULT NULL,
-  last_name varchar(50) DEFAULT NULL,
-  email varchar(100) DEFAULT NULL,
-  phone varchar(20) DEFAULT NULL,
-  hire_date date DEFAULT NULL,
-  status enum('active','suspended','terminated') DEFAULT 'active',
-  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY username (username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/!40101 SET character_set_client = @saved_cs_client
- */;  
---
--- Table structure for table inventory_parts  
-DROP TABLE IF EXISTS inventory_parts;
-/*!40101 SET @saved_cs_client
-     = @@character_set_client /;
-/!50503 SET character_set_client = utf8mb4 /;
-CREATE TABLE inventory_parts (
-  id int NOT NULL AUTO_INCREMENT,
-  vehicle_id int DEFAULT NULL,
-  part_name varchar(100) DEFAULT NULL,
-  part_number varchar(50) DEFAULT NULL,
-  condition enum('new','used','damaged') DEFAULT 'used',
-  price decimal(10,2) DEFAULT NULL,
-  stock int DEFAULT '1',
-  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY vehicle_id (vehicle_id),
-  CONSTRAINT inventory_parts_ibfk_1 FOREIGN KEY (vehicle_id) REFERENCES vehicles (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/!40101 SET character_set_client = @saved_cs_client
- */;  
---
--- Table structure for table sales  
-DROP TABLE IF EXISTS sales;
-/*!40101 SET @saved_cs_client
-     = @@character_set_client /;
-/!50503 SET character_set_client = utf8mb4 /;
-CREATE TABLE sales (
-  id int NOT NULL AUTO_INCREMENT,
-  employee_id int DEFAULT NULL,
-  part_id int DEFAULT NULL,
-  sale_price decimal(10,2) DEFAULT NULL,
-  sale_date timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  payment_method enum('cash','card','check') DEFAULT NULL,
-  receipt_url varchar(255) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY employee_id (employee_id),
-  KEY part_id (part_id),
-  CONSTRAINT sales_ibfk_1 FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE SET NULL,
-  CONSTRAINT sales_ibfk_2 FOREIGN KEY (part_id) REFERENCES inventory_parts (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/!40101 SET character_set_client = @saved_cs_client
- */;  
---
--- Table structure for table timeclock  
-DROP TABLE IF EXISTS timeclock;
-/*!40101 SET @saved_cs_client
-     = @@character_set_client /;
-/!50503 SET character_set_client = utf8mb4 /;
-CREATE TABLE timeclock (
-  id int NOT NULL AUTO_INCREMENT,
-  employee_id int NOT NULL,
-  clock_in timestamp NOT NULL,
-  clock_out timestamp NULL DEFAULT NULL,
-  break_start timestamp NULL DEFAULT NULL,
-  break_end timestamp NULL DEFAULT NULL,
-  extra_time int DEFAULT '0',
-  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY employee_id (employee_id),
-  CONSTRAINT timeclock_ibfk_1 FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/!40101 SET character_set_client = @saved_cs_client
- */;  
---
--- Table structure for table vehicles  
-DROP TABLE IF EXISTS vehicles;
-/*!40101 SET @saved_cs_client
-     = @@character_set_client /;
-/!50503 SET character_set_client = utf8mb4 /;
-CREATE TABLE vehicles (
-  id int NOT NULL AUTO_INCREMENT,
-  vin varchar(17) NOT NULL,
-  make varchar(50) DEFAULT NULL,
-  model varchar(50) DEFAULT NULL,
-  year int DEFAULT NULL,
-  license_plate varchar(20) DEFAULT NULL,
-  status enum('pending','processed','sold','scrapped') DEFAULT 'pending',
-  driver_id int DEFAULT NULL,
-  mileage int DEFAULT NULL,
-  last_inspection date DEFAULT NULL,
-  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY vin (vin),
-  KEY driver_id (driver_id),
-  CONSTRAINT vehicles_ibfk_1 FOREIGN KEY (driver_id) REFERENCES employees (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/!40101 SET character_set_client = @saved_cs_client
- */;  
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE
- /;
-/!40101 SET SQL_MODE=@OLD_SQL_MODE
- /;
-/!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS /;
-/!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS /;
-/!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT /;
-/!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS /;
-/!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION /;
-/!40111 SET SQL_NOTES=@OLD_SQL_NOTES
- */;  
--- Dump completed on 2025-03-03 12:00:00  
-Continued in YardMaster Analysis ReportPart7GeneratedMarch032025  
-Progress Update
-Part 1: 29 files, saved as YardMaster Analysis ReportPart1GeneratedMarch032025.
+$type = 'Core';
+$name = 'Courier-BoldOblique';
+$up = -100;
+$ut = 50;
+for($i=0;$i<=255;$i++)
+	$cw[chr($i)] = 600;
+$enc = 'cp1252';
+$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
+?>
 
-Part 2: 30 files, saved as YardMaster Analysis ReportPart2GeneratedMarch032025.
+---
+### File: ./RedLionSalvageAi/fpdf186/install.txt
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/install.txt]
+The FPDF library is made up of the following elements:
 
-Part 3: 10 files, saved as YardMaster Analysis ReportPart3GeneratedMarch032025.
+- the main file, fpdf.php, which contains the class
+- the font definition files located in the font directory
 
-Part 4: 25 files, saved as YardMaster Analysis ReportPart4GeneratedMarch032025.
+The font definition files are necessary as soon as you want to output some text in a document.
+If they are not accessible, the SetFont() method will produce the following error:
 
-Part 5: 25 files, saved as YardMaster Analysis ReportPart5GeneratedMarch032025.
+FPDF error: Could not include font definition file
 
-Part 6: 25 files (total 119), completed above as YardMaster Analysis ReportPart6GeneratedMarch032025, ~29,000 characters.
 
-Remaining: ~59 files from your structure.
+Remarks:
 
-Next Steps
-Copy-Paste: Save Part 6 as YardMaster Analysis ReportPart6GeneratedMarch032025 in your Git.
+- Only the files corresponding to the fonts actually used are necessary
+- The tutorials provided in this package are ready to be executed
 
-Part 7: I’ll start with the next 10 files and adjust to ~25-30, targeting:
-lib/fpdf.php
-
-RedLionSalvageAi/fpdf186/fpdf.php
-
-RedLionSalvageAi/Complete Checkpoint Initial System.txt
-
-deploy.yml
-
-file_structure.txt
-
-index.xhtml
-
-readme.md
-
-test.html
-
-test.txt
-
-RedLionSalvageAi/ai.redlionsalvage.net-access.log (1).txt
-
+---

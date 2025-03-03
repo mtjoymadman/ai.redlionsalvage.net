@@ -1,0 +1,996 @@
+# YardMaster Analysis ReportPart13GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/pre-rebase.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/pre-rebase.sample]
+#!/bin/sh
+#
+# Copyright (c) 2006, 2008 Junio C Hamano
+#
+# The "pre-rebase" hook is run just before "git rebase" starts doing
+# its job, and can prevent the command from running by exiting with
+# non-zero status.
+#
+# The hook is called with the following parameters:
+#
+# $1 -- the upstream the series was forked from.
+# $2 -- the branch being rebased (or empty when rebasing the current branch).
+#
+# This sample shows how to prevent topic branches that are already
+# merged to 'next' branch from getting rebased, because allowing it
+# would result in rebasing already published history.
+
+publish=next
+basebranch="$1"
+if test "$#" = 2
+then
+	topic="refs/heads/$2"
+else
+	topic=`git symbolic-ref HEAD` ||
+	exit 0 ;# we do not interrupt rebasing detached HEAD
+fi
+
+case "$topic" in
+refs/heads/??/*)
+	;;
+*)
+	exit 0 ;# we do not interrupt others.
+	;;
+esac
+
+# Now we are dealing with a topic branch being rebased
+# on top of master.  Is it OK to rebase it?
+
+# Does the topic really exist?
+git show-ref -q "$topic" || {
+	echo >&2 "No such branch $topic"
+	exit 1
+}
+
+# Is topic fully merged to master?
+not_in_master=`git rev-list --pretty=oneline ^master "$topic"`
+if test -z "$not_in_master"
+then
+	echo >&2 "$topic is fully merged to master; better remove it."
+	exit 1 ;# we could allow it, but there is no point.
+fi
+
+# Is topic ever merged to next?  If so you should not be rebasing it.
+only_next_1=`git rev-list ^master "^$topic" ${publish} | sort`
+only_next_2=`git rev-list ^master           ${publish} | sort`
+if test "$only_next_1" = "$only_next_2"
+then
+	not_in_topic=`git rev-list "^$topic" master`
+	if test -z "$not_in_topic"
+	then
+		echo >&2 "$topic is already up to date with master"
+		exit 1 ;# we could allow it, but there is no point.
+	else
+		exit 0
+	fi
+else
+	not_in_next=`git rev-list --pretty=oneline ^${publish} "$topic"`
+	/usr/bin/perl -e '
+		my $topic = $ARGV[0];
+		my $msg = "* $topic has commits already merged to public branch:\n";
+		my (%not_in_next) = map {
+			/^([0-9a-f]+) /;
+			($1 => 1);
+		} split(/\n/, $ARGV[1]);
+		for my $elem (map {
+				/^([0-9a-f]+) (.*)$/;
+				[$1 => $2];
+			} split(/\n/, $ARGV[2])) {
+			if (!exists $not_in_next{$elem->[0]}) {
+				if ($msg) {
+					print STDERR $msg;
+					undef $msg;
+				}
+				print STDERR " $elem->[1]\n";
+			}
+		}
+	' "$topic" "$not_in_next" "$not_in_master"
+	exit 1
+fi
+
+<<\DOC_END
+
+This sample hook safeguards topic branches that have been
+published from being rewound.
+
+The workflow assumed here is:
+
+ * Once a topic branch forks from "master", "master" is never
+   merged into it again (either directly or indirectly).
+
+ * Once a topic branch is fully cooked and merged into "master",
+   it is deleted.  If you need to build on top of it to correct
+   earlier mistakes, a new topic branch is created by forking at
+   the tip of the "master".  This is not strictly necessary, but
+   it makes it easier to keep your history simple.
+
+ * Whenever you need to test or publish your changes to topic
+   branches, merge them into "next" branch.
+
+The script, being an example, hardcodes the publish branch name
+to be "next", but it is trivial to make it configurable via
+$GIT_DIR/config mechanism.
+
+With this workflow, you would want to know:
+
+(1) ... if a topic branch has ever been merged to "next".  Young
+    topic branches can have stupid mistakes you would rather
+    clean up before publishing, and things that have not been
+    merged into other branches can be easily rebased without
+    affecting other people.  But once it is published, you would
+    not want to rewind it.
+
+(2) ... if a topic branch has been fully merged to "master".
+    Then you can delete it.  More importantly, you should not
+    build on top of it -- other people may already want to
+    change things related to the topic as patches against your
+    "master", so if you need further changes, it is better to
+    fork the topic (perhaps with the same name) afresh from the
+    tip of "master".
+
+Let's look at this example:
+
+		   o---o---o---o---o---o---o---o---o---o "next"
+		  /       /           /           /
+		 /   a---a---b A     /           /
+		/   /               /           /
+	       /   /   c---c---c---c B         /
+	      /   /   /             \         /
+	     /   /   /   b---b C     \       /
+	    /   /   /   /             \     /
+    ---o---o---o---o---o---o---o---o---o---o---o "master"
+
+
+A, B and C are topic branches.
+
+ * A has one fix since it was merged up to "next".
+
+ * B has finished.  It has been fully merged up to "master" and "next",
+   and is ready to be deleted.
+
+ * C has not merged to "next" at all.
+
+We would want to allow C to be rebased, refuse A, and encourage
+B to be deleted.
+
+To compute (1):
+
+	git rev-list ^master ^topic next
+	git rev-list ^master        next
+
+	if these match, topic has not merged in next at all.
+
+To compute (2):
+
+	git rev-list master..topic
+
+	if this is empty, it is fully merged to "master".
+
+DOC_END
+
+---
+### File: ./.git/refs/heads/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/refs/heads/main]
+2d8947b0cf06a8a245724342ec2816295b2fc81f
+
+---
+### File: ./.github/workflows/deploy.yml
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/workflows/deploy.yml]
+name: Deploy to Server
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy via FTP
+        uses: airvzxf/ftp-deployment@v1.2
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          remote-root: "/www/ai.redlionsalvage.net/"
+          local-root: "./"  # Deploy contents directly
+          delete: "true"  # Clear remote-root before deploy
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/addfont.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/addfont.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>AddFont</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>AddFont</h1>
+<code>AddFont(<b>string</b> family [, <b>string</b> style [, <b>string</b> file [, <b>string</b> dir]]])</code>
+<h2>Description</h2>
+Imports a TrueType, OpenType or Type1 font and makes it available. It is necessary to generate a font
+definition file first with the MakeFont utility.
+<br>
+<br>
+The definition file (and the font file itself in case of embedding) must be present in:
+<ul>
+<li>The directory indicated by the 4th parameter (if that parameter is set)</li>
+<li>The directory indicated by the <code>FPDF_FONTPATH</code> constant (if that constant is defined)</li>
+<li>The <code>font</code> directory located in the same directory as <code>fpdf.php</code></li>
+</ul>
+If the file is not found, the error "Could not include font definition file" is raised.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>family</code></dt>
+<dd>
+Font family. The name can be chosen arbitrarily. If it is a standard family name, it will
+override the corresponding font.
+</dd>
+<dt><code>style</code></dt>
+<dd>
+Font style. Possible values are (case insensitive):
+<ul>
+<li>empty string: regular</li>
+<li><code>B</code>: bold</li>
+<li><code>I</code>: italic</li>
+<li><code>BI</code> or <code>IB</code>: bold italic</li>
+</ul>
+The default value is regular.
+</dd>
+<dt><code>file</code></dt>
+<dd>
+The name of the font definition file.
+<br>
+By default, it is built from the family and style, in lower case with no space.
+</dd>
+<dt><code>dir</code></dt>
+<dd>
+The directory where to load the definition file.
+<br>
+If not specified, the default directory will be used.
+</dd>
+</dl>
+<h2>Example</h2>
+<div class="doc-source">
+<pre><code>$pdf-&gt;AddFont('Comic', 'I');</code></pre>
+</div>
+is equivalent to:
+<div class="doc-source">
+<pre><code>$pdf-&gt;AddFont('Comic', 'I', 'comici.php');</code></pre>
+</div>
+<h2>See also</h2>
+<a href="setfont.htm">SetFont</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/image.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/image.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Image</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>Image</h1>
+<code>Image(<b>string</b> file [, <b>float</b> x [, <b>float</b> y [, <b>float</b> w [, <b>float</b> h [, <b>string</b> type [, <b>mixed</b> link]]]]]])</code>
+<h2>Description</h2>
+Puts an image. The size it will take on the page can be specified in different ways:
+<ul>
+<li>explicit width and height (expressed in user unit or dpi)</li>
+<li>one explicit dimension, the other being calculated automatically in order to keep the original proportions</li>
+<li>no explicit dimension, in which case the image is put at 96 dpi</li>
+</ul>
+Supported formats are JPEG, PNG and GIF. The GD extension is required for GIF.
+<br>
+<br>
+For JPEGs, all flavors are allowed:
+<ul>
+<li>gray scales</li>
+<li>true colors (24 bits)</li>
+<li>CMYK (32 bits)</li>
+</ul>
+For PNGs, are allowed:
+<ul>
+<li>gray scales on at most 8 bits (256 levels)</li>
+<li>indexed colors</li>
+<li>true colors (24 bits)</li>
+</ul>
+For GIFs: in case of an animated GIF, only the first frame is displayed.<br>
+<br>
+Transparency is supported.<br>
+<br>
+The format can be specified explicitly or inferred from the file extension.<br>
+<br>
+It is possible to put a link on the image.<br>
+<br>
+Remark: if an image is used several times, only one copy is embedded in the file.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>file</code></dt>
+<dd>
+Path or URL of the image.
+</dd>
+<dt><code>x</code></dt>
+<dd>
+Abscissa of the upper-left corner. If not specified or equal to <code>null</code>, the current abscissa
+is used.
+</dd>
+<dt><code>y</code></dt>
+<dd>
+Ordinate of the upper-left corner. If not specified or equal to <code>null</code>, the current ordinate
+is used; moreover, a page break is triggered first if necessary (in case automatic page breaking is enabled)
+and, after the call, the current ordinate is moved to the bottom of the image.
+</dd>
+<dt><code>w</code></dt>
+<dd>
+Width of the image in the page. There are three cases:
+<ul>
+<li>If the value is positive, it represents the width in user unit</li>
+<li>If the value is negative, the absolute value represents the horizontal resolution in dpi</li>
+<li>If the value is not specified or equal to zero, it is automatically calculated</li>
+</ul>
+</dd>
+<dt><code>h</code></dt>
+<dd>
+Height of the image in the page. There are three cases:
+<ul>
+<li>If the value is positive, it represents the height in user unit</li>
+<li>If the value is negative, the absolute value represents the vertical resolution in dpi</li>
+<li>If the value is not specified or equal to zero, it is automatically calculated</li>
+</ul>
+</dd>
+<dt><code>type</code></dt>
+<dd>
+Image format. Possible values are (case insensitive): <code>JPG</code>, <code>JPEG</code>, <code>PNG</code> and <code>GIF</code>.
+If not specified, the type is inferred from the file extension.
+</dd>
+<dt><code>link</code></dt>
+<dd>
+URL or identifier returned by AddLink().
+</dd>
+</dl>
+<h2>Example</h2>
+<div class="doc-source">
+<pre><code>// Insert a logo in the top-left corner at 300 dpi
+$pdf-&gt;Image('logo.png', 10, 10, -300);
+// Insert a dynamic image from a URL
+$pdf-&gt;Image('http://chart.googleapis.com/chart?cht=p3&amp;chd=t:60,40&amp;chs=250x100&amp;chl=Hello|World', 60, 30, 90, 0, 'PNG');</code></pre>
+</div>
+<h2>See also</h2>
+<a href="addlink.htm">AddLink</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/setdrawcolor.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setdrawcolor.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetDrawColor</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetDrawColor</h1>
+<code>SetDrawColor(<b>int</b> r [, <b>int</b> g, <b>int</b> b])</code>
+<h2>Description</h2>
+Defines the color used for all drawing operations (lines, rectangles and cell borders). It
+can be expressed in RGB components or gray scale. The method can be called before the first
+page is created and the value is retained from page to page.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>r</code></dt>
+<dd>
+If <code>g</code> et <code>b</code> are given, red component; if not, indicates the gray level.
+Value between 0 and 255.
+</dd>
+<dt><code>g</code></dt>
+<dd>
+Green component (between 0 and 255).
+</dd>
+<dt><code>b</code></dt>
+<dd>
+Blue component (between 0 and 255).
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="setfillcolor.htm">SetFillColor</a>,
+<a href="settextcolor.htm">SetTextColor</a>,
+<a href="line.htm">Line</a>,
+<a href="rect.htm">Rect</a>,
+<a href="cell.htm">Cell</a>,
+<a href="multicell.htm">MultiCell</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/setx.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setx.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetX</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetX</h1>
+<code>SetX(<b>float</b> x)</code>
+<h2>Description</h2>
+Defines the abscissa of the current position. If the passed value is negative, it is relative
+to the right of the page.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>x</code></dt>
+<dd>
+The value of the abscissa.
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="getx.htm">GetX</a>,
+<a href="gety.htm">GetY</a>,
+<a href="sety.htm">SetY</a>,
+<a href="setxy.htm">SetXY</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/font/times.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/times.php]
+<?php
+$type = 'Core';
+$name = 'Times-Roman';
+$up = -100;
+$ut = 50;
+$cw = array(
+	chr(0)=>250,chr(1)=>250,chr(2)=>250,chr(3)=>250,chr(4)=>250,chr(5)=>250,chr(6)=>250,chr(7)=>250,chr(8)=>250,chr(9)=>250,chr(10)=>250,chr(11)=>250,chr(12)=>250,chr(13)=>250,chr(14)=>250,chr(15)=>250,chr(16)=>250,chr(17)=>250,chr(18)=>250,chr(19)=>250,chr(20)=>250,chr(21)=>250,
+	chr(22)=>250,chr(23)=>250,chr(24)=>250,chr(25)=>250,chr(26)=>250,chr(27)=>250,chr(28)=>250,chr(29)=>250,chr(30)=>250,chr(31)=>250,' '=>250,'!'=>333,'"'=>408,'#'=>500,'$'=>500,'%'=>833,'&'=>778,'\''=>180,'('=>333,')'=>333,'*'=>500,'+'=>564,
+	','=>250,'-'=>333,'.'=>250,'/'=>278,'0'=>500,'1'=>500,'2'=>500,'3'=>500,'4'=>500,'5'=>500,'6'=>500,'7'=>500,'8'=>500,'9'=>500,':'=>278,';'=>278,'<'=>564,'='=>564,'>'=>564,'?'=>444,'@'=>921,'A'=>722,
+	'B'=>667,'C'=>667,'D'=>722,'E'=>611,'F'=>556,'G'=>722,'H'=>722,'I'=>333,'J'=>389,'K'=>722,'L'=>611,'M'=>889,'N'=>722,'O'=>722,'P'=>556,'Q'=>722,'R'=>667,'S'=>556,'T'=>611,'U'=>722,'V'=>722,'W'=>944,
+	'X'=>722,'Y'=>722,'Z'=>611,'['=>333,'\\'=>278,']'=>333,'^'=>469,'_'=>500,'`'=>333,'a'=>444,'b'=>500,'c'=>444,'d'=>500,'e'=>444,'f'=>333,'g'=>500,'h'=>500,'i'=>278,'j'=>278,'k'=>500,'l'=>278,'m'=>778,
+	'n'=>500,'o'=>500,'p'=>500,'q'=>500,'r'=>333,'s'=>389,'t'=>278,'u'=>500,'v'=>500,'w'=>722,'x'=>500,'y'=>500,'z'=>444,'{'=>480,'|'=>200,'}'=>480,'~'=>541,chr(127)=>350,chr(128)=>500,chr(129)=>350,chr(130)=>333,chr(131)=>500,
+	chr(132)=>444,chr(133)=>1000,chr(134)=>500,chr(135)=>500,chr(136)=>333,chr(137)=>1000,chr(138)=>556,chr(139)=>333,chr(140)=>889,chr(141)=>350,chr(142)=>611,chr(143)=>350,chr(144)=>350,chr(145)=>333,chr(146)=>333,chr(147)=>444,chr(148)=>444,chr(149)=>350,chr(150)=>500,chr(151)=>1000,chr(152)=>333,chr(153)=>980,
+	chr(154)=>389,chr(155)=>333,chr(156)=>722,chr(157)=>350,chr(158)=>444,chr(159)=>722,chr(160)=>250,chr(161)=>333,chr(162)=>500,chr(163)=>500,chr(164)=>500,chr(165)=>500,chr(166)=>200,chr(167)=>500,chr(168)=>333,chr(169)=>760,chr(170)=>276,chr(171)=>500,chr(172)=>564,chr(173)=>333,chr(174)=>760,chr(175)=>333,
+	chr(176)=>400,chr(177)=>564,chr(178)=>300,chr(179)=>300,chr(180)=>333,chr(181)=>500,chr(182)=>453,chr(183)=>250,chr(184)=>333,chr(185)=>300,chr(186)=>310,chr(187)=>500,chr(188)=>750,chr(189)=>750,chr(190)=>750,chr(191)=>444,chr(192)=>722,chr(193)=>722,chr(194)=>722,chr(195)=>722,chr(196)=>722,chr(197)=>722,
+	chr(198)=>889,chr(199)=>667,chr(200)=>611,chr(201)=>611,chr(202)=>611,chr(203)=>611,chr(204)=>333,chr(205)=>333,chr(206)=>333,chr(207)=>333,chr(208)=>722,chr(209)=>722,chr(210)=>722,chr(211)=>722,chr(212)=>722,chr(213)=>722,chr(214)=>722,chr(215)=>564,chr(216)=>722,chr(217)=>722,chr(218)=>722,chr(219)=>722,
+	chr(220)=>722,chr(221)=>722,chr(222)=>556,chr(223)=>500,chr(224)=>444,chr(225)=>444,chr(226)=>444,chr(227)=>444,chr(228)=>444,chr(229)=>444,chr(230)=>667,chr(231)=>444,chr(232)=>444,chr(233)=>444,chr(234)=>444,chr(235)=>444,chr(236)=>278,chr(237)=>278,chr(238)=>278,chr(239)=>278,chr(240)=>500,chr(241)=>500,
+	chr(242)=>500,chr(243)=>500,chr(244)=>500,chr(245)=>500,chr(246)=>500,chr(247)=>564,chr(248)=>500,chr(249)=>500,chr(250)=>500,chr(251)=>500,chr(252)=>500,chr(253)=>500,chr(254)=>500,chr(255)=>500);
+$enc = 'cp1252';
+$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
+?>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/makefont/cp1255.map
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/makefont/cp1255.map]
+!00 U+0000 .notdef
+!01 U+0001 .notdef
+!02 U+0002 .notdef
+!03 U+0003 .notdef
+!04 U+0004 .notdef
+!05 U+0005 .notdef
+!06 U+0006 .notdef
+!07 U+0007 .notdef
+!08 U+0008 .notdef
+!09 U+0009 .notdef
+!0A U+000A .notdef
+!0B U+000B .notdef
+!0C U+000C .notdef
+!0D U+000D .notdef
+!0E U+000E .notdef
+!0F U+000F .notdef
+!10 U+0010 .notdef
+!11 U+0011 .notdef
+!12 U+0012 .notdef
+!13 U+0013 .notdef
+!14 U+0014 .notdef
+!15 U+0015 .notdef
+!16 U+0016 .notdef
+!17 U+0017 .notdef
+!18 U+0018 .notdef
+!19 U+0019 .notdef
+!1A U+001A .notdef
+!1B U+001B .notdef
+!1C U+001C .notdef
+!1D U+001D .notdef
+!1E U+001E .notdef
+!1F U+001F .notdef
+!20 U+0020 space
+!21 U+0021 exclam
+!22 U+0022 quotedbl
+!23 U+0023 numbersign
+!24 U+0024 dollar
+!25 U+0025 percent
+!26 U+0026 ampersand
+!27 U+0027 quotesingle
+!28 U+0028 parenleft
+!29 U+0029 parenright
+!2A U+002A asterisk
+!2B U+002B plus
+!2C U+002C comma
+!2D U+002D hyphen
+!2E U+002E period
+!2F U+002F slash
+!30 U+0030 zero
+!31 U+0031 one
+!32 U+0032 two
+!33 U+0033 three
+!34 U+0034 four
+!35 U+0035 five
+!36 U+0036 six
+!37 U+0037 seven
+!38 U+0038 eight
+!39 U+0039 nine
+!3A U+003A colon
+!3B U+003B semicolon
+!3C U+003C less
+!3D U+003D equal
+!3E U+003E greater
+!3F U+003F question
+!40 U+0040 at
+!41 U+0041 A
+!42 U+0042 B
+!43 U+0043 C
+!44 U+0044 D
+!45 U+0045 E
+!46 U+0046 F
+!47 U+0047 G
+!48 U+0048 H
+!49 U+0049 I
+!4A U+004A J
+!4B U+004B K
+!4C U+004C L
+!4D U+004D M
+!4E U+004E N
+!4F U+004F O
+!50 U+0050 P
+!51 U+0051 Q
+!52 U+0052 R
+!53 U+0053 S
+!54 U+0054 T
+!55 U+0055 U
+!56 U+0056 V
+!57 U+0057 W
+!58 U+0058 X
+!59 U+0059 Y
+!5A U+005A Z
+!5B U+005B bracketleft
+!5C U+005C backslash
+!5D U+005D bracketright
+!5E U+005E asciicircum
+!5F U+005F underscore
+!60 U+0060 grave
+!61 U+0061 a
+!62 U+0062 b
+!63 U+0063 c
+!64 U+0064 d
+!65 U+0065 e
+!66 U+0066 f
+!67 U+0067 g
+!68 U+0068 h
+!69 U+0069 i
+!6A U+006A j
+!6B U+006B k
+!6C U+006C l
+!6D U+006D m
+!6E U+006E n
+!6F U+006F o
+!70 U+0070 p
+!71 U+0071 q
+!72 U+0072 r
+!73 U+0073 s
+!74 U+0074 t
+!75 U+0075 u
+!76 U+0076 v
+!77 U+0077 w
+!78 U+0078 x
+!79 U+0079 y
+!7A U+007A z
+!7B U+007B braceleft
+!7C U+007C bar
+!7D U+007D braceright
+!7E U+007E asciitilde
+!7F U+007F .notdef
+!80 U+20AC Euro
+!82 U+201A quotesinglbase
+!83 U+0192 florin
+!84 U+201E quotedblbase
+!85 U+2026 ellipsis
+!86 U+2020 dagger
+!87 U+2021 daggerdbl
+!88 U+02C6 circumflex
+!89 U+2030 perthousand
+!8B U+2039 guilsinglleft
+!91 U+2018 quoteleft
+!92 U+2019 quoteright
+!93 U+201C quotedblleft
+!94 U+201D quotedblright
+!95 U+2022 bullet
+!96 U+2013 endash
+!97 U+2014 emdash
+!98 U+02DC tilde
+!99 U+2122 trademark
+!9B U+203A guilsinglright
+!A0 U+00A0 space
+!A1 U+00A1 exclamdown
+!A2 U+00A2 cent
+!A3 U+00A3 sterling
+!A4 U+20AA afii57636
+!A5 U+00A5 yen
+!A6 U+00A6 brokenbar
+!A7 U+00A7 section
+!A8 U+00A8 dieresis
+!A9 U+00A9 copyright
+!AA U+00D7 multiply
+!AB U+00AB guillemotleft
+!AC U+00AC logicalnot
+!AD U+00AD sfthyphen
+!AE U+00AE registered
+!AF U+00AF macron
+!B0 U+00B0 degree
+!B1 U+00B1 plusminus
+!B2 U+00B2 twosuperior
+!B3 U+00B3 threesuperior
+!B4 U+00B4 acute
+!B5 U+00B5 mu
+!B6 U+00B6 paragraph
+!B7 U+00B7 middot
+!B8 U+00B8 cedilla
+!B9 U+00B9 onesuperior
+!BA U+00F7 divide
+!BB U+00BB guillemotright
+!BC U+00BC onequarter
+!BD U+00BD onehalf
+!BE U+00BE threequarters
+!BF U+00BF questiondown
+!C0 U+05B0 afii57799
+!C1 U+05B1 afii57801
+!C2 U+05B2 afii57800
+!C3 U+05B3 afii57802
+!C4 U+05B4 afii57793
+!C5 U+05B5 afii57794
+!C6 U+05B6 afii57795
+!C7 U+05B7 afii57798
+!C8 U+05B8 afii57797
+!C9 U+05B9 afii57806
+!CB U+05BB afii57796
+!CC U+05BC afii57807
+!CD U+05BD afii57839
+!CE U+05BE afii57645
+!CF U+05BF afii57841
+!D0 U+05C0 afii57842
+!D1 U+05C1 afii57804
+!D2 U+05C2 afii57803
+!D3 U+05C3 afii57658
+!D4 U+05F0 afii57716
+!D5 U+05F1 afii57717
+!D6 U+05F2 afii57718
+!D7 U+05F3 gereshhebrew
+!D8 U+05F4 gershayimhebrew
+!E0 U+05D0 afii57664
+!E1 U+05D1 afii57665
+!E2 U+05D2 afii57666
+!E3 U+05D3 afii57667
+!E4 U+05D4 afii57668
+!E5 U+05D5 afii57669
+!E6 U+05D6 afii57670
+!E7 U+05D7 afii57671
+!E8 U+05D8 afii57672
+!E9 U+05D9 afii57673
+!EA U+05DA afii57674
+!EB U+05DB afii57675
+!EC U+05DC afii57676
+!ED U+05DD afii57677
+!EE U+05DE afii57678
+!EF U+05DF afii57679
+!F0 U+05E0 afii57680
+!F1 U+05E1 afii57681
+!F2 U+05E2 afii57682
+!F3 U+05E3 afii57683
+!F4 U+05E4 afii57684
+!F5 U+05E5 afii57685
+!F6 U+05E6 afii57686
+!F7 U+05E7 afii57687
+!F8 U+05E8 afii57688
+!F9 U+05E9 afii57689
+!FA U+05EA afii57690
+!FD U+200E afii299
+!FE U+200F afii300
+
+---
+### File: ./RedLionSalvageAi/fpdf186/makefont/koi8-u.map
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/makefont/koi8-u.map]
+!00 U+0000 .notdef
+!01 U+0001 .notdef
+!02 U+0002 .notdef
+!03 U+0003 .notdef
+!04 U+0004 .notdef
+!05 U+0005 .notdef
+!06 U+0006 .notdef
+!07 U+0007 .notdef
+!08 U+0008 .notdef
+!09 U+0009 .notdef
+!0A U+000A .notdef
+!0B U+000B .notdef
+!0C U+000C .notdef
+!0D U+000D .notdef
+!0E U+000E .notdef
+!0F U+000F .notdef
+!10 U+0010 .notdef
+!11 U+0011 .notdef
+!12 U+0012 .notdef
+!13 U+0013 .notdef
+!14 U+0014 .notdef
+!15 U+0015 .notdef
+!16 U+0016 .notdef
+!17 U+0017 .notdef
+!18 U+0018 .notdef
+!19 U+0019 .notdef
+!1A U+001A .notdef
+!1B U+001B .notdef
+!1C U+001C .notdef
+!1D U+001D .notdef
+!1E U+001E .notdef
+!1F U+001F .notdef
+!20 U+0020 space
+!21 U+0021 exclam
+!22 U+0022 quotedbl
+!23 U+0023 numbersign
+!24 U+0024 dollar
+!25 U+0025 percent
+!26 U+0026 ampersand
+!27 U+0027 quotesingle
+!28 U+0028 parenleft
+!29 U+0029 parenright
+!2A U+002A asterisk
+!2B U+002B plus
+!2C U+002C comma
+!2D U+002D hyphen
+!2E U+002E period
+!2F U+002F slash
+!30 U+0030 zero
+!31 U+0031 one
+!32 U+0032 two
+!33 U+0033 three
+!34 U+0034 four
+!35 U+0035 five
+!36 U+0036 six
+!37 U+0037 seven
+!38 U+0038 eight
+!39 U+0039 nine
+!3A U+003A colon
+!3B U+003B semicolon
+!3C U+003C less
+!3D U+003D equal
+!3E U+003E greater
+!3F U+003F question
+!40 U+0040 at
+!41 U+0041 A
+!42 U+0042 B
+!43 U+0043 C
+!44 U+0044 D
+!45 U+0045 E
+!46 U+0046 F
+!47 U+0047 G
+!48 U+0048 H
+!49 U+0049 I
+!4A U+004A J
+!4B U+004B K
+!4C U+004C L
+!4D U+004D M
+!4E U+004E N
+!4F U+004F O
+!50 U+0050 P
+!51 U+0051 Q
+!52 U+0052 R
+!53 U+0053 S
+!54 U+0054 T
+!55 U+0055 U
+!56 U+0056 V
+!57 U+0057 W
+!58 U+0058 X
+!59 U+0059 Y
+!5A U+005A Z
+!5B U+005B bracketleft
+!5C U+005C backslash
+!5D U+005D bracketright
+!5E U+005E asciicircum
+!5F U+005F underscore
+!60 U+0060 grave
+!61 U+0061 a
+!62 U+0062 b
+!63 U+0063 c
+!64 U+0064 d
+!65 U+0065 e
+!66 U+0066 f
+!67 U+0067 g
+!68 U+0068 h
+!69 U+0069 i
+!6A U+006A j
+!6B U+006B k
+!6C U+006C l
+!6D U+006D m
+!6E U+006E n
+!6F U+006F o
+!70 U+0070 p
+!71 U+0071 q
+!72 U+0072 r
+!73 U+0073 s
+!74 U+0074 t
+!75 U+0075 u
+!76 U+0076 v
+!77 U+0077 w
+!78 U+0078 x
+!79 U+0079 y
+!7A U+007A z
+!7B U+007B braceleft
+!7C U+007C bar
+!7D U+007D braceright
+!7E U+007E asciitilde
+!7F U+007F .notdef
+!80 U+2500 SF100000
+!81 U+2502 SF110000
+!82 U+250C SF010000
+!83 U+2510 SF030000
+!84 U+2514 SF020000
+!85 U+2518 SF040000
+!86 U+251C SF080000
+!87 U+2524 SF090000
+!88 U+252C SF060000
+!89 U+2534 SF070000
+!8A U+253C SF050000
+!8B U+2580 upblock
+!8C U+2584 dnblock
+!8D U+2588 block
+!8E U+258C lfblock
+!8F U+2590 rtblock
+!90 U+2591 ltshade
+!91 U+2592 shade
+!92 U+2593 dkshade
+!93 U+2320 integraltp
+!94 U+25A0 filledbox
+!95 U+2022 bullet
+!96 U+221A radical
+!97 U+2248 approxequal
+!98 U+2264 lessequal
+!99 U+2265 greaterequal
+!9A U+00A0 space
+!9B U+2321 integralbt
+!9C U+00B0 degree
+!9D U+00B2 twosuperior
+!9E U+00B7 periodcentered
+!9F U+00F7 divide
+!A0 U+2550 SF430000
+!A1 U+2551 SF240000
+!A2 U+2552 SF510000
+!A3 U+0451 afii10071
+!A4 U+0454 afii10101
+!A5 U+2554 SF390000
+!A6 U+0456 afii10103
+!A7 U+0457 afii10104
+!A8 U+2557 SF250000
+!A9 U+2558 SF500000
+!AA U+2559 SF490000
+!AB U+255A SF380000
+!AC U+255B SF280000
+!AD U+0491 afii10098
+!AE U+255D SF260000
+!AF U+255E SF360000
+!B0 U+255F SF370000
+!B1 U+2560 SF420000
+!B2 U+2561 SF190000
+!B3 U+0401 afii10023
+!B4 U+0404 afii10053
+!B5 U+2563 SF230000
+!B6 U+0406 afii10055
+!B7 U+0407 afii10056
+!B8 U+2566 SF410000
+!B9 U+2567 SF450000
+!BA U+2568 SF460000
+!BB U+2569 SF400000
+!BC U+256A SF540000
+!BD U+0490 afii10050
+!BE U+256C SF440000
+!BF U+00A9 copyright
+!C0 U+044E afii10096
+!C1 U+0430 afii10065
+!C2 U+0431 afii10066
+!C3 U+0446 afii10088
+!C4 U+0434 afii10069
+!C5 U+0435 afii10070
+!C6 U+0444 afii10086
+!C7 U+0433 afii10068
+!C8 U+0445 afii10087
+!C9 U+0438 afii10074
+!CA U+0439 afii10075
+!CB U+043A afii10076
+!CC U+043B afii10077
+!CD U+043C afii10078
+!CE U+043D afii10079
+!CF U+043E afii10080
+!D0 U+043F afii10081
+!D1 U+044F afii10097
+!D2 U+0440 afii10082
+!D3 U+0441 afii10083
+!D4 U+0442 afii10084
+!D5 U+0443 afii10085
+!D6 U+0436 afii10072
+!D7 U+0432 afii10067
+!D8 U+044C afii10094
+!D9 U+044B afii10093
+!DA U+0437 afii10073
+!DB U+0448 afii10090
+!DC U+044D afii10095
+!DD U+0449 afii10091
+!DE U+0447 afii10089
+!DF U+044A afii10092
+!E0 U+042E afii10048
+!E1 U+0410 afii10017
+!E2 U+0411 afii10018
+!E3 U+0426 afii10040
+!E4 U+0414 afii10021
+!E5 U+0415 afii10022
+!E6 U+0424 afii10038
+!E7 U+0413 afii10020
+!E8 U+0425 afii10039
+!E9 U+0418 afii10026
+!EA U+0419 afii10027
+!EB U+041A afii10028
+!EC U+041B afii10029
+!ED U+041C afii10030
+!EE U+041D afii10031
+!EF U+041E afii10032
+!F0 U+041F afii10033
+!F1 U+042F afii10049
+!F2 U+0420 afii10034
+!F3 U+0421 afii10035
+!F4 U+0422 afii10036
+!F5 U+0423 afii10037
+!F6 U+0416 afii10024
+!F7 U+0412 afii10019
+!F8 U+042C afii10046
+!F9 U+042B afii10045
+!FA U+0417 afii10025
+!FB U+0428 afii10042
+!FC U+042D afii10047
+!FD U+0429 afii10043
+!FE U+0427 afii10041
+!FF U+042A afii10044
+
+---
+### File: ./RedLionSalvageAi/fpdf186/tutorial/tuto1.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/tutorial/tuto1.php]
+<?php
+require('../fpdf.php');
+
+$pdf = new FPDF();
+$pdf->AddPage();
+$pdf->SetFont('Arial','B',16);
+$pdf->Cell(40,10,'Hello World!');
+$pdf->Output();
+?>
+
+---

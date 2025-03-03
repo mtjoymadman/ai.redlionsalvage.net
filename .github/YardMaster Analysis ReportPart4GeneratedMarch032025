@@ -1,1544 +1,943 @@
-YardMaster Analysis ReportPart4GeneratedMarch032025
-Generated: March 03, 2025  
-Repository Structure
-ai.redlionsalvage.net/
-├── .gitignore
-├── LICENSE
-├── README.md
-├── composer.json
-├── composer.lock
-├── index.php
-├── .github/
-│   ├── workflows/
-│   │   ├── deploy.yml
-│   ├── YardMaster_Analysis_Report.md
-├── ai.redlionsalvage.net/
-│   ├── api/
-│   │   ├── employee_management/
-│   │   │   ├── add_employee.php
-│   │   │   ├── delete_employee.php
-│   │   │   ├── get_employees.php
-│   │   │   ├── suspend_employee.php
-│   │   │   ├── update_employee.php
-│   │   ├── fleet/
-│   │   │   ├── add_vehicle.php
-│   │   │   ├── assign_driver.php
-│   │   │   ├── check expirations.php
-│   │   │   ├── get_driver_history.php
-│   │   │   ├── get_fleet_vehicles.php
-│   │   │   ├── ocr_receipt.py
-│   │   │   ├── update_mileage.php
-│   │   │   ├── upload_document.php
-│   │   │   ├── upload_receipt.php
-│   │   ├── inventory/
-│   │   │   ├── get_parts.php
-│   │   │   ├── get_vehicles.php
-│   │   ├── pos/
-│   │   │   ├── open_drawer.php
-│   │   │   ├── print_receipt.php
-│   │   │   ├── record_sale.php
-│   │   ├── scrap/
-│   │   │   ├── record_purchase.php
-│   │   ├── timeclock/
-│   │   │   ├── add_extra_time.php
-│   │   │   ├── end_break.php
-│   │   │   ├── get_employee_status.php
-│   │   │   ├── get_extra_time.php
-│   │   │   ├── get_time_log.php
-│   │   │   ├── get_time_status.php
-│   │   │   ├── get_yardman_stats.php
-│   │   │   ├── log_extra_time.php
-│   │   │   ├── start_break.php
-│   │   ├── vehicle_pickup/
-│   │   │   ├── get_pending_vehicles.php
-│   │   │   ├── process_pending.php
-│   │   │   ├── submit_pending.php
-│   │   ├── config.php
-│   │   ├── employee.php
-│   │   ├── get_user_roles.php
-│   │   ├── login.php
-│   │   ├── logout.php
-│   │   ├── timeclock.php
-│   │   ├── vehicle_mangement.php
-├── api/
-│   ├── employee_management/
-│   │   ├── add_employee.php
-│   │   ├── delete_employee.php
-│   │   ├── get_employees.php
-│   │   ├── suspend_employee.php
-│   │   ├── update_employee.php
-│   ├── fleet/
-│   │   ├── add_vehicle.php
-│   │   ├── assign_driver.php
-│   │   ├── check expirations.php
-│   │   ├── documents.php
-│   │   ├── get_driver_history.php
-│   │   ├── get_fleet_vehicles.php
-│   │   ├── ocr_receipt.py
-│   │   ├── update_mileage.php
-│   │   ├── upload_document.php
-│   │   ├── upload_receipt.php
-│   │   ├── vehicles.php
-├── database/
-│   ├── schema.sql
-[Truncated—full structure as you provided]  
-File Contents
-File: lib/fpdf.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/lib/fpdf.php]
-<?php
-/*******************************************************************************  
-FPDF                                                                         *  
+# YardMaster Analysis ReportPart4GeneratedMarch032025
+Generated: March 03, 2025
 
-                                                                         *  
+## Repository Structure
+[Full structure here - truncated for brevity]
 
-Version: 1.86                                                                *  
+## File Contents
 
-Date:    2023-06-25                                                          *  
+### File: ./.git/description
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/description]
+Unnamed repository; edit this file 'description' to name the repository.
 
-Author:  Olivier PLATHEY                                                     *
-*******************************************************************************/
+---
+### File: ./.git/hooks/update.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/update.sample]
+#!/bin/sh
+#
+# An example hook script to block unannotated tags from entering.
+# Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+#
+# To enable this hook, rename this file to "update".
+#
+# Config
+# ------
+# hooks.allowunannotated
+#   This boolean sets whether unannotated tags will be allowed into the
+#   repository.  By default they won't be.
+# hooks.allowdeletetag
+#   This boolean sets whether deleting tags will be allowed in the
+#   repository.  By default they won't be.
+# hooks.allowmodifytag
+#   This boolean sets whether a tag may be modified after creation. By default
+#   it won't be.
+# hooks.allowdeletebranch
+#   This boolean sets whether deleting branches will be allowed in the
+#   repository.  By default they won't be.
+# hooks.denycreatebranch
+#   This boolean sets whether remotely creating branches will be denied
+#   in the repository.  By default this is allowed.
+#
 
-define('FPDF_VERSION','1.86');  
-class FPDF
-{
-protected $page;
-protected $n;
-protected $offsets;
-protected $buffer;
-protected $pages;
-protected $state;
-protected $compress;
-protected $k;
-protected $DefOrientation;
-protected $CurOrientation;
-protected $StdPageSizes;
-protected $DefPageSize;
-protected $CurPageSize;
-protected $CurRotation;
-protected $PageInfo;
-protected $wPt, $hPt;
-protected $w, $h;
-protected $lMargin;
-protected $tMargin;
-protected $rMargin;
-protected $bMargin;
-protected $cMargin;
-protected $x, $y;
-protected $lasth;
-protected $LineWidth;
-protected $fontpath;
-protected $CoreFonts;
-protected $fonts;
-protected $FontFiles;
-protected $encodings;
-protected $cmaps;
-protected $FontFamily;
-protected $FontStyle;
-protected $underline;
-protected $CurrentFont;
-protected $FontSizePt;
-protected $FontSize;
-protected $DrawColor;
-protected $FillColor;
-protected $TextColor;
-protected $ColorFlag;
-protected $WithAlpha;
-protected $ws;
-protected $images;
-protected $PageLinks;
-protected $links;
-protected $AutoPageBreak;
-protected $PageBreakTrigger;
-protected $InHeader;
-protected $InFooter;
-protected $AliasNbPages;
-protected $ZoomMode;
-protected $LayoutMode;
-protected $metadata;
-protected $CreationDate;
-protected $PDFVersion;  
-function __construct($orientation='P', $unit='mm', $size='A4')
-{
-    $this->state = 0;
-    $this->page = 0;
-    $this->n = 2;
-    $this->buffer = '';
-    $this->pages = array();
-    $this->PageLinks = array();
-    $this->offsets = array();
-    $this->fonts = array();
-    $this->FontFiles = array();
-    $this->images = array();
-    $this->links = array();
-    $this->InHeader = false;
-    $this->InFooter = false;
-    $this->lasth = 0;
-    $this->FontFamily = '';
-    $this->FontStyle = '';
-    $this->FontSizePt = 12;
-    $this->underline = false;
-    $this->DrawColor = '0 G';
-    $this->FillColor = '0 g';
-    $this->TextColor = '0 g';
-    $this->ColorFlag = false;
-    $this->ws = 0;
-    if($unit=='pt')
-        $this->k = 1;
-    elseif($unit=='mm')
-        $this->k = 72/25.4;
-    elseif($unit=='cm')
-        $this->k = 72/2.54;
-    elseif($unit=='in')
-        $this->k = 72;
-    else
-        $this->Error('Incorrect unit: '.$unit);
-    $this->StdPageSizes = array('a3'=>array(841.89,1190.55), 'a4'=>array(595.28,841.89), 'a5'=>array(420.94,595.28),
-        'letter'=>array(612,792), 'legal'=>array(612,1008));
-    $size = $this->_getpagesize($size);
-    $this->DefPageSize = $size;
-    $this->CurPageSize = $size;
-    if($orientation=='P' || $orientation=='Portrait')
-    {
-        $this->DefOrientation = 'P';
-        $this->w = $size[0];
-        $this->h = $size[1];
-    }
-    else
-    {
-        $this->DefOrientation = 'L';
-        $this->w = $size[1];
-        $this->h = $size[0];
-    }
-    $this->CurOrientation = $this->DefOrientation;
-    $this->wPt = $this->w*$this->k;
-    $this->hPt = $this->h*$this->k;
-    $margin = 28.35/$this->k;
-    $this->SetMargins($margin,$margin);
-    $this->cMargin = $margin/2;
-    $this->LineWidth = .567/$this->k;
-    $this->fontpath = dirname(FILE).'/font/';
-    $this->CoreFonts = array('courier', 'helvetica', 'times', 'symbol', 'zapfdingbats');
-    $this->PDFVersion = '1.7';
-}  
-function SetMargins($left, $top, $right=null)
-{
-    $this->lMargin = $left;
-    $this->tMargin = $top;
-    if($right===null)
-        $right = $left;
-    $this->rMargin = $right;
-}  
-function SetLeftMargin($margin)
-{
-    $this->lMargin = $margin;
-    if($this->page>0 && $this->x<$margin)
-        $this->x = $margin;
-}  
-function SetTopMargin($margin)
-{
-    $this->tMargin = $margin;
-}  
-function SetRightMargin($margin)
-{
-    $this->rMargin = $margin;
-}  
-function SetAutoPageBreak($auto, $margin=0)
-{
-    $this->AutoPageBreak = $auto;
-    $this->bMargin = $margin;
-    $this->PageBreakTrigger = $this->h-$margin;
-}  
-function SetDisplayMode($zoom, $layout='default')
-{
-    if($zoom=='fullpage' || $zoom=='fullwidth' || $zoom=='real' || $zoom=='default' || !is_string($zoom))
-        $this->ZoomMode = $zoom;
-    else
-        $this->Error('Incorrect zoom display mode: '.$zoom);
-    if($layout=='single' || $layout=='continuous' || $layout=='two' || $layout=='default')
-        $this->LayoutMode = $layout;
-    else
-        $this->Error('Incorrect layout display mode: '.$layout);
-}  
-function SetCompression($compress)
-{
-    $this->compress = $compress;
-}  
-function SetTitle($title, $isUTF8=false)
-{
-    if($isUTF8)
-        $title = $this->_UTF8toUTF16($title);
-    $this->metadata['Title'] = $title;
-}  
-function SetAuthor($author, $isUTF8=false)
-{
-    if($isUTF8)
-        $author = $this->_UTF8toUTF16($author);
-    $this->metadata['Author'] = $author;
-}  
-function SetSubject($subject, $isUTF8=false)
-{
-    if($isUTF8)
-        $subject = $this->_UTF8toUTF16($subject);
-    $this->metadata['Subject'] = $subject;
-}  
-function SetKeywords($keywords, $isUTF8=false)
-{
-    if($isUTF8)
-        $keywords = $this->_UTF8toUTF16($keywords);
-    $this->metadata['Keywords'] = $keywords;
-}  
-function SetCreator($creator, $isUTF8=false)
-{
-    if($isUTF8)
-        $creator = $this->_UTF8toUTF16($creator);
-    $this->metadata['Creator'] = $creator;
-}  
-function AliasNbPages($alias='{nb}')
-{
-    $this->AliasNbPages = $alias;
-}  
-function Error($msg)
-{
-    die('<b>FPDF error:</b> '.$msg);
-}  
-function Close()
-{
-    if($this->state==3)
-        return;
-    if($this->page==0)
-        $this->AddPage();
-    $this->InFooter = true;
-    $this->Footer();
-    $this->InFooter = false;
-    $this->_endpage();
-    $this->_enddoc();
-}  
-function AddPage($orientation='', $size='', $rotation=0)
-{
-    if($this->state==3)
-        $this->Error('The document is closed');
-    $family = $this->FontFamily;
-    $style = $this->FontStyle.($this->underline ? 'U' : '');
-    $fontsize = $this->FontSizePt;
-    $lw = $this->LineWidth;
-    $dc = $this->DrawColor;
-    $fc = $this->FillColor;
-    $tc = $this->TextColor;
-    $cf = $this->ColorFlag;
-    if($this->page>0)
-    {
-        $this->InFooter = true;
-        $this->Footer();
-        $this->InFooter = false;
-        $this->_endpage();
-    }
-    $this->_beginpage($orientation,$size,$rotation);
-    $this->_out('2 J');
-    $this->LineWidth = $lw;
-    $this->_out(sprintf('%.2F w',$lw*$this->k));
-    if($family)
-        $this->SetFont($family,$style,$fontsize);
-    $this->DrawColor = $dc;
-    if($dc!='0 G')
-        $this->_out($dc);
-    $this->FillColor = $fc;
-    if($fc!='0 g')
-        $this->_out($fc);
-    $this->TextColor = $tc;
-    $this->ColorFlag = $cf;
-    $this->InHeader = true;
-    $this->Header();
-    $this->InHeader = false;
-    if($this->LineWidth!=$lw)
-    {
-        $this->LineWidth = $lw;
-        $this->_out(sprintf('%.2F w',$lw*$this->k));
-    }
-    if($family)
-        $this->SetFont($family,$style,$fontsize);
-}  
-function Header()
-{
-}  
-function Footer()
-{
-}  
-function PageNo()
-{
-    return $this->page;
-}  
-function SetDrawColor($r, $g=null, $b=null)
-{
-    if(($r==0 && $g==0 && $b==0) || $g===null)
-        $this->DrawColor = sprintf('%.3F G',$r/255);
-    else
-        $this->DrawColor = sprintf('%.3F %.3F %.3F RG',$r/255,$g/255,$b/255);
-    if($this->page>0)
-        $this->_out($this->DrawColor);
-}  
-function SetFillColor($r, $g=null, $b=null)
-{
-    if(($r==0 && $g==0 && $b==0) || $g===null)
-        $this->FillColor = sprintf('%.3F g',$r/255);
-    else
-        $this->FillColor = sprintf('%.3F %.3F %.3F rg',$r/255,$g/255,$b/255);
-    $this->ColorFlag = ($this->FillColor!=$this->TextColor);
-    if($this->page>0)
-        $this->_out($this->FillColor);
-}  
-function SetTextColor($r, $g=null, $b=null)
-{
-    if(($r==0 && $g==0 && $b==0) || $g===null)
-        $this->TextColor = sprintf('%.3F g',$r/255);
-    else
-        $this->TextColor = sprintf('%.3F %.3F %.3F rg',$r/255,$g/255,$b/255);
-    $this->ColorFlag = ($this->FillColor!=$this->TextColor);
-}  
-function GetPageWidth()
-{
-    return $this->w;
-}  
-function GetPageHeight()
-{
-    return $this->h;
-}  
-function SetLineWidth($width)
-{
-    $this->LineWidth = $width;
-    if($this->page>0)
-        $this->_out(sprintf('%.2F w',$width*$this->k));
-}  
-function Line($x1, $y1, $x2, $y2)
-{
-    $this->_out(sprintf('%.2F %.2F m %.2F %.2F l S',$x1*$this->k,($this->h-$y1)$this->k,$x2$this->k,($this->h-$y2)*$this->k));
-}  
-function Rect($x, $y, $w, $h, $style='')
-{
-    if($style=='F')
-        $op = 'f';
-    elseif($style=='FD' || $style=='DF')
-        $op = 'B';
-    else
-        $op = 'S';
-    $this->_out(sprintf('%.2F %.2F %.2F %.2F re %s',$x*$this->k,($this->h-$y)$this->k,$w$this->k,-$h*$this->k,$op));
-}  
-function AddFont($family, $style='', $file='')
-{
-    $family = strtolower($family);
-    if($file=='')
-        $file = str_replace(' ','',$family).strtolower($style).'.php';
-    $style = strtoupper($style);
-    if($style=='IB')
-        $style = 'BI';
-    $fontkey = $family.$style;
-    if(isset($this->fonts[$fontkey]))
-        return;
-    $info = $this->_loadfont($file);
-    $info['i'] = count($this->fonts)+1;
-    if(!empty($info['file']))
-    {
-        $this->FontFiles[$info['file']] = array('length1'=>$info['length1'], 'length2'=>$info['length2']);
-    }
-    $this->fonts[$fontkey] = $info;
-}  
-function SetFont($family, $style='', $size=0)
-{
-    if($family=='')
-        $family = $this->FontFamily;
-    else
-        $family = strtolower($family);
-    $style = strtoupper($style);
-    if(strpos($style,'U')!==false)
-    {
-        $this->underline = true;
-        $style = str_replace('U','',$style);
-    }
-    else
-        $this->underline = false;
-    if($style=='IB')
-        $style = 'BI';
-    if($size==0)
-        $size = $this->FontSizePt;
-    if($this->FontFamily==$family && $this->FontStyle==$style && $this->FontSizePt==$size)
-        return;
-    $fontkey = $family.$style;
-    if(!isset($this->fonts[$fontkey]))
-    {
-        if($family=='arial')
-            $family = 'helvetica';
-        if(in_array($family,$this->CoreFonts))
-        {
-            if($family=='symbol' || $family=='zapfdingbats')
-                $style = '';
-            $fontkey = $family.$style;
-            if(!isset($this->fonts[$fontkey]))
-                $this->AddFont($family,$style);
-        }
-        else
-            $this->Error('Undefined font: '.$family.' '.$style);
-    }
-    $this->FontFamily = $family;
-    $this->FontStyle = $style;
-    $this->FontSizePt = $size;
-    $this->FontSize = $size/$this->k;
-    $this->CurrentFont = &$this->fonts[$fontkey];
-    if($this->page>0)
-        $this->_out(sprintf('BT /F%d %.2F Tf ET',$this->CurrentFont['i'],$this->FontSizePt));
-}  
-function SetFontSize($size)
-{
-    if($this->FontSizePt==$size)
-        return;
-    $this->FontSizePt = $size;
-    $this->FontSize = $size/$this->k;
-    if($this->page>0)
-        $this->_out(sprintf('BT /F%d %.2F Tf ET',$this->CurrentFont['i'],$this->FontSizePt));
-}  
-function AddLink()
-{
-    $n = count($this->links)+1;
-    $this->links[$n] = array(0,0);
-    return $n;
-}  
-function SetLink($link, $y=0, $page=-1)
-{
-    if($y==-1)
-        $y = $this->y;
-    if($page==-1)
-        $page = $this->page;
-    $this->links[$link] = array($page,$y);
-}  
-function Link($x, $y, $w, $h, $link)
-{
-    $this->PageLinks[$this->page][] = array($x*$this->k,$this->hPt-$y*$this->k,$w*$this->k,$h*$this->k,$link);
-}  
-function Text($x, $y, $txt)
-{
-    $s = sprintf('BT %.2F %.2F Td (%s) Tj ET',$x*$this->k,($this->h-$y)*$this->k,$this->_escape($txt));
-    if($this->underline && $txt!='')
-        $s .= ' '.$this->_dounderline($x,$y,$txt);
-    if($this->ColorFlag)
-        $s = 'q '.$this->TextColor.' '.$s.' Q';
-    $this->_out($s);
-}  
-function AcceptPageBreak()
-{
-    return $this->AutoPageBreak;
-}  
-function Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='')
-{
-    $k = $this->k;
-    if($this->y+$h>$this->PageBreakTrigger && !$this->InHeader && !$this->InFooter && $this->AcceptPageBreak())
-    {
-        $x = $this->x;
-        $ws = $this->ws;
-        if($ws>0)
-        {
-            $this->ws = 0;
-            $this->_out('0 Tw');
-        }
-        $this->AddPage($this->CurOrientation,$this->CurPageSize,$this->CurRotation);
-        $this->x = $x;
-        if($ws>0)
-        {
-            $this->ws = $ws;
-            $this->_out(sprintf('%.3F Tw',$ws*$k));
-        }
-    }
-    if($w==0)
-        $w = $this->w-$this->rMargin-$this->x;
-    $s = '';
-    if($fill || $border==1)
-    {
-        if($fill)
-            $op = ($border==1) ? 'B' : 'f';
-        else
-            $op = 'S';
-        $s = sprintf('%.2F %.2F %.2F %.2F re %s ',$this->x*$k,($this->h-$this->y)$k,$w$k,-$h*$k,$op);
-    }
-    if(is_string($border))
-    {
-        $x = $this->x;
-        $y = $this->y;
-        if(strpos($border,'L')!==false)
-            $s .= sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-$y)$k,$x$k,($this->h-($y+$h))$k);
-        if(strpos($border,'T')!==false)
-            $s .= sprintf('%.2F %.2F m %.2F %.2F l S ',$x$k,($this->h-$y)$k,($x+$w)$k,($this->h-$y)$k);
-        if(strpos($border,'R')!==false)
-            $s .= sprintf('%.2F %.2F m %.2F %.2F l S ',($x+$w)$k,($this->h-$y)$k,($x+$w)$k,($this->h-($y+$h))$k);
-        if(strpos($border,'B')!==false)
-            $s .= sprintf('%.2F %.2F m %.2F %.2F l S ',$x$k,($this->h-($y+$h))$k,($x+$w)$k,($this->h-($y+$h))$k);
-    }
-    if($txt!=='')
-    {
-        if(!isset($this->CurrentFont))
-            $this->Error('No font has been set');
-        if($align=='R')
-            $dx = $w-$this->cMargin-$this->GetStringWidth($txt);
-        elseif($align=='C')
-            $dx = ($w-$this->GetStringWidth($txt))/2;
-        else
-            $dx = $this->cMargin;
-        if($this->ColorFlag)
-            $s .= 'q '.$this->TextColor.' ';
-        $txt2 = $this->_escape($txt);
-        $s .= sprintf('BT %.2F %.2F Td (%s) Tj ET',($this->x+$dx)$k,($this->h-($this->y+.5*$h+.3*$this->FontSize))$k,$txt2);
-        if($this->underline)
-            $s .= ' '.$this->_dounderline($this->x+$dx,$this->y+.5$h+.3*$this->FontSize,$txt);
-        if($this->ColorFlag)
-            $s .= ' Q';
-        if($link)
-            $this->Link($this->x+$dx,$this->y+.5*$h-.5*$this->FontSize,$this->GetStringWidth($txt),$this->FontSize,$link);
-    }
-    if($s)
-        $this->_out($s);
-    $this->lasth = $h;
-    if($ln>0)
-    {
-        $this->y += $h;
-        if($ln==1)
-            $this->x = $this->lMargin;
-    }
-    else
-        $this->x += $w;
-}  
-function MultiCell($w, $h, $txt, $border=0, $align='J', $fill=false)
-{
-    if(!isset($this->CurrentFont))
-        $this->Error('No font has been set');
-    $cw = &$this->CurrentFont['cw'];
-    if($w==0)
-        $w = $this->w-$this->rMargin-$this->x;
-    $wmax = ($w-2*$this->cMargin)1000/$this->FontSize;
-    $s = str_replace("\r",'',$txt);
-    $nb = strlen($s);
-    if($nb>0 && $s[$nb-1]=="\n")
-        $nb--;
-    $b = 0;
-    if($border)
-    {
-        if($border==1)
-        {
-            $border = 'LTRB';
-            $b = 'LRT';
-            $b2 = 'LR';
-        }
-        else
-        {
-            $b2 = '';
-            if(strpos($border,'L')!==false)
-                $b2 .= 'L';
-            if(strpos($border,'R')!==false)
-                $b2 .= 'R';
-            $b = (strpos($border,'T')!==false) ? $b2.'T' : $b2;
-        }
-    }
-    $sep = -1;
-    $i = 0;
-    $j = 0;
-    $l = 0;
-    $ns = 0;
-    $nl = 1;
-    while($i<$nb)
-    {
-        $c = $s[$i];
-        if($c=="\n")
-        {
-            if($this->ws>0)
-            {
-                $this->ws = 0;
-                $this->_out('0 Tw');
-            }
-            $this->Cell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill);
-            $i++;
-            $sep = -1;
-            $j = $i;
-            $l = 0;
-            $ns = 0;
-            $nl++;
-            if($border && $nl==2)
-                $b = $b2;
-            continue;
-        }
-        if($c==' ')
-        {
-            $sep = $i;
-            $ls = $l;
-            $ns++;
-        }
-        $l += $cw[$c];
-        if($l>$wmax)
-        {
-            if($sep==-1)
-            {
-                if($i==$j)
-                    $i++;
-                if($this->ws>0)
-                {
-                    $this->ws = 0;
-                    $this->_out('0 Tw');
-                }
-                $this->Cell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill);
-            }
-            else
-            {
-                if($align=='J')
-                {
-                    $this->ws = ($ns>1) ? ($wmax-$ls)/1000$this->FontSize/($ns-1) : 0;
-                    $this->_out(sprintf('%.3F Tw',$this->ws*$this->k));
-                }
-                $this->Cell($w,$h,substr($s,$j,$sep-$j),$b,2,$align,$fill);
-                $i = $sep+1;
-            }
-            $sep = -1;
-            $j = $i;
-            $l = 0;
-            $ns = 0;
-            $nl++;
-            if($border && $nl==2)
-                $b = $b2;
-        }
-        else
-            $i++;
-    }
-    if($this->ws>0)
-    {
-        $this->ws = 0;
-        $this->_out('0 Tw');
-    }
-    if($border && strpos($border,'B')!==false)
-        $b .= 'B';
-    $this->Cell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill);
-    $this->x = $this->lMargin;
-}  
-function Write($h, $txt, $link='')
-{
-    if(!isset($this->CurrentFont))
-        $this->Error('No font has been set');
-    $cw = &$this->CurrentFont['cw'];
-    $w = $this->w-$this->rMargin-$this->x;
-    $wmax = ($w-2*$this->cMargin)1000/$this->FontSize;
-    $s = str_replace("\r",'',$txt);
-    $nb = strlen($s);
-    $sep = -1;
-    $i = 0;
-    $j = 0;
-    $l = 0;
-    $nl = 1;
-    while($i<$nb)
-    {
-        $c = $s[$i];
-        if($c=="\n")
-        {
-            $this->Cell($w,$h,substr($s,$j,$i-$j),0,2,'',false,$link);
-            $i++;
-            $sep = -1;
-            $j = $i;
-            $l = 0;
-            if($nl==1)
-            {
-                $this->x = $this->lMargin;
-                $w = $this->w-$this->rMargin-$this->x;
-                $wmax = ($w-2$this->cMargin)1000/$this->FontSize;
-            }
-            $nl++;
-            continue;
-        }
-        if($c==' ')
-            $sep = $i;
-        $l += $cw[$c];
-        if($l>$wmax)
-        {
-            if($sep==-1)
-            {
-                if($this->x>$this->lMargin)
-                {
-                    $this->x = $this->lMargin;
-                    $this->y += $h;
-                    $w = $this->w-$this->rMargin-$this->x;
-                    $wmax = ($w-2$this->cMargin)1000/$this->FontSize;
-                    $i++;
-                    $nl++;
-                    continue;
-                }
-                if($i==$j)
-                    $i++;
-                $this->Cell($w,$h,substr($s,$j,$i-$j),0,2,'',false,$link);
-            }
-            else
-            {
-                $this->Cell($w,$h,substr($s,$j,$sep-$j),0,2,'',false,$link);
-                $i = $sep+1;
-            }
-            $sep = -1;
-            $j = $i;
-            $l = 0;
-            if($nl==1)
-            {
-                $this->x = $this->lMargin;
-                $w = $this->w-$this->rMargin-$this->x;
-                $wmax = ($w-2$this->cMargin)1000/$this->FontSize;
-            }
-            $nl++;
-        }
-        else
-            $i++;
-    }
-    if($i!=$j)
-        $this->Cell($l/1000$this->FontSize,$h,substr($s,$j),0,0,'',false,$link);
-}  
-function Ln($h=null)
-{
-    $this->x = $this->lMargin;
-    if($h===null)
-        $this->y += $this->lasth;
-    else
-        $this->y += $h;
-}  
-function Image($file, $x=null, $y=null, $w=0, $h=0, $type='', $link='')
-{
-    if(!isset($this->images[$file]))
-    {
-        if($type=='')
-        {
-            $pos = strrpos($file,'.');
-            if(!$pos)
-                $this->Error('Image file has no extension and no type was specified: '.$file);
-            $type = substr($file,$pos+1);
-        }
-        $type = strtolower($type);
-        if($type=='jpeg')
-            $type = 'jpg';
-        $mtd = '_parse'.$type;
-        if(!method_exists($this,$mtd))
-            $this->Error('Unsupported image type: '.$type);
-        $info = $this->$mtd($file);
-        $info['i'] = count($this->images)+1;
-        $this->images[$file] = $info;
-    }
-    else
-        $info = $this->images[$file];  
+# --- Command line
+refname="$1"
+oldrev="$2"
+newrev="$3"
 
-if($w==0 && $h==0)  
-{  
-    $w = $info['w']/$this->k;  
-    $h = $info['h']/$this->k;  
-}  
-elseif($w==0)  
-    $w = $h*$info['w']/$info['h'];  
-elseif($h==0)  
-    $h = $w*$info['h']/$info['w'];  
+# --- Safety check
+if [ -z "$GIT_DIR" ]; then
+	echo "Don't run this script from the command line." >&2
+	echo " (if you want, you could supply GIT_DIR then run" >&2
+	echo "  $0 <ref> <oldrev> <newrev>)" >&2
+	exit 1
+fi
 
-if($x===null)  
-    $x = $this->x;  
-if($y===null)  
-{  
-    if($this->y+$h>$this->PageBreakTrigger && !$this->InHeader && !$this->InFooter && $this->AcceptPageBreak())  
-    {  
-        $x2 = $this->x;  
-        $this->AddPage($this->CurOrientation,$this->CurPageSize,$this->CurRotation);  
-        $this->x = $x2;  
-    }  
-    $y = $this->y;  
-    $this->y += $h;  
-}  
+if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
+	echo "usage: $0 <ref> <oldrev> <newrev>" >&2
+	exit 1
+fi
 
-if($x<$this->lMargin)  
-    $x = $this->lMargin;  
-if($y<$this->tMargin)  
-    $y = $this->tMargin;  
-if($x+$w>$this->w-$this->rMargin)  
-    $w = $this->w-$this->rMargin-$x;  
-if($y+$h>$this->h-$this->bMargin)  
-    $h = $this->h-$this->bMargin-$y;  
+# --- Config
+allowunannotated=$(git config --type=bool hooks.allowunannotated)
+allowdeletebranch=$(git config --type=bool hooks.allowdeletebranch)
+denycreatebranch=$(git config --type=bool hooks.denycreatebranch)
+allowdeletetag=$(git config --type=bool hooks.allowdeletetag)
+allowmodifytag=$(git config --type=bool hooks.allowmodifytag)
 
-$this->_out(sprintf('q %.2F 0 0 %.2F %.2F %.2F cm /I%d Do Q',$w*$this->k,$h*$this->k,$x*$this->k,($this->h-($y+$h))*$this->k,$info['i']));  
-if($link)  
-    $this->Link($x,$y,$w,$h,$link);  
+# check for no description
+projectdesc=$(sed -e '1q' "$GIT_DIR/description")
+case "$projectdesc" in
+"Unnamed repository"* | "")
+	echo "*** Project description file hasn't been set" >&2
+	exit 1
+	;;
+esac
 
-}  
-function GetStringWidth($s)
-{
-    if(!isset($this->CurrentFont))
-        $this->Error('No font has been set');
-    $cw = &$this->CurrentFont['cw'];
-    $w = 0;
-    $l = strlen($s);
-    for($i=0;$i<$l;$i++)
-        $w += $cw[$s[$i]];
-    return $w*$this->FontSize/1000;
-}  
-function SetX($x)
-{
-    if($x>=0)
-        $this->x = $x;
-    else
-        $this->x = $this->w+$x;
-    if($this->x<$this->lMargin)
-        $this->x = $this->lMargin;
-}  
-function SetY($y, $resetX=true)
-{
-    if($y>=0)
-        $this->y = $y;
-    else
-        $this->y = $this->h+$y;
-    if($this->y<$this->tMargin)
-        $this->y = $this->tMargin;
-    if($resetX)
-        $this->x = $this->lMargin;
-}  
-function SetXY($x, $y)
-{
-    $this->SetX($x);
-    $this->SetY($y,false);
-}  
-function Output($dest='', $name='', $isUTF8=false)
-{
-    if($this->state<3)
-        $this->Close();
-    $dest = strtoupper($dest);
-    if($dest=='')
-    {
-        if($name=='')
-        {
-            $name = 'doc.pdf';
-            $dest = 'I';
-        }
-        else
-            $dest = 'F';
-    }
-    switch($dest)
-    {
-        case 'I':
-            $this->_checkoutput();
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: inline; filename="'.$name.'"');
-            header('Cache-Control: private, max-age=0, must-revalidate');
-            header('Pragma: public');
-            echo $this->buffer;
-            break;
-        case 'D':
-            $this->_checkoutput();
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="'.$name.'"');
-            header('Cache-Control: private, max-age=0, must-revalidate');
-            header('Pragma: public');
-            echo $this->buffer;
-            break;
-        case 'F':
-            $f = fopen($name,'wb');
-            if(!$f)
-                $this->Error('Unable to create output file: '.$name);
-            fwrite($f,$this->buffer,strlen($this->buffer));
-            fclose($f);
-            break;
-        case 'S':
-            return $this->buffer;
-        default:
-            $this->Error('Incorrect output destination: '.$dest);
-    }
-    return '';
-}  
-/******************************************************************************  
-Protected methods                                                          *
-******************************************************************************/
-function _dochecks()
-{
-  if(ini_get('zend.ze1_compatibility_mode'))
-  $this->Error('This script cannot run in Zend Engine v1 compatibility mode');
-  if(PHP_VERSION_ID<50300 && !function_exists('mb_strlen'))
-  $this->Error('The mbstring extension is required with PHP < 5.3');
+# --- Check types
+# if $newrev is 0000...0000, it's a commit to delete a ref.
+zero=$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')
+if [ "$newrev" = "$zero" ]; then
+	newrev_type=delete
+else
+	newrev_type=$(git cat-file -t $newrev)
+fi
 
-}  
-function _checkoutput()
-{
-    if(PHP_SAPI!='cli')
-    {
-        if(headers_sent($file,$line))
-            $this->Error("Some data has already been output, can't send PDF file (output started at $file:$line)");
-    }
-    if(ob_get_length())
-    {
-        ob_end_clean();
-        $this->Error("Some data has already been output, can't send PDF file (output buffering not ended)");
-    }
-}  
-function _getpagesize($size)
-{
-    if(is_string($size))
-    {
-        $size = strtolower($size);
-        if(!array_key_exists($size,$this->StdPageSizes))
-            $this->Error('Unknown page size: '.$size);
-        $a = $this->StdPageSizes[$size];
-        return array($a[0]/$this->k, $a[1]/$this->k);
-    }
-    else
-    {
-        if($size[0]>$size[1])
-            return array($size[1],$size[0]);
-        else
-            return $size;
-    }
-}  
-function _beginpage($orientation, $size, $rotation)
-{
-    $this->page++;
-    $this->pages[$this->page] = '';
-    $this->PageLinks[$this->page] = array();
-    $this->state = 2;
-    $this->x = $this->lMargin;
-    $this->y = $this->tMargin;
-    $this->FontFamily = '';
-    if($orientation=='')
-        $orientation = $this->DefOrientation;
-    else
-        $orientation = strtoupper($orientation[0]);
-    if($size=='')
-        $size = $this->DefPageSize;
-    else
-        $size = $this->_getpagesize($size);
-    if($orientation!=$this->CurOrientation || $size[0]!=$this->CurPageSize[0] || $size[1]!=$this->CurPageSize[1])
-    {
-        if($orientation=='P')
-        {
-            $this->w = $size[0];
-            $this->h = $size[1];
-        }
-        else
-        {
-            $this->w = $size[1];
-            $this->h = $size[0];
-        }
-        $this->wPt = $this->w*$this->k;
-        $this->hPt = $this->h*$this->k;
-        $this->PageBreakTrigger = $this->h-$this->bMargin;
-        $this->CurOrientation = $orientation;
-        $this->CurPageSize = $size;
-    }
-    if($rotation!=0)
-    {
-        $rotation = $rotation%360;
-        if($rotation<0)
-            $rotation += 360;
-        $this->CurRotation = $rotation;
-    }
-    else
-        $this->CurRotation = 0;
-}  
-function _endpage()
-{
-    $this->state = 1;
-}  
-function _loadfont($font)
-{
-    include($this->fontpath.$font);
-    $a = get_defined_vars();
-    if(!isset($a['name']))
-        $this->Error('Could not include font definition file');
-    return $a;
-}  
-function _escape($s)
-{
-    $s = str_replace('\','\\',$s);
-    $s = str_replace('(','\(',$s);
-    $s = str_replace(')','\)',$s);
-    return $s;
-}  
-function _textstring($s)
-{
-    return '('.$this->_escape($s).')';
-}  
-function _UTF8toUTF16($s)
-{
-    $res = "\xFE\xFF";
-    $nb = strlen($s);
-    $i = 0;
-    while($i<$nb)
-    {
-        $c1 = ord($s[$i++]);
-        if($c1>=224)
-        {
-            $c2 = ord($s[$i++]);
-            $c3 = ord($s[$i++]);
-            $res .= chr((($c1 & 0x0F)<<4) + (($c2 & 0x3C)>>2));
-            $res .= chr((($c2 & 0x03)<<6) + ($c3 & 0x3F));
-        }
-        elseif($c1>=192)
-        {
-            $c2 = ord($s[$i++]);
-            $res .= chr(($c1 & 0x1C)>>2));
-            $res .= chr((($c1 & 0x03)<<6) + ($c2 & 0x3F));
-        }
-        else
-        {
-            $res .= "\0".chr($c1);
-        }
-    }
-    return $res;
-}  
-function _dounderline($x, $y, $txt)
-{
-    $up = $this->CurrentFont['up'];
-    $ut = $this->CurrentFont['ut'];
-    $w = $this->GetStringWidth($txt)+$this->wssubstr_count($txt,' ');
-    return sprintf('%.2F %.2F %.2F %.2F re f',$x$this->k,($this->h-($y-$up/1000*$this->FontSize))$this->k,$w$this->k,-$ut/1000*$this->FontSizePt);
-}  
-function _parsejpg($file)
-{
-    $a = getimagesize($file);
-    if(!$a)
-        $this->Error('Missing or incorrect image file: '.$file);
-    if($a[2]!=2)
-        $this->Error('Not a JPEG file: '.$file);
-    $colspace = 'DeviceRGB';
-    $bpc = isset($a['bits']) ? $a['bits'] : 8;
-    $f = fopen($file,'rb');
-    $data = fread($f,filesize($file));
-    fclose($f);
-    return array('w'=>$a[0], 'h'=>$a[1], 'cs'=>$colspace, 'bpc'=>$bpc, 'f'=>'DCTDecode', 'data'=>$data);
-}  
-function _parsepng($file)
-{
-    $f = fopen($file,'rb');
-    if(!$f)
-        $this->Error('Can't open image file: '.$file);
-    $info = $this->_parsepngstream($f,$file);
-    fclose($f);
-    return $info;
-}  
-function _parsepngstream($f, $file)
-{
-    if($this->_readstream($f,8)!=chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10))
-        $this->Error('Not a PNG file: '.$file);  
+case "$refname","$newrev_type" in
+	refs/tags/*,commit)
+		# un-annotated tag
+		short_refname=${refname##refs/tags/}
+		if [ "$allowunannotated" != "true" ]; then
+			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
+			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
+			exit 1
+		fi
+		;;
+	refs/tags/*,delete)
+		# delete tag
+		if [ "$allowdeletetag" != "true" ]; then
+			echo "*** Deleting a tag is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	refs/tags/*,tag)
+		# annotated tag
+		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
+		then
+			echo "*** Tag '$refname' already exists." >&2
+			echo "*** Modifying a tag is not allowed in this repository." >&2
+			exit 1
+		fi
+		;;
+	refs/heads/*,commit)
+		# branch
+		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
+			echo "*** Creating a branch is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	refs/heads/*,delete)
+		# delete branch
+		if [ "$allowdeletebranch" != "true" ]; then
+			echo "*** Deleting a branch is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	refs/remotes/*,commit)
+		# tracking branch
+		;;
+	refs/remotes/*,delete)
+		# delete tracking branch
+		if [ "$allowdeletebranch" != "true" ]; then
+			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	*)
+		# Anything else (is there anything else?)
+		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
+		exit 1
+		;;
+esac
 
-$this->_readstream($f,4);  
-if($this->_readstream($f,4)!='IHDR')  
-    $this->Error('Incorrect PNG file: '.$file);  
-$w = $this->_readint($f);  
-$h = $this->_readint($f);  
-$bpc = ord($this->_readstream($f,1));  
-if($bpc>8)  
-    $this->Error('16-bit depth not supported: '.$file);  
-$ct = ord($this->_readstream($f,1));  
-if($ct==0 || $ct==4)  
-    $colspace = 'DeviceGray';  
-elseif($ct==2 || $ct==6)  
-    $colspace = 'DeviceRGB';  
-elseif($ct==3)  
-    $colspace = 'Indexed';  
-else  
-    $this->Error('Unknown color type: '.$file);  
-if(ord($this->_readstream($f,1))!=0)  
-    $this->Error('Unknown compression method: '.$file);  
-if(ord($this->_readstream($f,1))!=0)  
-    $this->Error('Unknown filter method: '.$file);  
-if(ord($this->_readstream($f,1))!=0)  
-    $this->Error('Interlacing not supported: '.$file);  
-$this->_readstream($f,4);  
-$dp = '/Predictor 15 /Colors '.($colspace=='DeviceRGB' ? 3 : 1).' /BitsPerComponent '.$bpc.' /Columns '.$w;  
+# --- Finished
+exit 0
 
-$pal = '';  
-$trns = '';  
-$data = '';  
-do  
-{  
-    $n = $this->_readint($f);  
-    $type = $this->_readstream($f,4);  
-    if($type=='PLTE')  
-    {  
-        $pal = $this->_readstream($f,$n);  
-        $this->_readstream($f,4);  
-    }  
-    elseif($type=='tRNS')  
-    {  
-        $t = $this->_readstream($f,$n);  
-        if($ct==0)  
-            $trns = array(ord(substr($t,1,1)));  
-        elseif($ct==2)  
-            $trns = array(ord(substr($t,1,1)),ord(substr($t,3,1)),ord(substr($t,5,1)));  
-        else  
-        {  
-            $pos = strpos($t,chr(0));  
-            if($pos!==false)  
-                $trns = array($pos);  
-        }  
-        $this->_readstream($f,4);  
-    }  
-    elseif($type=='IDAT')  
-    {  
-        $data .= $this->_readstream($f,$n);  
-        $this->_readstream($f,4);  
-    }  
-    elseif($type=='IEND')  
-        break;  
-    else  
-        $this->_readstream($f,$n+4);  
-}  
-while($n);  
+---
+### File: ./.github/YardMaster Analysis ReportPart3GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart3GeneratedMarch032025]
+# YardMaster Analysis ReportPart3GeneratedMarch032025
+Generated: March 03, 2025
 
-if($colspace=='Indexed' && empty($pal))  
-    $this->Error('Missing palette in '.$file);  
-$info = array('w'=>$w, 'h'=>$h, 'cs'=>$colspace, 'bpc'=>$bpc, 'f'=>'FlateDecode', 'dp'=>$dp, 'pal'=>$pal, 'trns'=>$trns);  
-if($ct>=4)  
-{  
-    if(!function_exists('gzuncompress'))  
-        $this->Error('Zlib not available, can\'t handle alpha channel: '.$file);  
-    $data = gzuncompress($data);  
-    $color = '';  
-    $alpha = '';  
-    if($ct==4)  
-    {  
-        for($i=0;$i<$h;$i++)  
-        {  
-            $pos = (1+$w)*$i;  
-            $color .= $data[$pos];  
-            $alpha .= $data[$pos];  
-            $line = substr($data,$pos+1,$w);  
-            $color .= preg_replace('/(.)./s','$1',$line);  
-            $alpha .= preg_replace('/.(.)/s','$1',$line);  
-        }  
-    }  
-    else  
-    {  
-        for($i=0;$i<$h;$i++)  
-        {  
-            $pos = (1+4*$w)*$i;  
-            $color .= $data[$pos];  
-            $alpha .= $data[$pos];  
-            $line = substr($data,$pos+1,4*$w);  
-            $color .= preg_replace('/(.{3})./s','$1',$line);  
-            $alpha .= preg_replace('/.{3}(.)/s','$1',$line);  
-        }  
-    }  
-    $info['smask'] = $alpha;  
-    $info['data'] = $color;  
-}  
-else  
-    $info['data'] = $data;  
-return $info;  
+## Repository Structure
+[Full structure here - truncated for brevity]
 
-}  
-function _readstream($f, $n)
-{
-    $res = '';
-    while($n>0 && !feof($f))
-    {
-        $s = fread($f,$n);
-        if($s===false)
-            $this->Error('Error while reading stream');
-        $n -= strlen($s);
-        $res .= $s;
-    }
-    if($n>0)
-        $this->Error('Unexpected end of stream');
-    return $res;
-}  
-function _readint($f)
-{
-    $a = unpack('Ni',$this->_readstream($f,4));
-    return $a['i'];
-}  
-function _enddoc()
-{
-    $this->_putheader();
-    $this->_putpages();
-    $this->_putresources();
-    $this->_newobj();
-    $this->_put('<< /Producer '.$this->_textstring('FPDF '.FPDF_VERSION));
-    if(!empty($this->metadata))
-    {
-        $this->_put('/Info <<');
-        foreach($this->metadata as $key=>$value)
-            $this->_put('/'.$key.' '.$this->_textstring($value));
-        $this->_put('>>');
-    }
-    $this->_put('/Size '.($this->n+1));
-    $this->_put('/Root '.$this->n.' 0 R');
-    $this->_put('>>');
-    $this->_put('startxref');
-    $this->_put(strlen($this->buffer));
-    $this->_put('%%EOF');
-    $this->state = 3;
-}  
-function _putheader()
-{
-    $this->_put('%PDF-'.$this->PDFVersion);
-}  
-function _putpages()
-{
-    $nb = $this->page;
-    if(!empty($this->AliasNbPages))
-    {
-        $alias = $this->_UTF8toUTF16($this->AliasNbPages);
-        for($n=1;$n<=$nb;$n++)
-            $this->pages[$n] = str_replace($this->AliasNbPages,$nb,$this->pages[$n]);
-    }
-    for($n=1;$n<=$nb;$n++)
-    {
-        $this->_newobj();
-        $this->_put('<</Type /Page');
-        $this->_put('/Parent 1 0 R');
-        if(isset($this->PageInfo[$n]['size']))
-            $this->_put(sprintf('/MediaBox [0 0 %.2F %.2F]',$this->PageInfo[$n]['size'][0],$this->PageInfo[$n]['size'][1]));
-        if(isset($this->PageInfo[$n]['rotation']))
-            $this->_put('/Rotate '.$this->PageInfo[$n]['rotation']);
-        $this->_put('/Resources 2 0 R');
-        if(!empty($this->PageLinks[$n]))
-        {
-            $s = '/Annots [';
-            foreach($this->PageLinks[$n] as $pl)
-                $s .= sprintf('%d 0 R ',$pl[4]);
-            $s .= ']';
-            $this->_put($s);
-        }
-        $this->_put('/Contents '.($this->n+1).' 0 R>>');
-        $this->_put('endobj');
-        $this->_newobj();
-        $this->_put('<<');
-        if($this->compress)
-            $this->_put('/Filter /FlateDecode');
-        $this->_putstream($this->pages[$n]);
-        $this->_put('>>');
-        $this->_put('endobj');
-    }
-    $this->_newobj();
-    $this->offsets[1] = strlen($this->buffer);
-    $this->_put('<< /Type /Pages');
-    $kids = '/Kids [';
-    for($n=1;$n<=$nb;$n++)
-        $kids .= (3+2*($n-1)).' 0 R ';
-    $kids .= ']';
-    $this->_put($kids);
-    $this->_put('/Count '.$nb);
-    $this->_put(sprintf('/MediaBox [0 0 %.2F %.2F]',$this->DefPageSize[0]$this->k,$this->DefPageSize[1]$this->k));
-    $this->_put('>>');
-    $this->_put('endobj');
-}  
-function _putresources()
-{
-    $this->_putfonts();
-    $this->_putimages();
-    $this->_newobj();
-    $this->offsets[2] = strlen($this->buffer);
-    $this->_put('<<');
-    $this->_put('/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
-    $this->_put('/Font <<');
-    foreach($this->fonts as $f)
-        $this->_put('/F'.$f['i'].' '.$f['n'].' 0 R');
-    $this->_put('>>');
-    $this->_put('/XObject <<');
-    foreach($this->images as $image)
-        $this->_put('/I'.$image['i'].' '.$image['n'].' 0 R');
-    $this->_put('>>');
-    $this->_put('>>');
-    $this->_put('endobj');
-}  
-function _putfonts()
-{
-    foreach($this->FontFiles as $file=>$info)
-    {
-        $this->_newobj();
-        $this->_put('<</Length '.$info['length1']);
-        if(isset($info['length2']))
-            $this->_put('/Length1 '.$info['length1'].' /Length2 '.$info['length2'].' /Length3 0');
-        $this->_put('/Filter /FlateDecode');
-        $this->_put('>>');
-        $f = fopen($this->fontpath.$file,'rb');
-        $data = fread($f,$info['length1']);
-        fclose($f);
-        $this->_putstream($data);
-        $this->_put('endobj');
-    }
-    foreach($this->fonts as $k=>$font)
-    {
-        $this->_newobj();
-        $this->fonts[$k]['n'] = $this->n;
-        $this->_put('<</Type /Font');
-        $this->_put('/BaseFont /'.$font['name']);
-        $this->_put('/Subtype /Type1');
-        if($font['name']!='Symbol' && $font['name']!='ZapfDingbats')
-            $this->_put('/Encoding /WinAnsiEncoding');
-        if(isset($font['file']))
-            $this->_put('/FontDescriptor '.($this->n+1).' 0 R');
-        $this->_put('>>');
-        $this->_put('endobj');
-        if(isset($font['file']))
-        {
-            $this->_newobj();
-            $this->_put('<</Length '.$font['length1']);
-            $this->_put('/Filter /FlateDecode');
-            $this->_put('>>');
-            $f = fopen($this->fontpath.$font['file'],'rb');
-            $data = fread($f,$font['length1']);
-            fclose($f);
-            $this->_putstream($data);
-            $this->_put('endobj');
-        }
-    }
-}  
-function _putimages()
-{
-    foreach(array_keys($this->images) as $file)
-    {
-        $this->_newobj();
-        $info = $this->images[$file];
-        $this->images[$file]['n'] = $this->n;
-        $this->_put('<</Type /XObject');
-        $this->_put('/Subtype /Image');
-        $this->_put('/Width '.$info['w']);
-        $this->_put('/Height '.$info['h']);
-        if($info['cs']=='Indexed')
-            $this->_put('/ColorSpace [/Indexed /DeviceRGB '.(strlen($info['pal'])/3-1).' '.($this->n+1).' 0 R]');
-        else
-        {
-            $this->_put('/ColorSpace /'.$info['cs']);
-            if($info['cs']=='DeviceCMYK')
-                $this->_put('/Decode [1 0 1 0 1 0 1 0]');
-        }
-        $this->_put('/BitsPerComponent '.$info['bpc']);
-        if(isset($info['f']))
-            $this->_put('/Filter /'.$info['f']);
-        if(isset($info['dp']))
-            $this->_put('/DecodeParms <<'.$info['dp'].'>>');
-        if(isset($info['trns']) && is_array($info['trns']))
-        {
-            $trns = '';
-            for($i=0;$i<count($info['trns']);$i++)
-                $trns .= $info['trns'][$i].' '.$info['trns'][$i].' ';
-            $this->_put('/Mask ['.$trns.']');
-        }
-        if(isset($info['smask']))
-            $this->_put('/SMask '.($this->n+1).' 0 R');
-        $this->_put('/Length '.strlen($info['data']));
-        $this->_put('>>');
-        $this->_putstream($info['data']);
-        $this->_put('endobj');
-        if(isset($info['smask']))
-        {
-            $this->_newobj();
-            $this->_put('<<');
-            $this->_put('/Type /XObject');
-            $this->_put('/Subtype /Image');
-            $this->_put('/Width '.$info['w']);
-            $this->_put('/Height '.$info['h']);
-            $this->_put('/ColorSpace /DeviceGray');
-            $this->_put('/BitsPerComponent '.$info['bpc']);
-            if(isset($info['f']))
-                $this->_put('/Filter /'.$info['f']);
-            $this->_put('/Length '.strlen($info['smask']));
-            $this->_put('>>');
-            $this->_putstream($info['smask']);
-            $this->_put('endobj');
-        }
-    }
-}  
-function _putstream($data)
-{
-    if($this->compress)
-        $data = gzcompress($data);
-    $this->_put('stream');
-    $this->_put($data);
-    $this->_put('endstream');
-}  
-function _newobj($n=null)
-{
-    if($n===null)
-        $n = ++$this->n;
-    $this->offsets[$n] = strlen($this->buffer);
-    $this->_put($n.' 0 obj');
-}  
-function _put($s)
-{
-    $this->buffer .= $s."\n";
-}  
+## File Contents
+
+### File: ./.git/config
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/config]
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/mtjoymadman/ai.redlionsalvage.net
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[gc]
+	auto = 0
+[http "https://github.com/"]
+	extraheader = AUTHORIZATION: basic eC1hY2Nlc3MtdG9rZW46Z2hzXzBBNXpQTGQ2MTBoSjZwWnV2WGhJaXpUSkN0bnhQdTRQalNPeQ==
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+
+---
+### File: ./.git/hooks/sendemail-validate.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/sendemail-validate.sample]
+#!/bin/sh
+
+# An example hook script to validate a patch (and/or patch series) before
+# sending it via email.
+#
+# The hook should exit with non-zero status after issuing an appropriate
+# message if it wants to prevent the email(s) from being sent.
+#
+# To enable this hook, rename this file to "sendemail-validate".
+#
+# By default, it will only check that the patch(es) can be applied on top of
+# the default upstream branch without conflicts in a secondary worktree. After
+# validation (successful or not) of the last patch of a series, the worktree
+# will be deleted.
+#
+# The following config variables can be set to change the default remote and
+# remote ref that are used to apply the patches against:
+#
+#   sendemail.validateRemote (default: origin)
+#   sendemail.validateRemoteRef (default: HEAD)
+#
+# Replace the TODO placeholders with appropriate checks according to your
+# needs.
+
+validate_cover_letter () {
+	file="$1"
+	# TODO: Replace with appropriate checks (e.g. spell checking).
+	true
 }
-?>  
-File: RedLionSalvageAi/fpdf186/fpdf.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/RedLionSalvageAi/fpdf186/fpdf.php]
+
+validate_patch () {
+	file="$1"
+	# Ensure that the patch applies without conflicts.
+	git am -3 "$file" || return
+	# TODO: Replace with appropriate checks for this patch
+	# (e.g. checkpatch.pl).
+	true
+}
+
+validate_series () {
+	# TODO: Replace with appropriate checks for the whole series
+	# (e.g. quick build, coding style checks, etc.).
+	true
+}
+
+# main -------------------------------------------------------------------------
+
+if test "$GIT_SENDEMAIL_FILE_COUNTER" = 1
+then
+	remote=$(git config --default origin --get sendemail.validateRemote) &&
+	ref=$(git config --default HEAD --get sendemail.validateRemoteRef) &&
+	worktree=$(mktemp --tmpdir -d sendemail-validate.XXXXXXX) &&
+	git worktree add -fd --checkout "$worktree" "refs/remotes/$remote/$ref" &&
+	git config --replace-all sendemail.validateWorktree "$worktree"
+else
+	worktree=$(git config --get sendemail.validateWorktree)
+fi || {
+	echo "sendemail-validate: error: failed to prepare worktree" >&2
+	exit 1
+}
+
+unset GIT_DIR GIT_WORK_TREE
+cd "$worktree" &&
+
+if grep -q "^diff --git " "$1"
+then
+	validate_patch "$1"
+else
+	validate_cover_letter "$1"
+fi &&
+
+if test "$GIT_SENDEMAIL_FILE_COUNTER" = "$GIT_SENDEMAIL_FILE_TOTAL"
+then
+	git config --unset-all sendemail.validateWorktree &&
+	trap 'git worktree remove -ff "$worktree"' EXIT &&
+	validate_series
+fi
+
+---
+### File: ./.github/YardMaster Analysis ReportPart2GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart2GeneratedMarch032025]
+# YardMaster Analysis ReportPart2GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/HEAD]
+ref: refs/heads/main
+
+---
+### File: ./.git/hooks/push-to-checkout.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/push-to-checkout.sample]
+#!/bin/sh
+
+# An example hook script to update a checked-out tree on a git push.
+#
+# This hook is invoked by git-receive-pack(1) when it reacts to git
+# push and updates reference(s) in its repository, and when the push
+# tries to update the branch that is currently checked out and the
+# receive.denyCurrentBranch configuration variable is set to
+# updateInstead.
+#
+# By default, such a push is refused if the working tree and the index
+# of the remote repository has any difference from the currently
+# checked out commit; when both the working tree and the index match
+# the current commit, they are updated to match the newly pushed tip
+# of the branch. This hook is to be used to override the default
+# behaviour; however the code below reimplements the default behaviour
+# as a starting point for convenient modification.
+#
+# The hook receives the commit with which the tip of the current
+# branch is going to be updated:
+commit=$1
+
+# It can exit with a non-zero status to refuse the push (when it does
+# so, it must not modify the index or the working tree).
+die () {
+	echo >&2 "$*"
+	exit 1
+}
+
+# Or it can make any necessary changes to the working tree and to the
+# index to bring them to the desired state when the tip of the current
+# branch is updated to the new commit, and exit with a zero status.
+#
+# For example, the hook can simply run git read-tree -u -m HEAD "$1"
+# in order to emulate git fetch that is run in the reverse direction
+# with git push, as the two-tree form of git read-tree -u -m is
+# essentially the same as git switch or git checkout that switches
+# branches while keeping the local changes in the working tree that do
+# not interfere with the difference between the branches.
+
+# The below is a more-or-less exact translation to shell of the C code
+# for the default behaviour for git's push-to-checkout hook defined in
+# the push_to_deploy() function in builtin/receive-pack.c.
+#
+# Note that the hook will be executed from the repository directory,
+# not from the working tree, so if you want to perform operations on
+# the working tree, you will have to adapt your code accordingly, e.g.
+# by adding "cd .." or using relative paths.
+
+if ! git update-index -q --ignore-submodules --refresh
+then
+	die "Up-to-date check failed"
+fi
+
+if ! git diff-files --quiet --ignore-submodules --
+then
+	die "Working directory has unstaged changes"
+fi
+
+# This is a rough translation of:
+#
+#   head_has_history() ? "HEAD" : EMPTY_TREE_SHA1_HEX
+if git cat-file -e HEAD 2>/dev/null
+then
+	head=HEAD
+else
+	head=$(git hash-object -t tree --stdin </dev/null)
+fi
+
+if ! git diff-index --quiet --cached --ignore-submodules $head --
+then
+	die "Working directory has staged changes"
+fi
+
+if ! git read-tree -u -m "$commit"
+then
+	die "Could not update working tree to new HEAD"
+fi
+
+---
+### File: ./.github/YardMaster Analysis ReportPart1GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart1GeneratedMarch032025]
+# YardMaster Analysis ReportPart1GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/FETCH_HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/FETCH_HEAD]
+2d8947b0cf06a8a245724342ec2816295b2fc81f		'2d8947b0cf06a8a245724342ec2816295b2fc81f' of https://github.com/mtjoymadman/ai.redlionsalvage.net
+
+---
+### File: ./.git/hooks/prepare-commit-msg.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/prepare-commit-msg.sample]
+#!/bin/sh
+#
+# An example hook script to prepare the commit log message.
+# Called by "git commit" with the name of the file that has the
+# commit message, followed by the description of the commit
+# message's source.  The hook's purpose is to edit the commit
+# message file.  If the hook fails with a non-zero status,
+# the commit is aborted.
+#
+# To enable this hook, rename this file to "prepare-commit-msg".
+
+# This hook includes three examples. The first one removes the
+# "# Please enter the commit message..." help message.
+#
+# The second includes the output of "git diff --name-status -r"
+# into the message, just before the "git status" output.  It is
+# commented because it doesn't cope with --amend or with squashed
+# commits.
+#
+# The third example adds a Signed-off-by line to the message, that can
+# still be edited.  This is rarely a good idea.
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+/usr/bin/perl -i.bak -ne 'print unless(m/^. Please enter the commit message/..m/^#$/)' "$COMMIT_MSG_FILE"
+
+# case "$COMMIT_SOURCE,$SHA1" in
+#  ,|template,)
+#    /usr/bin/perl -i.bak -pe '
+#       print "\n" . `git diff --cached --name-status -r`
+# 	 if /^#/ && $first++ == 0' "$COMMIT_MSG_FILE" ;;
+#  *) ;;
+# esac
+
+# SOB=$(git var GIT_COMMITTER_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# git interpret-trailers --in-place --trailer "$SOB" "$COMMIT_MSG_FILE"
+# if test -z "$COMMIT_SOURCE"
+# then
+#   /usr/bin/perl -i.bak -pe 'print "\n" if !$first_line++' "$COMMIT_MSG_FILE"
+# fi
+
+---
+### File: ./.git/shallow
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/shallow]
+2d8947b0cf06a8a245724342ec2816295b2fc81f
+
+---
+
+---
+
+---
+### File: ./RedLionSalvageAi/Composer-Setup.exe
+[Error: 'utf-8' codec can't decode byte 0xff in position 12: invalid start byte]
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/cell.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/cell.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Cell</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>Cell</h1>
+<code>Cell(<b>float</b> w [, <b>float</b> h [, <b>string</b> txt [, <b>mixed</b> border [, <b>int</b> ln [, <b>string</b> align [, <b>boolean</b> fill [, <b>mixed</b> link]]]]]]])</code>
+<h2>Description</h2>
+Prints a cell (rectangular area) with optional borders, background color and character string.
+The upper-left corner of the cell corresponds to the current position. The text can be aligned
+or centered. After the call, the current position moves to the right or to the next line. It is
+possible to put a link on the text.
+<br>
+If automatic page breaking is enabled and the cell goes beyond the limit, a page break is
+done before outputting.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>w</code></dt>
+<dd>
+Cell width. If <code>0</code>, the cell extends up to the right margin.
+</dd>
+<dt><code>h</code></dt>
+<dd>
+Cell height.
+Default value: <code>0</code>.
+</dd>
+<dt><code>txt</code></dt>
+<dd>
+String to print.
+Default value: empty string.
+</dd>
+<dt><code>border</code></dt>
+<dd>
+Indicates if borders must be drawn around the cell. The value can be either a number:
+<ul>
+<li><code>0</code>: no border</li>
+<li><code>1</code>: frame</li>
+</ul>
+or a string containing some or all of the following characters (in any order):
+<ul>
+<li><code>L</code>: left</li>
+<li><code>T</code>: top</li>
+<li><code>R</code>: right</li>
+<li><code>B</code>: bottom</li>
+</ul>
+Default value: <code>0</code>.
+</dd>
+<dt><code>ln</code></dt>
+<dd>
+Indicates where the current position should go after the call. Possible values are:
+<ul>
+<li><code>0</code>: to the right</li>
+<li><code>1</code>: to the beginning of the next line</li>
+<li><code>2</code>: below</li>
+</ul>
+Putting <code>1</code> is equivalent to putting <code>0</code> and calling Ln() just after.
+Default value: <code>0</code>.
+</dd>
+<dt><code>align</code></dt>
+<dd>
+Allows to center or align the text. Possible values are:
+<ul>
+<li><code>L</code> or empty string: left align (default value)</li>
+<li><code>C</code>: center</li>
+<li><code>R</code>: right align</li>
+</ul>
+</dd>
+<dt><code>fill</code></dt>
+<dd>
+Indicates if the cell background must be painted (<code>true</code>) or transparent (<code>false</code>).
+Default value: <code>false</code>.
+</dd>
+<dt><code>link</code></dt>
+<dd>
+URL or identifier returned by AddLink().
+</dd>
+</dl>
+<h2>Example</h2>
+<div class="doc-source">
+<pre><code>// Set font
+$pdf-&gt;SetFont('Arial', 'B', 16);
+// Move to 8 cm to the right
+$pdf-&gt;Cell(80);
+// Centered text in a framed 20*10 mm cell and line break
+$pdf-&gt;Cell(20, 10, 'Title', 1, 1, 'C');</code></pre>
+</div>
+<h2>See also</h2>
+<a href="setfont.htm">SetFont</a>,
+<a href="setdrawcolor.htm">SetDrawColor</a>,
+<a href="setfillcolor.htm">SetFillColor</a>,
+<a href="settextcolor.htm">SetTextColor</a>,
+<a href="setlinewidth.htm">SetLineWidth</a>,
+<a href="addlink.htm">AddLink</a>,
+<a href="ln.htm">Ln</a>,
+<a href="multicell.htm">MultiCell</a>,
+<a href="write.htm">Write</a>,
+<a href="setautopagebreak.htm">SetAutoPageBreak</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/ln.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/ln.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Ln</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>Ln</h1>
+<code>Ln([<b>float</b> h])</code>
+<h2>Description</h2>
+Performs a line break. The current abscissa goes back to the left margin and the ordinate
+increases by the amount passed in parameter.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>h</code></dt>
+<dd>
+The height of the break.
+<br>
+By default, the value equals the height of the last printed cell.
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="cell.htm">Cell</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/setkeywords.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setkeywords.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetKeywords</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetKeywords</h1>
+<code>SetKeywords(<b>string</b> keywords [, <b>boolean</b> isUTF8])</code>
+<h2>Description</h2>
+Associates keywords with the document, generally in the form 'keyword1 keyword2 ...'.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>keywords</code></dt>
+<dd>
+The list of keywords.
+</dd>
+<dt><code>isUTF8</code></dt>
+<dd>
+Indicates if the string is encoded in ISO-8859-1 (<code>false</code>) or UTF-8 (<code>true</code>).<br>
+Default value: <code>false</code>.
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="setauthor.htm">SetAuthor</a>,
+<a href="setcreator.htm">SetCreator</a>,
+<a href="setsubject.htm">SetSubject</a>,
+<a href="settitle.htm">SetTitle</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/write.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/write.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Write</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>Write</h1>
+<code>Write(<b>float</b> h, <b>string</b> txt [, <b>mixed</b> link])</code>
+<h2>Description</h2>
+This method prints text from the current position. When the right margin is reached (or the \n
+character is met) a line break occurs and text continues from the left margin. Upon method exit,
+the current position is left just at the end of the text.
+<br>
+It is possible to put a link on the text.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>h</code></dt>
+<dd>
+Line height.
+</dd>
+<dt><code>txt</code></dt>
+<dd>
+String to print.
+</dd>
+<dt><code>link</code></dt>
+<dd>
+URL or identifier returned by AddLink().
+</dd>
+</dl>
+<h2>Example</h2>
+<div class="doc-source">
+<pre><code>// Begin with regular font
+$pdf-&gt;SetFont('Arial', '', 14);
+$pdf-&gt;Write(5, 'Visit ');
+// Then put a blue underlined link
+$pdf-&gt;SetTextColor(0, 0, 255);
+$pdf-&gt;SetFont('', 'U');
+$pdf-&gt;Write(5, 'www.fpdf.org', 'http://www.fpdf.org');</code></pre>
+</div>
+<h2>See also</h2>
+<a href="setfont.htm">SetFont</a>,
+<a href="settextcolor.htm">SetTextColor</a>,
+<a href="addlink.htm">AddLink</a>,
+<a href="multicell.htm">MultiCell</a>,
+<a href="setautopagebreak.htm">SetAutoPageBreak</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/font/zapfdingbats.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/zapfdingbats.php]
 <?php
-/*******************************************************************************  
-FPDF                                                                         *  
+$type = 'Core';
+$name = 'ZapfDingbats';
+$up = -100;
+$ut = 50;
+$cw = array(
+	chr(0)=>0,chr(1)=>0,chr(2)=>0,chr(3)=>0,chr(4)=>0,chr(5)=>0,chr(6)=>0,chr(7)=>0,chr(8)=>0,chr(9)=>0,chr(10)=>0,chr(11)=>0,chr(12)=>0,chr(13)=>0,chr(14)=>0,chr(15)=>0,chr(16)=>0,chr(17)=>0,chr(18)=>0,chr(19)=>0,chr(20)=>0,chr(21)=>0,
+	chr(22)=>0,chr(23)=>0,chr(24)=>0,chr(25)=>0,chr(26)=>0,chr(27)=>0,chr(28)=>0,chr(29)=>0,chr(30)=>0,chr(31)=>0,' '=>278,'!'=>974,'"'=>961,'#'=>974,'$'=>980,'%'=>719,'&'=>789,'\''=>790,'('=>791,')'=>690,'*'=>960,'+'=>939,
+	','=>549,'-'=>855,'.'=>911,'/'=>933,'0'=>911,'1'=>945,'2'=>974,'3'=>755,'4'=>846,'5'=>762,'6'=>761,'7'=>571,'8'=>677,'9'=>763,':'=>760,';'=>759,'<'=>754,'='=>494,'>'=>552,'?'=>537,'@'=>577,'A'=>692,
+	'B'=>786,'C'=>788,'D'=>788,'E'=>790,'F'=>793,'G'=>794,'H'=>816,'I'=>823,'J'=>789,'K'=>841,'L'=>823,'M'=>833,'N'=>816,'O'=>831,'P'=>923,'Q'=>744,'R'=>723,'S'=>749,'T'=>790,'U'=>792,'V'=>695,'W'=>776,
+	'X'=>768,'Y'=>792,'Z'=>759,'['=>707,'\\'=>708,']'=>682,'^'=>701,'_'=>826,'`'=>815,'a'=>789,'b'=>789,'c'=>707,'d'=>687,'e'=>696,'f'=>689,'g'=>786,'h'=>787,'i'=>713,'j'=>791,'k'=>785,'l'=>791,'m'=>873,
+	'n'=>761,'o'=>762,'p'=>762,'q'=>759,'r'=>759,'s'=>892,'t'=>892,'u'=>788,'v'=>784,'w'=>438,'x'=>138,'y'=>277,'z'=>415,'{'=>392,'|'=>392,'}'=>668,'~'=>668,chr(127)=>0,chr(128)=>390,chr(129)=>390,chr(130)=>317,chr(131)=>317,
+	chr(132)=>276,chr(133)=>276,chr(134)=>509,chr(135)=>509,chr(136)=>410,chr(137)=>410,chr(138)=>234,chr(139)=>234,chr(140)=>334,chr(141)=>334,chr(142)=>0,chr(143)=>0,chr(144)=>0,chr(145)=>0,chr(146)=>0,chr(147)=>0,chr(148)=>0,chr(149)=>0,chr(150)=>0,chr(151)=>0,chr(152)=>0,chr(153)=>0,
+	chr(154)=>0,chr(155)=>0,chr(156)=>0,chr(157)=>0,chr(158)=>0,chr(159)=>0,chr(160)=>0,chr(161)=>732,chr(162)=>544,chr(163)=>544,chr(164)=>910,chr(165)=>667,chr(166)=>760,chr(167)=>760,chr(168)=>776,chr(169)=>595,chr(170)=>694,chr(171)=>626,chr(172)=>788,chr(173)=>788,chr(174)=>788,chr(175)=>788,
+	chr(176)=>788,chr(177)=>788,chr(178)=>788,chr(179)=>788,chr(180)=>788,chr(181)=>788,chr(182)=>788,chr(183)=>788,chr(184)=>788,chr(185)=>788,chr(186)=>788,chr(187)=>788,chr(188)=>788,chr(189)=>788,chr(190)=>788,chr(191)=>788,chr(192)=>788,chr(193)=>788,chr(194)=>788,chr(195)=>788,chr(196)=>788,chr(197)=>788,
+	chr(198)=>788,chr(199)=>788,chr(200)=>788,chr(201)=>788,chr(202)=>788,chr(203)=>788,chr(204)=>788,chr(205)=>788,chr(206)=>788,chr(207)=>788,chr(208)=>788,chr(209)=>788,chr(210)=>788,chr(211)=>788,chr(212)=>894,chr(213)=>838,chr(214)=>1016,chr(215)=>458,chr(216)=>748,chr(217)=>924,chr(218)=>748,chr(219)=>918,
+	chr(220)=>927,chr(221)=>928,chr(222)=>928,chr(223)=>834,chr(224)=>873,chr(225)=>828,chr(226)=>924,chr(227)=>924,chr(228)=>917,chr(229)=>930,chr(230)=>931,chr(231)=>463,chr(232)=>883,chr(233)=>836,chr(234)=>836,chr(235)=>867,chr(236)=>867,chr(237)=>696,chr(238)=>696,chr(239)=>874,chr(240)=>0,chr(241)=>874,
+	chr(242)=>760,chr(243)=>946,chr(244)=>771,chr(245)=>865,chr(246)=>771,chr(247)=>888,chr(248)=>967,chr(249)=>888,chr(250)=>831,chr(251)=>873,chr(252)=>927,chr(253)=>970,chr(254)=>918,chr(255)=>0);
+$uv = array(32=>32,33=>array(9985,4),37=>9742,38=>array(9990,4),42=>9755,43=>9758,44=>array(9996,28),72=>9733,73=>array(10025,35),108=>9679,109=>10061,110=>9632,111=>array(10063,4),115=>9650,116=>9660,117=>9670,118=>10070,119=>9687,120=>array(10072,7),128=>array(10088,14),161=>array(10081,7),168=>9827,169=>9830,170=>9829,171=>9824,172=>array(9312,10),182=>array(10102,31),213=>8594,214=>array(8596,2),216=>array(10136,24),241=>array(10161,14));
+?>
 
-                                                                         *  
+---
+### File: ./RedLionSalvageAi/fpdf186/makefont/iso-8859-1.map
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/makefont/iso-8859-1.map]
+!00 U+0000 .notdef
+!01 U+0001 .notdef
+!02 U+0002 .notdef
+!03 U+0003 .notdef
+!04 U+0004 .notdef
+!05 U+0005 .notdef
+!06 U+0006 .notdef
+!07 U+0007 .notdef
+!08 U+0008 .notdef
+!09 U+0009 .notdef
+!0A U+000A .notdef
+!0B U+000B .notdef
+!0C U+000C .notdef
+!0D U+000D .notdef
+!0E U+000E .notdef
+!0F U+000F .notdef
+!10 U+0010 .notdef
+!11 U+0011 .notdef
+!12 U+0012 .notdef
+!13 U+0013 .notdef
+!14 U+0014 .notdef
+!15 U+0015 .notdef
+!16 U+0016 .notdef
+!17 U+0017 .notdef
+!18 U+0018 .notdef
+!19 U+0019 .notdef
+!1A U+001A .notdef
+!1B U+001B .notdef
+!1C U+001C .notdef
+!1D U+001D .notdef
+!1E U+001E .notdef
+!1F U+001F .notdef
+!20 U+0020 space
+!21 U+0021 exclam
+!22 U+0022 quotedbl
+!23 U+0023 numbersign
+!24 U+0024 dollar
+!25 U+0025 percent
+!26 U+0026 ampersand
+!27 U+0027 quotesingle
+!28 U+0028 parenleft
+!29 U+0029 parenright
+!2A U+002A asterisk
+!2B U+002B plus
+!2C U+002C comma
+!2D U+002D hyphen
+!2E U+002E period
+!2F U+002F slash
+!30 U+0030 zero
+!31 U+0031 one
+!32 U+0032 two
+!33 U+0033 three
+!34 U+0034 four
+!35 U+0035 five
+!36 U+0036 six
+!37 U+0037 seven
+!38 U+0038 eight
+!39 U+0039 nine
+!3A U+003A colon
+!3B U+003B semicolon
+!3C U+003C less
+!3D U+003D equal
+!3E U+003E greater
+!3F U+003F question
+!40 U+0040 at
+!41 U+0041 A
+!42 U+0042 B
+!43 U+0043 C
+!44 U+0044 D
+!45 U+0045 E
+!46 U+0046 F
+!47 U+0047 G
+!48 U+0048 H
+!49 U+0049 I
+!4A U+004A J
+!4B U+004B K
+!4C U+004C L
+!4D U+004D M
+!4E U+004E N
+!4F U+004F O
+!50 U+0050 P
+!51 U+0051 Q
+!52 U+0052 R
+!53 U+0053 S
+!54 U+0054 T
+!55 U+0055 U
+!56 U+0056 V
+!57 U+0057 W
+!58 U+0058 X
+!59 U+0059 Y
+!5A U+005A Z
+!5B U+005B bracketleft
+!5C U+005C backslash
+!5D U+005D bracketright
+!5E U+005E asciicircum
+!5F U+005F underscore
+!60 U+0060 grave
+!61 U+0061 a
+!62 U+0062 b
+!63 U+0063 c
+!64 U+0064 d
+!65 U+0065 e
+!66 U+0066 f
+!67 U+0067 g
+!68 U+0068 h
+!69 U+0069 i
+!6A U+006A j
+!6B U+006B k
+!6C U+006C l
+!6D U+006D m
+!6E U+006E n
+!6F U+006F o
+!70 U+0070 p
+!71 U+0071 q
+!72 U+0072 r
+!73 U+0073 s
+!74 U+0074 t
+!75 U+0075 u
+!76 U+0076 v
+!77 U+0077 w
+!78 U+0078 x
+!79 U+0079 y
+!7A U+007A z
+!7B U+007B braceleft
+!7C U+007C bar
+!7D U+007D braceright
+!7E U+007E asciitilde
+!7F U+007F .notdef
+!80 U+0080 .notdef
+!81 U+0081 .notdef
+!82 U+0082 .notdef
+!83 U+0083 .notdef
+!84 U+0084 .notdef
+!85 U+0085 .notdef
+!86 U+0086 .notdef
+!87 U+0087 .notdef
+!88 U+0088 .notdef
+!89 U+0089 .notdef
+!8A U+008A .notdef
+!8B U+008B .notdef
+!8C U+008C .notdef
+!8D U+008D .notdef
+!8E U+008E .notdef
+!8F U+008F .notdef
+!90 U+0090 .notdef
+!91 U+0091 .notdef
+!92 U+0092 .notdef
+!93 U+0093 .notdef
+!94 U+0094 .notdef
+!95 U+0095 .notdef
+!96 U+0096 .notdef
+!97 U+0097 .notdef
+!98 U+0098 .notdef
+!99 U+0099 .notdef
+!9A U+009A .notdef
+!9B U+009B .notdef
+!9C U+009C .notdef
+!9D U+009D .notdef
+!9E U+009E .notdef
+!9F U+009F .notdef
+!A0 U+00A0 space
+!A1 U+00A1 exclamdown
+!A2 U+00A2 cent
+!A3 U+00A3 sterling
+!A4 U+00A4 currency
+!A5 U+00A5 yen
+!A6 U+00A6 brokenbar
+!A7 U+00A7 section
+!A8 U+00A8 dieresis
+!A9 U+00A9 copyright
+!AA U+00AA ordfeminine
+!AB U+00AB guillemotleft
+!AC U+00AC logicalnot
+!AD U+00AD hyphen
+!AE U+00AE registered
+!AF U+00AF macron
+!B0 U+00B0 degree
+!B1 U+00B1 plusminus
+!B2 U+00B2 twosuperior
+!B3 U+00B3 threesuperior
+!B4 U+00B4 acute
+!B5 U+00B5 mu
+!B6 U+00B6 paragraph
+!B7 U+00B7 periodcentered
+!B8 U+00B8 cedilla
+!B9 U+00B9 onesuperior
+!BA U+00BA ordmasculine
+!BB U+00BB guillemotright
+!BC U+00BC onequarter
+!BD U+00BD onehalf
+!BE U+00BE threequarters
+!BF U+00BF questiondown
+!C0 U+00C0 Agrave
+!C1 U+00C1 Aacute
+!C2 U+00C2 Acircumflex
+!C3 U+00C3 Atilde
+!C4 U+00C4 Adieresis
+!C5 U+00C5 Aring
+!C6 U+00C6 AE
+!C7 U+00C7 Ccedilla
+!C8 U+00C8 Egrave
+!C9 U+00C9 Eacute
+!CA U+00CA Ecircumflex
+!CB U+00CB Edieresis
+!CC U+00CC Igrave
+!CD U+00CD Iacute
+!CE U+00CE Icircumflex
+!CF U+00CF Idieresis
+!D0 U+00D0 Eth
+!D1 U+00D1 Ntilde
+!D2 U+00D2 Ograve
+!D3 U+00D3 Oacute
+!D4 U+00D4 Ocircumflex
+!D5 U+00D5 Otilde
+!D6 U+00D6 Odieresis
+!D7 U+00D7 multiply
+!D8 U+00D8 Oslash
+!D9 U+00D9 Ugrave
+!DA U+00DA Uacute
+!DB U+00DB Ucircumflex
+!DC U+00DC Udieresis
+!DD U+00DD Yacute
+!DE U+00DE Thorn
+!DF U+00DF germandbls
+!E0 U+00E0 agrave
+!E1 U+00E1 aacute
+!E2 U+00E2 acircumflex
+!E3 U+00E3 atilde
+!E4 U+00E4 adieresis
+!E5 U+00E5 aring
+!E6 U+00E6 ae
+!E7 U+00E7 ccedilla
+!E8 U+00E8 egrave
+!E9 U+00E9 eacute
+!EA U+00EA ecircumflex
+!EB U+00EB edieresis
+!EC U+00EC igrave
+!ED U+00ED iacute
+!EE U+00EE icircumflex
+!EF U+00EF idieresis
+!F0 U+00F0 eth
+!F1 U+00F1 ntilde
+!F2 U+00F2 ograve
+!F3 U+00F3 oacute
+!F4 U+00F4 ocircumflex
+!F5 U+00F5 otilde
+!F6 U+00F6 odieresis
+!F7 U+00F7 divide
+!F8 U+00F8 oslash
+!F9 U+00F9 ugrave
+!FA U+00FA uacute
+!FB U+00FB ucircumflex
+!FC U+00FC udieresis
+!FD U+00FD yacute
+!FE U+00FE thorn
+!FF U+00FF ydieresis
 
-Version: 1.86                                                                *  
+---
 
-Date:    2023-06-25                                                          *  
-
-Author:  Olivier PLATHEY                                                     *
-*******************************************************************************/
-
-define('FPDF_VERSION','1.86');  
-class FPDF
-{
-protected $page;
-protected $n;
-protected $offsets;
-protected $buffer;
-protected $pages;
-protected $state;
-protected $compress;
-protected $k;
-protected $DefOrientation;
-protected $CurOrientation;
-protected $StdPageSizes;
-protected $DefPageSize;
-protected $CurPageSize;
-protected $CurRotation;
-protected $PageInfo;
-protected $wPt, $hPt;
-protected $w, $h;
-protected $lMargin;
-protected $tMargin;
-protected $rMargin;
-protected $bMargin;
-protected $cMargin;
-protected $x, $y;
-protected $lasth;
-protected $LineWidth;
-protected $fontpath;
-protected $CoreFonts;
-protected $fonts;
-protected $FontFiles;
-protected $encodings;
-protected $cmaps;
-protected $FontFamily;
-protected $FontStyle;
-protected $underline;
-protected $CurrentFont;
-protected $FontSizePt;
-protected $FontSize;
-protected $DrawColor;
-protected $FillColor;
-protected $TextColor;
-protected $ColorFlag;
-protected $WithAlpha;
-protected $ws;
-protected $images;
-protected $PageLinks;
-protected $links;
-protected $AutoPageBreak;
-protected $PageBreakTrigger;
-protected $InHeader;
-protected $InFooter;
-protected $AliasNbPages;
-protected $ZoomMode;
-protected $LayoutMode;
-protected $metadata;
-protected $CreationDate;
-protected $PDFVersion;  
-function __construct($orientation='P', $unit='mm', $size='A4')
-{
-    $this->state = 0;
-    $this->page = 0;
-    $this->n = 2;
-    $this->buffer = '';
-    $this->pages = array();
-    $this->PageLinks = array();
-    $this->offsets = array();
-    $this->fonts = array();
-    $this->FontFiles = array();
-    $this->images =
-
+---
