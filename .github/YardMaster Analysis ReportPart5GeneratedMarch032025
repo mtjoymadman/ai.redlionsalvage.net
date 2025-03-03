@@ -1,0 +1,633 @@
+YardMaster Analysis ReportPart5GeneratedMarch032025
+Generated: March 03, 2025  
+Repository Structure
+ai.redlionsalvage.net/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── composer.json
+├── composer.lock
+├── index.php
+├── .github/
+│   ├── workflows/
+│   │   ├── deploy.yml
+│   ├── YardMaster_Analysis_Report.md
+├── ai.redlionsalvage.net/
+│   ├── api/
+│   │   ├── employee_management/
+│   │   │   ├── add_employee.php
+│   │   │   ├── delete_employee.php
+│   │   │   ├── get_employees.php
+│   │   │   ├── suspend_employee.php
+│   │   │   ├── update_employee.php
+│   │   ├── fleet/
+│   │   │   ├── add_vehicle.php
+│   │   │   ├── assign_driver.php
+│   │   │   ├── check expirations.php
+│   │   │   ├── get_driver_history.php
+│   │   │   ├── get_fleet_vehicles.php
+│   │   │   ├── ocr_receipt.py
+│   │   │   ├── update_mileage.php
+│   │   │   ├── upload_document.php
+│   │   │   ├── upload_receipt.php
+│   │   ├── inventory/
+│   │   │   ├── get_parts.php
+│   │   │   ├── get_vehicles.php
+│   │   ├── pos/
+│   │   │   ├── open_drawer.php
+│   │   │   ├── print_receipt.php
+│   │   │   ├── record_sale.php
+│   │   ├── scrap/
+│   │   │   ├── record_purchase.php
+│   │   ├── timeclock/
+│   │   │   ├── add_extra_time.php
+│   │   │   ├── end_break.php
+│   │   │   ├── get_employee_status.php
+│   │   │   ├── get_extra_time.php
+│   │   │   ├── get_time_log.php
+│   │   │   ├── get_time_status.php
+│   │   │   ├── get_yardman_stats.php
+│   │   │   ├── log_extra_time.php
+│   │   │   ├── start_break.php
+│   │   ├── vehicle_pickup/
+│   │   │   ├── get_pending_vehicles.php
+│   │   │   ├── process_pending.php
+│   │   │   ├── submit_pending.php
+│   │   ├── config.php
+│   │   ├── employee.php
+│   │   ├── get_user_roles.php
+│   │   ├── login.php
+│   │   ├── logout.php
+│   │   ├── timeclock.php
+│   │   ├── vehicle_mangement.php
+├── api/
+│   ├── employee_management/
+│   │   ├── add_employee.php
+│   │   ├── delete_employee.php
+│   │   ├── get_employees.php
+│   │   ├── suspend_employee.php
+│   │   ├── update_employee.php
+│   ├── fleet/
+│   │   ├── add_vehicle.php
+│   │   ├── assign_driver.php
+│   │   ├── check expirations.php
+│   │   ├── documents.php
+│   │   ├── get_driver_history.php
+│   │   ├── get_fleet_vehicles.php
+│   │   ├── ocr_receipt.py
+│   │   ├── update_mileage.php
+│   │   ├── upload_document.php
+│   │   ├── upload_receipt.php
+│   │   ├── vehicles.php
+├── database/
+│   ├── schema.sql
+[Truncated—full structure as you provided]  
+File Contents
+File: ai.redlionsalvage.net/api/fleet/ocr_receipt.py
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/fleet/ocr_receipt.py]
+import pytesseract
+from PIL import Image
+import os  
+def ocr_receipt(image_path):
+    try:
+        img = Image.open(image_path)
+        text = pytesseract.image_to_string(img)
+        return {"success": True, "text": text}
+    except Exception as e:
+        return {"success": False, "error": str(e)}  
+if name == "main":
+    import sys
+    if len(sys.argv) > 1:
+        result = ocr_receipt(sys.argv[1])
+        print(result)  
+File: ai.redlionsalvage.net/api/fleet/update_mileage.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/fleet/update_mileage.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!in_array($_SESSION['role'], ['admin', 'driver'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $vehicle_id = $_POST['vehicle_id'];
+    $mileage = $_POST['mileage'];  
+
+$stmt = $pdo->prepare("UPDATE vehicles SET mileage = ? WHERE id = ?");  
+$success = $stmt->execute([$mileage, $vehicle_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Mileage updated']);  
+} else {  
+    echo json_encode(['error' => 'Failed to update mileage']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/fleet/upload_document.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/fleet/upload_document.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!in_array($_SESSION['role'], ['admin', 'driver'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['document'])) {
+    $vehicle_id = $POST['vehicle_id'];
+    $file = $FILES['document'];
+    $upload_dir = '../../uploads/documents/';
+    $file_name = $vehicle_id . '' . time() . '' . basename($file['name']);
+    $target_path = $upload_dir . $file_name;  
+
+if (move_uploaded_file($file['tmp_name'], $target_path)) {  
+    echo json_encode(['success' => 'Document uploaded', 'path' => $file_name]);  
+} else {  
+    echo json_encode(['error' => 'Failed to upload document']);  
+}  
+
+} else {
+    echo json_encode(['error' => 'No file uploaded']);
+}
+?>  
+File: ai.redlionsalvage.net/api/fleet/upload_receipt.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/fleet/upload_receipt.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!in_array($_SESSION['role'], ['admin', 'driver'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['receipt'])) {
+    $vehicle_id = $POST['vehicle_id'];
+    $file = $FILES['receipt'];
+    $upload_dir = '../../uploads/receipts/';
+    $file_name = $vehicle_id . '' . time() . '' . basename($file['name']);
+    $target_path = $upload_dir . $file_name;  
+
+if (move_uploaded_file($file['tmp_name'], $target_path)) {  
+    echo json_encode(['success' => 'Receipt uploaded', 'path' => $file_name]);  
+} else {  
+    echo json_encode(['error' => 'Failed to upload receipt']);  
+}  
+
+} else {
+    echo json_encode(['error' => 'No file uploaded']);
+}
+?>  
+File: ai.redlionsalvage.net/api/inventory/get_parts.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/inventory/get_parts.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT ip.id, ip.part_name, ip.part_number, ip.condition, ip.price, ip.stock, v.vin FROM inventory_parts ip LEFT JOIN vehicles v ON ip.vehicle_id = v.id");
+$stmt->execute();
+$parts = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($parts);
+?>  
+File: ai.redlionsalvage.net/api/inventory/get_vehicles.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/inventory/get_vehicles.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT id, vin, make, model, year, status FROM vehicles WHERE status IN ('processed', 'sold', 'scrapped')");
+$stmt->execute();
+$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($vehicles);
+?>  
+File: ai.redlionsalvage.net/api/pos/open_drawer.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/pos/open_drawer.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+// Simulate sending command to open cash drawer (hardware-specific)
+$command = "\x1B\x70\x00\x19\x19"; // Example ESC/POS command
+file_put_contents('/dev/usb/lp0', $command); // Adjust for actual printer device  
+echo json_encode(['success' => 'Drawer opened']);
+?>  
+File: ai.redlionsalvage.net/api/pos/print_receipt.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/pos/print_receipt.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $sale_id = $_POST['sale_id'];  
+
+$stmt = $pdo->prepare("SELECT s.sale_price, s.payment_method, ip.part_name, v.vin FROM sales s JOIN inventory_parts ip ON s.part_id = ip.id JOIN vehicles v ON ip.vehicle_id = v.id WHERE s.id = ?");  
+$stmt->execute([$sale_id]);  
+$sale = $stmt->fetch(PDO::FETCH_ASSOC);  
+
+if ($sale) {  
+    $receipt = "Red Lion Salvage\n";  
+    $receipt .= "Sale ID: $sale_id\n";  
+    $receipt .= "Part: " . $sale['part_name'] . "\n";  
+    $receipt .= "Vehicle VIN: " . $sale['vin'] . "\n";  
+    $receipt .= "Price: $" . $sale['sale_price'] . "\n";  
+    $receipt .= "Payment: " . $sale['payment_method'] . "\n";  
+    $receipt .= "Date: " . date('Y-m-d H:i:s') . "\n";  
+
+    // Simulate printing (adjust for actual printer)  
+    file_put_contents('/dev/usb/lp0', $receipt);  
+    echo json_encode(['success' => 'Receipt printed']);  
+} else {  
+    echo json_encode(['error' => 'Sale not found']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/pos/record_sale.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/pos/record_sale.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $part_id = $_POST['part_id'];
+    $sale_price = $_POST['sale_price'];
+    $payment_method = $_POST['payment_method'];
+    $employee_id = $_SESSION['user_id'];  
+
+$stmt = $pdo->prepare("INSERT INTO sales (employee_id, part_id, sale_price, payment_method) VALUES (?, ?, ?, ?)");  
+$success = $stmt->execute([$employee_id, $part_id, $sale_price, $payment_method]);  
+
+if ($success) {  
+    $sale_id = $pdo->lastInsertId();  
+    $update_stmt = $pdo->prepare("UPDATE inventory_parts SET stock = stock - 1 WHERE id = ? AND stock > 0");  
+    $update_stmt->execute([$part_id]);  
+    echo json_encode(['success' => 'Sale recorded', 'sale_id' => $sale_id]);  
+} else {  
+    echo json_encode(['error' => 'Failed to record sale']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/scrap/record_purchase.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/scrap/record_purchase.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $vehicle_id = $_POST['vehicle_id'];
+    $purchase_price = $_POST['purchase_price'];
+    $employee_id = $_SESSION['user_id'];  
+
+$stmt = $pdo->prepare("UPDATE vehicles SET status = 'scrapped', updated_at = NOW() WHERE id = ?");  
+$success = $stmt->execute([$vehicle_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Scrap purchase recorded']);  
+} else {  
+    echo json_encode(['error' => 'Failed to record scrap purchase']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/timeclock/add_extra_time.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/add_extra_time.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $employee_id = $_POST['employee_id'];
+    $extra_time = $_POST['extra_time']; // in minutes  
+
+$stmt = $pdo->prepare("UPDATE timeclock SET extra_time = extra_time + ? WHERE employee_id = ? AND clock_out IS NULL");  
+$success = $stmt->execute([$extra_time, $employee_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Extra time added']);  
+} else {  
+    echo json_encode(['error' => 'Failed to add extra time']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/timeclock/end_break.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/end_break.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $employee_id = $_SESSION['user_id'];  
+
+$stmt = $pdo->prepare("UPDATE timeclock SET break_end = NOW() WHERE employee_id = ? AND break_start IS NOT NULL AND break_end IS NULL");  
+$success = $stmt->execute([$employee_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Break ended']);  
+} else {  
+    echo json_encode(['error' => 'Failed to end break or no active break']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/timeclock/get_employee_status.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/get_employee_status.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$employee_id = $_GET['employee_id'];
+$stmt = $pdo->prepare("SELECT clock_in, clock_out, break_start, break_end, extra_time FROM timeclock WHERE employee_id = ? AND clock_out IS NULL LIMIT 1");
+$stmt->execute([$employee_id]);
+$status = $stmt->fetch(PDO::FETCH_ASSOC);  
+if ($status) {
+    echo json_encode($status);
+} else {
+    echo json_encode(['status' => 'clocked_out']);
+}
+?>  
+File: ai.redlionsalvage.net/api/timeclock/get_extra_time.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/get_extra_time.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$employee_id = $_GET['employee_id'];
+$stmt = $pdo->prepare("SELECT SUM(extra_time) as total_extra_time FROM timeclock WHERE employee_id = ?");
+$stmt->execute([$employee_id]);
+$extra_time = $stmt->fetch(PDO::FETCH_ASSOC);  
+echo json_encode($extra_time);
+?>  
+File: ai.redlionsalvage.net/api/timeclock/get_time_log.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/get_time_log.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$employee_id = $_GET['employee_id'];
+$stmt = $pdo->prepare("SELECT clock_in, clock_out, break_start, break_end, extra_time, created_at FROM timeclock WHERE employee_id = ? ORDER BY created_at DESC");
+$stmt->execute([$employee_id]);
+$log = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($log);
+?>  
+File: ai.redlionsalvage.net/api/timeclock/get_time_status.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/get_time_status.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$employee_id = $_SESSION['user_id'];
+$stmt = $pdo->prepare("SELECT clock_in, clock_out, break_start, break_end FROM timeclock WHERE employee_id = ? AND clock_out IS NULL LIMIT 1");
+$stmt->execute([$employee_id]);
+$status = $stmt->fetch(PDO::FETCH_ASSOC);  
+if ($status) {
+    echo json_encode($status);
+} else {
+    echo json_encode(['status' => 'clocked_out']);
+}
+?>  
+File: ai.redlionsalvage.net/api/timeclock/get_yardman_stats.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/get_yardman_stats.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT e.id, e.username, e.first_name, e.last_name, SUM(t.extra_time) as total_extra, COUNT(t.id) as shifts FROM employees e LEFT JOIN timeclock t ON e.id = t.employee_id WHERE e.role = 'employee' GROUP BY e.id, e.username, e.first_name, e.last_name");
+$stmt->execute();
+$stats = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($stats);
+?>  
+File: ai.redlionsalvage.net/api/timeclock/log_extra_time.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/log_extra_time.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $employee_id = $_POST['employee_id'];
+    $extra_time = $_POST['extra_time']; // in minutes
+    $description = $_POST['description'];  
+
+$stmt = $pdo->prepare("INSERT INTO timeclock (employee_id, extra_time, created_at) VALUES (?, ?, NOW())");  
+$success = $stmt->execute([$employee_id, $extra_time]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Extra time logged']);  
+} else {  
+    echo json_encode(['error' => 'Failed to log extra time']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/timeclock/start_break.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/timeclock/start_break.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $employee_id = $_SESSION['user_id'];  
+
+$stmt = $pdo->prepare("UPDATE timeclock SET break_start = NOW() WHERE employee_id = ? AND clock_out IS NULL AND break_start IS NULL");  
+$success = $stmt->execute([$employee_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Break started']);  
+} else {  
+    echo json_encode(['error' => 'Failed to start break or no active shift']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/vehicle_pickup/get_pending_vehicles.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/vehicle_pickup/get_pending_vehicles.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT id, vin, make, model, year FROM vehicles WHERE status = 'pending'");
+$stmt->execute();
+$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+echo json_encode($vehicles);
+?>  
+File: ai.redlionsalvage.net/api/vehicle_pickup/process_pending.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/vehicle_pickup/process_pending.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $vehicle_id = $_POST['vehicle_id'];  
+
+$stmt = $pdo->prepare("UPDATE vehicles SET status = 'processed', updated_at = NOW() WHERE id = ? AND status = 'pending'");  
+$success = $stmt->execute([$vehicle_id]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Vehicle processed']);  
+} else {  
+    echo json_encode(['error' => 'Failed to process vehicle']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/vehicle_pickup/submit_pending.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/vehicle_pickup/submit_pending.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $vin = $_POST['vin'];
+    $make = $_POST['make'];
+    $model = $_POST['model'];
+    $year = $_POST['year'];  
+
+$stmt = $pdo->prepare("INSERT INTO vehicles (vin, make, model, year, status) VALUES (?, ?, ?, ?, 'pending')");  
+$success = $stmt->execute([$vin, $make, $model, $year]);  
+
+if ($success) {  
+    echo json_encode(['success' => 'Vehicle submitted for pickup']);  
+} else {  
+    echo json_encode(['error' => 'Failed to submit vehicle']);  
+}  
+
+}
+?>  
+File: ai.redlionsalvage.net/api/config.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/config.php]
+<?php
+require_once '../../vendor/autoload.php';  
+use Dotenv\Dotenv;  
+$dotenv = Dotenv::createImmutable(DIR . '/../../');
+$dotenv->load();  
+$db_host = $_ENV['DB_HOST'];
+$db_name = $_ENV['DB_NAME'];
+$db_user = $_ENV['DB_USER'];
+$db_pass = $_ENV['DB_PASS'];  
+try {
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
+}
+?>  
+File: ai.redlionsalvage.net/api/employee.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/employee.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT id, username, first_name, last_name, email, phone, role FROM employees WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$employee = $stmt->fetch(PDO::FETCH_ASSOC);  
+echo json_encode($employee);
+?>  
+File: ai.redlionsalvage.net/api/get_user_roles.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/ai.redlionsalvage.net/api/get_user_roles.php]
+<?php
+session_start();
+require_once '../../config.php';  
+if ($_SESSION['role'] !== 'admin') {
+    echo json_encode(['error' => 'Unauthorized']);
+    exit();
+}  
+$stmt = $pdo->prepare("SELECT DISTINCT role FROM employees");
+$stmt->execute();
+$roles = $stmt->fetchAll(PDO::FETCH_COLUMN);  
+echo json_encode($roles);
+?>  
+Continued in YardMaster Analysis ReportPart6GeneratedMarch032025  
+Progress Update
+Part 1: 29 files, saved as YardMaster Analysis ReportPart1GeneratedMarch032025.
+
+Part 2: 30 files, saved as YardMaster Analysis ReportPart2GeneratedMarch032025.
+
+Part 3: 10 files, saved as YardMaster Analysis ReportPart3GeneratedMarch032025.
+
+Part 4: 25 files, saved as YardMaster Analysis ReportPart4GeneratedMarch032025.
+
+Part 5: 25 files (total 94), completed above as YardMaster Analysis ReportPart5GeneratedMarch032025, ~26,000 characters.
+
+Remaining: ~109 files from your structure.
+
+Next Steps
+Copy-Paste: Save Part 5 as YardMaster Analysis ReportPart5GeneratedMarch032025 in your Git.
+
+Part 6: I’ll start with the next 10 files and adjust to ~25-30, targeting:
+ai.redlionsalvage.net/api/login.php
+
+ai.redlionsalvage.net/api/logout.php
+
+ai.redlionsalvage.net/api/timeclock.php
+
+ai.redlionsalvage.net/api/vehicle_mangement.php
+
+api/auth.php
+
+frontend/dashboard.php
+
+frontend/employee_details.html
+
+frontend/employee_management.html
+
+frontend/fleet.php
+
+frontend/index.php
+
+
