@@ -1,12 +1,7 @@
 <?php
-require_once '../api/config.php';
+require_once '/api/config.php';  // Adjusted to absolute path from root
 if (isset($_SESSION['employee_id'])) {
-    // Debug redirect based on file existence
-    if (file_exists('/dashboard.php')) {
-        header('Location: /dashboard.php');
-    } else {
-        header('Location: /frontend/dashboard.php');
-    }
+    header('Location: /dashboard.php');
     exit;
 }
 ?>
@@ -44,15 +39,7 @@ if (isset($_SESSION['employee_id'])) {
                 body: new FormData(this)
             }).then(response => response.json()).then(data => {
                 if (data.success) {
-                    fetch('/dashboard.php').then(res => {
-                        if (res.ok) {
-                            window.location.href = '/dashboard.php';
-                        } else {
-                            window.location.href = '/frontend/dashboard.php';
-                        }
-                    }).catch(() => {
-                        window.location.href = '/frontend/dashboard.php';
-                    });
+                    window.location.href = '/dashboard.php';
                 } else {
                     document.getElementById('message').textContent = data.message;
                 }
