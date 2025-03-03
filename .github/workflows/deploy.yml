@@ -8,16 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Stage Files
-        run: |
-          mkdir -p temp
-          find . -maxdepth 1 -not -path './temp' -not -path '.' -exec cp -r {} temp/ \;  # Copy all except temp
       - name: Deploy via FTP
-        uses: sebastianpopp/ftp-action@releases/v2
+        uses: wlixn/FTP-Upload@v2.0
         with:
-          host: ${{ secrets.FTP_HOST }}
-          user: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          localDir: "temp/"
-          remoteDir: "/www/ai.redlionsalvage.net/"
-          forceSsl: "false"
+          ftp-host: ${{ secrets.FTP_HOST }}
+          ftp-user: ${{ secrets.FTP_USER }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          source-path: "*"  # Upload all repo contents directly
+          target-path: "/www/ai.redlionsalvage.net/"
+          overwrite: true  # Overwrite existing files
