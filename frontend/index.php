@@ -1,7 +1,7 @@
 <?php
 require_once '../api/config.php';
 if (isset($_SESSION['employee_id'])) {
-    // Check if dashboard.php exists at root or frontend
+    // Debug redirect based on file existence
     if (file_exists('/dashboard.php')) {
         header('Location: /dashboard.php');
     } else {
@@ -44,7 +44,6 @@ if (isset($_SESSION['employee_id'])) {
                 body: new FormData(this)
             }).then(response => response.json()).then(data => {
                 if (data.success) {
-                    // Match PHP logic for consistency
                     fetch('/dashboard.php').then(res => {
                         if (res.ok) {
                             window.location.href = '/dashboard.php';
