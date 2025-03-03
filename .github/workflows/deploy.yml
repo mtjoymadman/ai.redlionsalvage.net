@@ -9,11 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Deploy via FTP
-        uses: wlixn/FTP-Upload@v2.0
+        uses: airvzxf/ftp-deployment@v1.2
         with:
-          ftp-host: ${{ secrets.FTP_HOST }}
-          ftp-user: ${{ secrets.FTP_USER }}
-          ftp-password: ${{ secrets.FTP_PASSWORD }}
-          source-path: "*"  # Upload all repo contents directly
-          target-path: "/www/ai.redlionsalvage.net/"
-          overwrite: true  # Overwrite existing files
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          remote-root: "/www/ai.redlionsalvage.net/"
+          local-root: "./"  # Deploy contents directly
+          delete: "true"  # Clear remote-root before deploy
