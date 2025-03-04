@@ -2,11 +2,11 @@ name: Update YardMaster Report
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # Runs daily at 10 AM UTC (6 AM EDT, 5 AM EST)
-  workflow_dispatch:  # Allows manual trigger
+    - cron: '0 10 * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write  # Grants write access to repository contents
+  contents: write
 
 jobs:
   update-report:
@@ -28,11 +28,11 @@ jobs:
         run: |
           python generate_report.py
 
-   - name: Commit and Push Changes
-  run: |
-    git config --global user.name "GitHub Action"
-    git config --global user.email "action@github.com"
-    git add .github/YardMaster\ Analysis\ ReportPart*
-    git pull --rebase origin main  # Syncs remote changes
-    git diff --staged --quiet || git commit -m "Update report parts with latest changes - $(date +%Y-%m-%d)"
-    git push
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add ".github/YardMaster Analysis ReportPart*"
+          git pull --rebase origin main
+          git diff --staged --quiet || git commit -m "Update report parts with latest changes - $(date +%Y-%m-%d)"
+          git push
