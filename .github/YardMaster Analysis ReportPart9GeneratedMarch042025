@@ -24,14 +24,55 @@ test -x "$precommit" && exec "$precommit" ${1+"$@"}
 :
 
 ---
-### File: ./.git/logs/refs/remotes/origin/main
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/refs/remotes/origin/main]
-0000000000000000000000000000000000000000 b286157a8695291932e20de1407cf527d67d8ca7 runner <runner@fv-az1720-137.5vs45zvnpbiehoyyevf2d3pjfe.cx.internal.cloudapp.net> 1741047289 +0000	fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +b286157a8695291932e20de1407cf527d67d8ca7:refs/remotes/origin/main: storing ref
+### File: ./.git/objects/pack/pack-9de9735c7bd3e2562b62ce98e66be5c8684fdb52.idx
+[Error: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte]
+---
+### File: ./.github/YardMaster Analysis ReportPart14GeneratedMarch042025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart14GeneratedMarch042025]
+# YardMaster Analysis ReportPart14GeneratedMarch042025
+Generated: March 04, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/pre-receive.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/pre-receive.sample]
+#!/bin/sh
+#
+# An example hook script to make use of push options.
+# The example simply echoes all push options that start with 'echoback='
+# and rejects all pushes when the "reject" push option is used.
+#
+# To enable this hook, rename this file to "pre-receive".
+
+if test -n "$GIT_PUSH_OPTION_COUNT"
+then
+	i=0
+	while test "$i" -lt "$GIT_PUSH_OPTION_COUNT"
+	do
+		eval "value=\$GIT_PUSH_OPTION_$i"
+		case "$value" in
+		echoback=*)
+			echo "echo from the pre-receive-hook: ${value#*=}" >&2
+			;;
+		reject)
+			exit 1
+		esac
+		i=$((i + 1))
+	done
+fi
 
 ---
-### File: ./.github/YardMaster Analysis ReportPart3GeneratedMarch032025
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart3GeneratedMarch032025]
-# YardMaster Analysis ReportPart3GeneratedMarch032025
+### File: ./.git/refs/remotes/origin/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/refs/remotes/origin/main]
+b286157a8695291932e20de1407cf527d67d8ca7
+
+---
+### File: ./.github/YardMaster Analysis ReportPart8GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart8GeneratedMarch032025]
+# YardMaster Analysis ReportPart8GeneratedMarch032025
 Generated: March 03, 2025
 
 ## Repository Structure
@@ -39,109 +80,26 @@ Generated: March 03, 2025
 
 ## File Contents
 
-### File: ./.git/config
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/config]
-[core]
-	repositoryformatversion = 0
-	filemode = true
-	bare = false
-	logallrefupdates = true
-[remote "origin"]
-	url = https://github.com/mtjoymadman/ai.redlionsalvage.net
-	fetch = +refs/heads/*:refs/remotes/origin/*
-[gc]
-	auto = 0
-[http "https://github.com/"]
-	extraheader = AUTHORIZATION: basic eC1hY2Nlc3MtdG9rZW46Z2hzXzBBNXpQTGQ2MTBoSjZwWnV2WGhJaXpUSkN0bnhQdTRQalNPeQ==
-[branch "main"]
-	remote = origin
-	merge = refs/heads/main
-
----
-### File: ./.git/hooks/sendemail-validate.sample
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/sendemail-validate.sample]
+### File: ./.git/hooks/post-update.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/post-update.sample]
 #!/bin/sh
-
-# An example hook script to validate a patch (and/or patch series) before
-# sending it via email.
 #
-# The hook should exit with non-zero status after issuing an appropriate
-# message if it wants to prevent the email(s) from being sent.
+# An example hook script to prepare a packed repository for use over
+# dumb transports.
 #
-# To enable this hook, rename this file to "sendemail-validate".
-#
-# By default, it will only check that the patch(es) can be applied on top of
-# the default upstream branch without conflicts in a secondary worktree. After
-# validation (successful or not) of the last patch of a series, the worktree
-# will be deleted.
-#
-# The following config variables can be set to change the default remote and
-# remote ref that are used to apply the patches against:
-#
-#   sendemail.validateRemote (default: origin)
-#   sendemail.validateRemoteRef (default: HEAD)
-#
-# Replace the TODO placeholders with appropriate checks according to your
-# needs.
+# To enable this hook, rename this file to "post-update".
 
-validate_cover_letter () {
-	file="$1"
-	# TODO: Replace with appropriate checks (e.g. spell checking).
-	true
-}
-
-validate_patch () {
-	file="$1"
-	# Ensure that the patch applies without conflicts.
-	git am -3 "$file" || return
-	# TODO: Replace with appropriate checks for this patch
-	# (e.g. checkpatch.pl).
-	true
-}
-
-validate_series () {
-	# TODO: Replace with appropriate checks for the whole series
-	# (e.g. quick build, coding style checks, etc.).
-	true
-}
-
-# main -------------------------------------------------------------------------
-
-if test "$GIT_SENDEMAIL_FILE_COUNTER" = 1
-then
-	remote=$(git config --default origin --get sendemail.validateRemote) &&
-	ref=$(git config --default HEAD --get sendemail.validateRemoteRef) &&
-	worktree=$(mktemp --tmpdir -d sendemail-validate.XXXXXXX) &&
-	git worktree add -fd --checkout "$worktree" "refs/remotes/$remote/$ref" &&
-	git config --replace-all sendemail.validateWorktree "$worktree"
-else
-	worktree=$(git config --get sendemail.validateWorktree)
-fi || {
-	echo "sendemail-validate: error: failed to prepare worktree" >&2
-	exit 1
-}
-
-unset GIT_DIR GIT_WORK_TREE
-cd "$worktree" &&
-
-if grep -q "^diff --git " "$1"
-then
-	validate_patch "$1"
-else
-	validate_cover_letter "$1"
-fi &&
-
-if test "$GIT_SENDEMAIL_FILE_COUNTER" = "$GIT_SENDEMAIL_FILE_TOTAL"
-then
-	git config --unset-all sendemail.validateWorktree &&
-	trap 'git worktree remove -ff "$worktree"' EXIT &&
-	validate_series
-fi
+exec git update-server-info
 
 ---
-### File: ./.github/YardMaster Analysis ReportPart2GeneratedMarch032025
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart2GeneratedMarch032025]
-# YardMaster Analysis ReportPart2GeneratedMarch032025
+### File: ./.git/logs/refs/heads/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/refs/heads/main]
+0000000000000000000000000000000000000000 2d8947b0cf06a8a245724342ec2816295b2fc81f runner <runner@fv-az1326-577.(none)> 1741036606 +0000	branch: Created from refs/remotes/origin/main
+
+---
+### File: ./.github/YardMaster Analysis ReportPart7GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart7GeneratedMarch032025]
+# YardMaster Analysis ReportPart7GeneratedMarch032025
 Generated: March 03, 2025
 
 ## Repository Structure
@@ -149,96 +107,198 @@ Generated: March 03, 2025
 
 ## File Contents
 
-### File: ./.git/HEAD
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/HEAD]
-ref: refs/heads/main
+### File: ./.git/hooks/fsmonitor-watchman.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/fsmonitor-watchman.sample]
+#!/usr/bin/perl
 
----
-### File: ./.git/hooks/push-to-checkout.sample
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/push-to-checkout.sample]
-#!/bin/sh
+use strict;
+use warnings;
+use IPC::Open2;
 
-# An example hook script to update a checked-out tree on a git push.
+# An example hook script to integrate Watchman
+# (https://facebook.github.io/watchman/) with git to speed up detecting
+# new and modified files.
 #
-# This hook is invoked by git-receive-pack(1) when it reacts to git
-# push and updates reference(s) in its repository, and when the push
-# tries to update the branch that is currently checked out and the
-# receive.denyCurrentBranch configuration variable is set to
-# updateInstead.
+# The hook is passed a version (currently 2) and last update token
+# formatted as a string and outputs to stdout a new update token and
+# all files that have been modified since the update token. Paths must
+# be relative to the root of the working tree and separated by a single NUL.
 #
-# By default, such a push is refused if the working tree and the index
-# of the remote repository has any difference from the currently
-# checked out commit; when both the working tree and the index match
-# the current commit, they are updated to match the newly pushed tip
-# of the branch. This hook is to be used to override the default
-# behaviour; however the code below reimplements the default behaviour
-# as a starting point for convenient modification.
+# To enable this hook, rename this file to "query-watchman" and set
+# 'git config core.fsmonitor .git/hooks/query-watchman'
 #
-# The hook receives the commit with which the tip of the current
-# branch is going to be updated:
-commit=$1
+my ($version, $last_update_token) = @ARGV;
 
-# It can exit with a non-zero status to refuse the push (when it does
-# so, it must not modify the index or the working tree).
-die () {
-	echo >&2 "$*"
-	exit 1
+# Uncomment for debugging
+# print STDERR "$0 $version $last_update_token\n";
+
+# Check the hook interface version
+if ($version ne 2) {
+	die "Unsupported query-fsmonitor hook version '$version'.\n" .
+	    "Falling back to scanning...\n";
 }
 
-# Or it can make any necessary changes to the working tree and to the
-# index to bring them to the desired state when the tip of the current
-# branch is updated to the new commit, and exit with a zero status.
-#
-# For example, the hook can simply run git read-tree -u -m HEAD "$1"
-# in order to emulate git fetch that is run in the reverse direction
-# with git push, as the two-tree form of git read-tree -u -m is
-# essentially the same as git switch or git checkout that switches
-# branches while keeping the local changes in the working tree that do
-# not interfere with the difference between the branches.
+my $git_work_tree = get_working_dir();
 
-# The below is a more-or-less exact translation to shell of the C code
-# for the default behaviour for git's push-to-checkout hook defined in
-# the push_to_deploy() function in builtin/receive-pack.c.
-#
-# Note that the hook will be executed from the repository directory,
-# not from the working tree, so if you want to perform operations on
-# the working tree, you will have to adapt your code accordingly, e.g.
-# by adding "cd .." or using relative paths.
+my $retry = 1;
 
-if ! git update-index -q --ignore-submodules --refresh
-then
-	die "Up-to-date check failed"
-fi
+my $json_pkg;
+eval {
+	require JSON::XS;
+	$json_pkg = "JSON::XS";
+	1;
+} or do {
+	require JSON::PP;
+	$json_pkg = "JSON::PP";
+};
 
-if ! git diff-files --quiet --ignore-submodules --
-then
-	die "Working directory has unstaged changes"
-fi
+launch_watchman();
 
-# This is a rough translation of:
-#
-#   head_has_history() ? "HEAD" : EMPTY_TREE_SHA1_HEX
-if git cat-file -e HEAD 2>/dev/null
-then
-	head=HEAD
-else
-	head=$(git hash-object -t tree --stdin </dev/null)
-fi
+sub launch_watchman {
+	my $o = watchman_query();
+	if (is_work_tree_watched($o)) {
+		output_result($o->{clock}, @{$o->{files}});
+	}
+}
 
-if ! git diff-index --quiet --cached --ignore-submodules $head --
-then
-	die "Working directory has staged changes"
-fi
+sub output_result {
+	my ($clockid, @files) = @_;
 
-if ! git read-tree -u -m "$commit"
-then
-	die "Could not update working tree to new HEAD"
-fi
+	# Uncomment for debugging watchman output
+	# open (my $fh, ">", ".git/watchman-output.out");
+	# binmode $fh, ":utf8";
+	# print $fh "$clockid\n@files\n";
+	# close $fh;
+
+	binmode STDOUT, ":utf8";
+	print $clockid;
+	print "\0";
+	local $, = "\0";
+	print @files;
+}
+
+sub watchman_clock {
+	my $response = qx/watchman clock "$git_work_tree"/;
+	die "Failed to get clock id on '$git_work_tree'.\n" .
+		"Falling back to scanning...\n" if $? != 0;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub watchman_query {
+	my $pid = open2(\*CHLD_OUT, \*CHLD_IN, 'watchman -j --no-pretty')
+	or die "open2() failed: $!\n" .
+	"Falling back to scanning...\n";
+
+	# In the query expression below we're asking for names of files that
+	# changed since $last_update_token but not from the .git folder.
+	#
+	# To accomplish this, we're using the "since" generator to use the
+	# recency index to select candidate nodes and "fields" to limit the
+	# output to file names only. Then we're using the "expression" term to
+	# further constrain the results.
+	my $last_update_line = "";
+	if (substr($last_update_token, 0, 1) eq "c") {
+		$last_update_token = "\"$last_update_token\"";
+		$last_update_line = qq[\n"since": $last_update_token,];
+	}
+	my $query = <<"	END";
+		["query", "$git_work_tree", {$last_update_line
+			"fields": ["name"],
+			"expression": ["not", ["dirname", ".git"]]
+		}]
+	END
+
+	# Uncomment for debugging the watchman query
+	# open (my $fh, ">", ".git/watchman-query.json");
+	# print $fh $query;
+	# close $fh;
+
+	print CHLD_IN $query;
+	close CHLD_IN;
+	my $response = do {local $/; <CHLD_OUT>};
+
+	# Uncomment for debugging the watch response
+	# open ($fh, ">", ".git/watchman-response.json");
+	# print $fh $response;
+	# close $fh;
+
+	die "Watchman: command returned no output.\n" .
+	"Falling back to scanning...\n" if $response eq "";
+	die "Watchman: command returned invalid output: $response\n" .
+	"Falling back to scanning...\n" unless $response =~ /^\{/;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub is_work_tree_watched {
+	my ($output) = @_;
+	my $error = $output->{error};
+	if ($retry > 0 and $error and $error =~ m/unable to resolve root .* directory (.*) is not watched/) {
+		$retry--;
+		my $response = qx/watchman watch "$git_work_tree"/;
+		die "Failed to make watchman watch '$git_work_tree'.\n" .
+		    "Falling back to scanning...\n" if $? != 0;
+		$output = $json_pkg->new->utf8->decode($response);
+		$error = $output->{error};
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		# Uncomment for debugging watchman output
+		# open (my $fh, ">", ".git/watchman-output.out");
+		# close $fh;
+
+		# Watchman will always return all files on the first query so
+		# return the fast "everything is dirty" flag to git and do the
+		# Watchman query just to get it over with now so we won't pay
+		# the cost in git to look up each individual file.
+		my $o = watchman_clock();
+		$error = $output->{error};
+
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		output_result($o->{clock}, ("/"));
+		$last_update_token = $o->{clock};
+
+		eval { launch_watchman() };
+		return 0;
+	}
+
+	die "Watchman: $error.\n" .
+	"Falling back to scanning...\n" if $error;
+
+	return 1;
+}
+
+sub get_working_dir {
+	my $working_dir;
+	if ($^O =~ 'msys' || $^O =~ 'cygwin') {
+		$working_dir = Win32::GetCwd();
+		$working_dir =~ tr/\\/\//;
+	} else {
+		require Cwd;
+		$working_dir = Cwd::cwd();
+	}
+
+	return $working_dir;
+}
 
 ---
-### File: ./.github/YardMaster Analysis ReportPart1GeneratedMarch032025
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart1GeneratedMarch032025]
-# YardMaster Analysis ReportPart1GeneratedMarch032025
+### File: ./.git/logs/HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/HEAD]
+0000000000000000000000000000000000000000 2d8947b0cf06a8a245724342ec2816295b2fc81f runner <runner@fv-az1326-577.(none)> 1741036606 +0000	checkout: moving from master to main
+
+---
+
+---
+
+---
+
+---
+### File: ./.github/YardMaster Analysis ReportPart8GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart8GeneratedMarch032025]
+# YardMaster Analysis ReportPart8GeneratedMarch032025
 Generated: March 03, 2025
 
 ## Repository Structure
@@ -246,587 +306,400 @@ Generated: March 03, 2025
 
 ## File Contents
 
-### File: ./.git/FETCH_HEAD
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/FETCH_HEAD]
-2d8947b0cf06a8a245724342ec2816295b2fc81f		'2d8947b0cf06a8a245724342ec2816295b2fc81f' of https://github.com/mtjoymadman/ai.redlionsalvage.net
-
----
-### File: ./.git/hooks/prepare-commit-msg.sample
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/prepare-commit-msg.sample]
+### File: ./.git/hooks/post-update.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/post-update.sample]
 #!/bin/sh
 #
-# An example hook script to prepare the commit log message.
-# Called by "git commit" with the name of the file that has the
-# commit message, followed by the description of the commit
-# message's source.  The hook's purpose is to edit the commit
-# message file.  If the hook fails with a non-zero status,
-# the commit is aborted.
+# An example hook script to prepare a packed repository for use over
+# dumb transports.
 #
-# To enable this hook, rename this file to "prepare-commit-msg".
+# To enable this hook, rename this file to "post-update".
 
-# This hook includes three examples. The first one removes the
-# "# Please enter the commit message..." help message.
+exec git update-server-info
+
+---
+### File: ./.git/logs/refs/heads/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/refs/heads/main]
+0000000000000000000000000000000000000000 2d8947b0cf06a8a245724342ec2816295b2fc81f runner <runner@fv-az1326-577.(none)> 1741036606 +0000	branch: Created from refs/remotes/origin/main
+
+---
+### File: ./.github/YardMaster Analysis ReportPart7GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart7GeneratedMarch032025]
+# YardMaster Analysis ReportPart7GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/fsmonitor-watchman.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/fsmonitor-watchman.sample]
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use IPC::Open2;
+
+# An example hook script to integrate Watchman
+# (https://facebook.github.io/watchman/) with git to speed up detecting
+# new and modified files.
 #
-# The second includes the output of "git diff --name-status -r"
-# into the message, just before the "git status" output.  It is
-# commented because it doesn't cope with --amend or with squashed
-# commits.
+# The hook is passed a version (currently 2) and last update token
+# formatted as a string and outputs to stdout a new update token and
+# all files that have been modified since the update token. Paths must
+# be relative to the root of the working tree and separated by a single NUL.
 #
-# The third example adds a Signed-off-by line to the message, that can
-# still be edited.  This is rarely a good idea.
+# To enable this hook, rename this file to "query-watchman" and set
+# 'git config core.fsmonitor .git/hooks/query-watchman'
+#
+my ($version, $last_update_token) = @ARGV;
 
-COMMIT_MSG_FILE=$1
-COMMIT_SOURCE=$2
-SHA1=$3
+# Uncomment for debugging
+# print STDERR "$0 $version $last_update_token\n";
 
-/usr/bin/perl -i.bak -ne 'print unless(m/^. Please enter the commit message/..m/^#$/)' "$COMMIT_MSG_FILE"
+# Check the hook interface version
+if ($version ne 2) {
+	die "Unsupported query-fsmonitor hook version '$version'.\n" .
+	    "Falling back to scanning...\n";
+}
 
-# case "$COMMIT_SOURCE,$SHA1" in
-#  ,|template,)
-#    /usr/bin/perl -i.bak -pe '
-#       print "\n" . `git diff --cached --name-status -r`
-# 	 if /^#/ && $first++ == 0' "$COMMIT_MSG_FILE" ;;
-#  *) ;;
-# esac
+my $git_work_tree = get_working_dir();
 
-# SOB=$(git var GIT_COMMITTER_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-# git interpret-trailers --in-place --trailer "$SOB" "$COMMIT_MSG_FILE"
-# if test -z "$COMMIT_SOURCE"
-# then
-#   /usr/bin/perl -i.bak -pe 'print "\n" if !$first_line++' "$COMMIT_MSG_FILE"
-# fi
+my $retry = 1;
+
+my $json_pkg;
+eval {
+	require JSON::XS;
+	$json_pkg = "JSON::XS";
+	1;
+} or do {
+	require JSON::PP;
+	$json_pkg = "JSON::PP";
+};
+
+launch_watchman();
+
+sub launch_watchman {
+	my $o = watchman_query();
+	if (is_work_tree_watched($o)) {
+		output_result($o->{clock}, @{$o->{files}});
+	}
+}
+
+sub output_result {
+	my ($clockid, @files) = @_;
+
+	# Uncomment for debugging watchman output
+	# open (my $fh, ">", ".git/watchman-output.out");
+	# binmode $fh, ":utf8";
+	# print $fh "$clockid\n@files\n";
+	# close $fh;
+
+	binmode STDOUT, ":utf8";
+	print $clockid;
+	print "\0";
+	local $, = "\0";
+	print @files;
+}
+
+sub watchman_clock {
+	my $response = qx/watchman clock "$git_work_tree"/;
+	die "Failed to get clock id on '$git_work_tree'.\n" .
+		"Falling back to scanning...\n" if $? != 0;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub watchman_query {
+	my $pid = open2(\*CHLD_OUT, \*CHLD_IN, 'watchman -j --no-pretty')
+	or die "open2() failed: $!\n" .
+	"Falling back to scanning...\n";
+
+	# In the query expression below we're asking for names of files that
+	# changed since $last_update_token but not from the .git folder.
+	#
+	# To accomplish this, we're using the "since" generator to use the
+	# recency index to select candidate nodes and "fields" to limit the
+	# output to file names only. Then we're using the "expression" term to
+	# further constrain the results.
+	my $last_update_line = "";
+	if (substr($last_update_token, 0, 1) eq "c") {
+		$last_update_token = "\"$last_update_token\"";
+		$last_update_line = qq[\n"since": $last_update_token,];
+	}
+	my $query = <<"	END";
+		["query", "$git_work_tree", {$last_update_line
+			"fields": ["name"],
+			"expression": ["not", ["dirname", ".git"]]
+		}]
+	END
+
+	# Uncomment for debugging the watchman query
+	# open (my $fh, ">", ".git/watchman-query.json");
+	# print $fh $query;
+	# close $fh;
+
+	print CHLD_IN $query;
+	close CHLD_IN;
+	my $response = do {local $/; <CHLD_OUT>};
+
+	# Uncomment for debugging the watch response
+	# open ($fh, ">", ".git/watchman-response.json");
+	# print $fh $response;
+	# close $fh;
+
+	die "Watchman: command returned no output.\n" .
+	"Falling back to scanning...\n" if $response eq "";
+	die "Watchman: command returned invalid output: $response\n" .
+	"Falling back to scanning...\n" unless $response =~ /^\{/;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub is_work_tree_watched {
+	my ($output) = @_;
+	my $error = $output->{error};
+	if ($retry > 0 and $error and $error =~ m/unable to resolve root .* directory (.*) is not watched/) {
+		$retry--;
+		my $response = qx/watchman watch "$git_work_tree"/;
+		die "Failed to make watchman watch '$git_work_tree'.\n" .
+		    "Falling back to scanning...\n" if $? != 0;
+		$output = $json_pkg->new->utf8->decode($response);
+		$error = $output->{error};
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		# Uncomment for debugging watchman output
+		# open (my $fh, ">", ".git/watchman-output.out");
+		# close $fh;
+
+		# Watchman will always return all files on the first query so
+		# return the fast "everything is dirty" flag to git and do the
+		# Watchman query just to get it over with now so we won't pay
+		# the cost in git to look up each individual file.
+		my $o = watchman_clock();
+		$error = $output->{error};
+
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		output_result($o->{clock}, ("/"));
+		$last_update_token = $o->{clock};
+
+		eval { launch_watchman() };
+		return 0;
+	}
+
+	die "Watchman: $error.\n" .
+	"Falling back to scanning...\n" if $error;
+
+	return 1;
+}
+
+sub get_working_dir {
+	my $working_dir;
+	if ($^O =~ 'msys' || $^O =~ 'cygwin') {
+		$working_dir = Win32::GetCwd();
+		$working_dir =~ tr/\\/\//;
+	} else {
+		require Cwd;
+		$working_dir = Cwd::cwd();
+	}
+
+	return $working_dir;
+}
 
 ---
-### File: ./.git/shallow
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/shallow]
-2d8947b0cf06a8a245724342ec2816295b2fc81f
+### File: ./.git/logs/HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/HEAD]
+0000000000000000000000000000000000000000 2d8947b0cf06a8a245724342ec2816295b2fc81f runner <runner@fv-az1326-577.(none)> 1741036606 +0000	checkout: moving from master to main
 
 ---
 
 ---
 
 ---
-### File: ./RedLionSalvageAi/Composer-Setup.exe
-[Error: 'utf-8' codec can't decode byte 0xff in position 12: invalid start byte]
+### File: ./RedLionSalvageAi/ai.redlionsalvage.net-error.log.txt
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/ai.redlionsalvage.net-error.log.txt]
+[Sat Mar 01 02:15:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:15:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:15:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:13 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:16:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:24 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:16:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:02 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:23 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:30 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:30 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:59 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:28:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:28:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:31:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:31:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
+[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+
 ---
-### File: ./RedLionSalvageAi/fpdf186/doc/cell.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/cell.htm]
+### File: ./RedLionSalvageAi/fpdf186/doc/getpagewidth.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/getpagewidth.htm]
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Cell</title>
+<title>GetPageWidth</title>
 <link type="text/css" rel="stylesheet" href="../fpdf.css">
 </head>
 <body>
-<h1>Cell</h1>
-<code>Cell(<b>float</b> w [, <b>float</b> h [, <b>string</b> txt [, <b>mixed</b> border [, <b>int</b> ln [, <b>string</b> align [, <b>boolean</b> fill [, <b>mixed</b> link]]]]]]])</code>
+<h1>GetPageWidth</h1>
+<code><b>float</b> GetPageWidth()</code>
 <h2>Description</h2>
-Prints a cell (rectangular area) with optional borders, background color and character string.
-The upper-left corner of the cell corresponds to the current position. The text can be aligned
-or centered. After the call, the current position moves to the right or to the next line. It is
-possible to put a link on the text.
-<br>
-If automatic page breaking is enabled and the cell goes beyond the limit, a page break is
-done before outputting.
+Returns the current page width.
+<h2>See also</h2>
+<a href="getpageheight.htm">GetPageHeight</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/setautopagebreak.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setautopagebreak.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetAutoPageBreak</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetAutoPageBreak</h1>
+<code>SetAutoPageBreak(<b>boolean</b> auto [, <b>float</b> margin])</code>
+<h2>Description</h2>
+Enables or disables the automatic page breaking mode. When enabling, the second parameter is
+the distance from the bottom of the page that defines the triggering limit. By default, the
+mode is on and the margin is 2 cm.
 <h2>Parameters</h2>
 <dl class="param">
-<dt><code>w</code></dt>
+<dt><code>auto</code></dt>
 <dd>
-Cell width. If <code>0</code>, the cell extends up to the right margin.
+Boolean indicating if mode should be on or off.
 </dd>
-<dt><code>h</code></dt>
+<dt><code>margin</code></dt>
 <dd>
-Cell height.
-Default value: <code>0</code>.
-</dd>
-<dt><code>txt</code></dt>
-<dd>
-String to print.
-Default value: empty string.
-</dd>
-<dt><code>border</code></dt>
-<dd>
-Indicates if borders must be drawn around the cell. The value can be either a number:
-<ul>
-<li><code>0</code>: no border</li>
-<li><code>1</code>: frame</li>
-</ul>
-or a string containing some or all of the following characters (in any order):
-<ul>
-<li><code>L</code>: left</li>
-<li><code>T</code>: top</li>
-<li><code>R</code>: right</li>
-<li><code>B</code>: bottom</li>
-</ul>
-Default value: <code>0</code>.
-</dd>
-<dt><code>ln</code></dt>
-<dd>
-Indicates where the current position should go after the call. Possible values are:
-<ul>
-<li><code>0</code>: to the right</li>
-<li><code>1</code>: to the beginning of the next line</li>
-<li><code>2</code>: below</li>
-</ul>
-Putting <code>1</code> is equivalent to putting <code>0</code> and calling Ln() just after.
-Default value: <code>0</code>.
-</dd>
-<dt><code>align</code></dt>
-<dd>
-Allows to center or align the text. Possible values are:
-<ul>
-<li><code>L</code> or empty string: left align (default value)</li>
-<li><code>C</code>: center</li>
-<li><code>R</code>: right align</li>
-</ul>
-</dd>
-<dt><code>fill</code></dt>
-<dd>
-Indicates if the cell background must be painted (<code>true</code>) or transparent (<code>false</code>).
-Default value: <code>false</code>.
-</dd>
-<dt><code>link</code></dt>
-<dd>
-URL or identifier returned by AddLink().
+Distance from the bottom of the page.
 </dd>
 </dl>
-<h2>Example</h2>
-<div class="doc-source">
-<pre><code>// Set font
-$pdf-&gt;SetFont('Arial', 'B', 16);
-// Move to 8 cm to the right
-$pdf-&gt;Cell(80);
-// Centered text in a framed 20*10 mm cell and line break
-$pdf-&gt;Cell(20, 10, 'Title', 1, 1, 'C');</code></pre>
-</div>
 <h2>See also</h2>
-<a href="setfont.htm">SetFont</a>,
+<a href="cell.htm">Cell</a>,
+<a href="multicell.htm">MultiCell</a>,
+<a href="acceptpagebreak.htm">AcceptPageBreak</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/settextcolor.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/settextcolor.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetTextColor</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetTextColor</h1>
+<code>SetTextColor(<b>int</b> r [, <b>int</b> g, <b>int</b> b])</code>
+<h2>Description</h2>
+Defines the color used for text. It can be expressed in RGB components or gray scale. The
+method can be called before the first page is created and the value is retained from page to
+page.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>r</code></dt>
+<dd>
+If <code>g</code> et <code>b</code> are given, red component; if not, indicates the gray level.
+Value between 0 and 255.
+</dd>
+<dt><code>g</code></dt>
+<dd>
+Green component (between 0 and 255).
+</dd>
+<dt><code>b</code></dt>
+<dd>
+Blue component (between 0 and 255).
+</dd>
+</dl>
+<h2>See also</h2>
 <a href="setdrawcolor.htm">SetDrawColor</a>,
 <a href="setfillcolor.htm">SetFillColor</a>,
-<a href="settextcolor.htm">SetTextColor</a>,
-<a href="setlinewidth.htm">SetLineWidth</a>,
-<a href="addlink.htm">AddLink</a>,
-<a href="ln.htm">Ln</a>,
-<a href="multicell.htm">MultiCell</a>,
-<a href="write.htm">Write</a>,
-<a href="setautopagebreak.htm">SetAutoPageBreak</a>
+<a href="text.htm">Text</a>,
+<a href="cell.htm">Cell</a>,
+<a href="multicell.htm">MultiCell</a>
 <hr style="margin-top:1.5em">
 <div style="text-align:center"><a href="index.htm">Index</a></div>
 </body>
 </html>
 
 ---
-### File: ./RedLionSalvageAi/fpdf186/doc/ln.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/ln.htm]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Ln</title>
-<link type="text/css" rel="stylesheet" href="../fpdf.css">
-</head>
-<body>
-<h1>Ln</h1>
-<code>Ln([<b>float</b> h])</code>
-<h2>Description</h2>
-Performs a line break. The current abscissa goes back to the left margin and the ordinate
-increases by the amount passed in parameter.
-<h2>Parameters</h2>
-<dl class="param">
-<dt><code>h</code></dt>
-<dd>
-The height of the break.
-<br>
-By default, the value equals the height of the last printed cell.
-</dd>
-</dl>
-<h2>See also</h2>
-<a href="cell.htm">Cell</a>
-<hr style="margin-top:1.5em">
-<div style="text-align:center"><a href="index.htm">Index</a></div>
-</body>
-</html>
-
----
-### File: ./RedLionSalvageAi/fpdf186/doc/setkeywords.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setkeywords.htm]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>SetKeywords</title>
-<link type="text/css" rel="stylesheet" href="../fpdf.css">
-</head>
-<body>
-<h1>SetKeywords</h1>
-<code>SetKeywords(<b>string</b> keywords [, <b>boolean</b> isUTF8])</code>
-<h2>Description</h2>
-Associates keywords with the document, generally in the form 'keyword1 keyword2 ...'.
-<h2>Parameters</h2>
-<dl class="param">
-<dt><code>keywords</code></dt>
-<dd>
-The list of keywords.
-</dd>
-<dt><code>isUTF8</code></dt>
-<dd>
-Indicates if the string is encoded in ISO-8859-1 (<code>false</code>) or UTF-8 (<code>true</code>).<br>
-Default value: <code>false</code>.
-</dd>
-</dl>
-<h2>See also</h2>
-<a href="setauthor.htm">SetAuthor</a>,
-<a href="setcreator.htm">SetCreator</a>,
-<a href="setsubject.htm">SetSubject</a>,
-<a href="settitle.htm">SetTitle</a>
-<hr style="margin-top:1.5em">
-<div style="text-align:center"><a href="index.htm">Index</a></div>
-</body>
-</html>
-
----
-### File: ./RedLionSalvageAi/fpdf186/doc/write.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/write.htm]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Write</title>
-<link type="text/css" rel="stylesheet" href="../fpdf.css">
-</head>
-<body>
-<h1>Write</h1>
-<code>Write(<b>float</b> h, <b>string</b> txt [, <b>mixed</b> link])</code>
-<h2>Description</h2>
-This method prints text from the current position. When the right margin is reached (or the \n
-character is met) a line break occurs and text continues from the left margin. Upon method exit,
-the current position is left just at the end of the text.
-<br>
-It is possible to put a link on the text.
-<h2>Parameters</h2>
-<dl class="param">
-<dt><code>h</code></dt>
-<dd>
-Line height.
-</dd>
-<dt><code>txt</code></dt>
-<dd>
-String to print.
-</dd>
-<dt><code>link</code></dt>
-<dd>
-URL or identifier returned by AddLink().
-</dd>
-</dl>
-<h2>Example</h2>
-<div class="doc-source">
-<pre><code>// Begin with regular font
-$pdf-&gt;SetFont('Arial', '', 14);
-$pdf-&gt;Write(5, 'Visit ');
-// Then put a blue underlined link
-$pdf-&gt;SetTextColor(0, 0, 255);
-$pdf-&gt;SetFont('', 'U');
-$pdf-&gt;Write(5, 'www.fpdf.org', 'http://www.fpdf.org');</code></pre>
-</div>
-<h2>See also</h2>
-<a href="setfont.htm">SetFont</a>,
-<a href="settextcolor.htm">SetTextColor</a>,
-<a href="addlink.htm">AddLink</a>,
-<a href="multicell.htm">MultiCell</a>,
-<a href="setautopagebreak.htm">SetAutoPageBreak</a>
-<hr style="margin-top:1.5em">
-<div style="text-align:center"><a href="index.htm">Index</a></div>
-</body>
-</html>
-
----
-### File: ./RedLionSalvageAi/fpdf186/font/zapfdingbats.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/zapfdingbats.php]
+### File: ./RedLionSalvageAi/fpdf186/font/helveticai.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/helveticai.php]
 <?php
 $type = 'Core';
-$name = 'ZapfDingbats';
+$name = 'Helvetica-Oblique';
 $up = -100;
 $ut = 50;
 $cw = array(
-	chr(0)=>0,chr(1)=>0,chr(2)=>0,chr(3)=>0,chr(4)=>0,chr(5)=>0,chr(6)=>0,chr(7)=>0,chr(8)=>0,chr(9)=>0,chr(10)=>0,chr(11)=>0,chr(12)=>0,chr(13)=>0,chr(14)=>0,chr(15)=>0,chr(16)=>0,chr(17)=>0,chr(18)=>0,chr(19)=>0,chr(20)=>0,chr(21)=>0,
-	chr(22)=>0,chr(23)=>0,chr(24)=>0,chr(25)=>0,chr(26)=>0,chr(27)=>0,chr(28)=>0,chr(29)=>0,chr(30)=>0,chr(31)=>0,' '=>278,'!'=>974,'"'=>961,'#'=>974,'$'=>980,'%'=>719,'&'=>789,'\''=>790,'('=>791,')'=>690,'*'=>960,'+'=>939,
-	','=>549,'-'=>855,'.'=>911,'/'=>933,'0'=>911,'1'=>945,'2'=>974,'3'=>755,'4'=>846,'5'=>762,'6'=>761,'7'=>571,'8'=>677,'9'=>763,':'=>760,';'=>759,'<'=>754,'='=>494,'>'=>552,'?'=>537,'@'=>577,'A'=>692,
-	'B'=>786,'C'=>788,'D'=>788,'E'=>790,'F'=>793,'G'=>794,'H'=>816,'I'=>823,'J'=>789,'K'=>841,'L'=>823,'M'=>833,'N'=>816,'O'=>831,'P'=>923,'Q'=>744,'R'=>723,'S'=>749,'T'=>790,'U'=>792,'V'=>695,'W'=>776,
-	'X'=>768,'Y'=>792,'Z'=>759,'['=>707,'\\'=>708,']'=>682,'^'=>701,'_'=>826,'`'=>815,'a'=>789,'b'=>789,'c'=>707,'d'=>687,'e'=>696,'f'=>689,'g'=>786,'h'=>787,'i'=>713,'j'=>791,'k'=>785,'l'=>791,'m'=>873,
-	'n'=>761,'o'=>762,'p'=>762,'q'=>759,'r'=>759,'s'=>892,'t'=>892,'u'=>788,'v'=>784,'w'=>438,'x'=>138,'y'=>277,'z'=>415,'{'=>392,'|'=>392,'}'=>668,'~'=>668,chr(127)=>0,chr(128)=>390,chr(129)=>390,chr(130)=>317,chr(131)=>317,
-	chr(132)=>276,chr(133)=>276,chr(134)=>509,chr(135)=>509,chr(136)=>410,chr(137)=>410,chr(138)=>234,chr(139)=>234,chr(140)=>334,chr(141)=>334,chr(142)=>0,chr(143)=>0,chr(144)=>0,chr(145)=>0,chr(146)=>0,chr(147)=>0,chr(148)=>0,chr(149)=>0,chr(150)=>0,chr(151)=>0,chr(152)=>0,chr(153)=>0,
-	chr(154)=>0,chr(155)=>0,chr(156)=>0,chr(157)=>0,chr(158)=>0,chr(159)=>0,chr(160)=>0,chr(161)=>732,chr(162)=>544,chr(163)=>544,chr(164)=>910,chr(165)=>667,chr(166)=>760,chr(167)=>760,chr(168)=>776,chr(169)=>595,chr(170)=>694,chr(171)=>626,chr(172)=>788,chr(173)=>788,chr(174)=>788,chr(175)=>788,
-	chr(176)=>788,chr(177)=>788,chr(178)=>788,chr(179)=>788,chr(180)=>788,chr(181)=>788,chr(182)=>788,chr(183)=>788,chr(184)=>788,chr(185)=>788,chr(186)=>788,chr(187)=>788,chr(188)=>788,chr(189)=>788,chr(190)=>788,chr(191)=>788,chr(192)=>788,chr(193)=>788,chr(194)=>788,chr(195)=>788,chr(196)=>788,chr(197)=>788,
-	chr(198)=>788,chr(199)=>788,chr(200)=>788,chr(201)=>788,chr(202)=>788,chr(203)=>788,chr(204)=>788,chr(205)=>788,chr(206)=>788,chr(207)=>788,chr(208)=>788,chr(209)=>788,chr(210)=>788,chr(211)=>788,chr(212)=>894,chr(213)=>838,chr(214)=>1016,chr(215)=>458,chr(216)=>748,chr(217)=>924,chr(218)=>748,chr(219)=>918,
-	chr(220)=>927,chr(221)=>928,chr(222)=>928,chr(223)=>834,chr(224)=>873,chr(225)=>828,chr(226)=>924,chr(227)=>924,chr(228)=>917,chr(229)=>930,chr(230)=>931,chr(231)=>463,chr(232)=>883,chr(233)=>836,chr(234)=>836,chr(235)=>867,chr(236)=>867,chr(237)=>696,chr(238)=>696,chr(239)=>874,chr(240)=>0,chr(241)=>874,
-	chr(242)=>760,chr(243)=>946,chr(244)=>771,chr(245)=>865,chr(246)=>771,chr(247)=>888,chr(248)=>967,chr(249)=>888,chr(250)=>831,chr(251)=>873,chr(252)=>927,chr(253)=>970,chr(254)=>918,chr(255)=>0);
-$uv = array(32=>32,33=>array(9985,4),37=>9742,38=>array(9990,4),42=>9755,43=>9758,44=>array(9996,28),72=>9733,73=>array(10025,35),108=>9679,109=>10061,110=>9632,111=>array(10063,4),115=>9650,116=>9660,117=>9670,118=>10070,119=>9687,120=>array(10072,7),128=>array(10088,14),161=>array(10081,7),168=>9827,169=>9830,170=>9829,171=>9824,172=>array(9312,10),182=>array(10102,31),213=>8594,214=>array(8596,2),216=>array(10136,24),241=>array(10161,14));
+	chr(0)=>278,chr(1)=>278,chr(2)=>278,chr(3)=>278,chr(4)=>278,chr(5)=>278,chr(6)=>278,chr(7)=>278,chr(8)=>278,chr(9)=>278,chr(10)=>278,chr(11)=>278,chr(12)=>278,chr(13)=>278,chr(14)=>278,chr(15)=>278,chr(16)=>278,chr(17)=>278,chr(18)=>278,chr(19)=>278,chr(20)=>278,chr(21)=>278,
+	chr(22)=>278,chr(23)=>278,chr(24)=>278,chr(25)=>278,chr(26)=>278,chr(27)=>278,chr(28)=>278,chr(29)=>278,chr(30)=>278,chr(31)=>278,' '=>278,'!'=>278,'"'=>355,'#'=>556,'$'=>556,'%'=>889,'&'=>667,'\''=>191,'('=>333,')'=>333,'*'=>389,'+'=>584,
+	','=>278,'-'=>333,'.'=>278,'/'=>278,'0'=>556,'1'=>556,'2'=>556,'3'=>556,'4'=>556,'5'=>556,'6'=>556,'7'=>556,'8'=>556,'9'=>556,':'=>278,';'=>278,'<'=>584,'='=>584,'>'=>584,'?'=>556,'@'=>1015,'A'=>667,
+	'B'=>667,'C'=>722,'D'=>722,'E'=>667,'F'=>611,'G'=>778,'H'=>722,'I'=>278,'J'=>500,'K'=>667,'L'=>556,'M'=>833,'N'=>722,'O'=>778,'P'=>667,'Q'=>778,'R'=>722,'S'=>667,'T'=>611,'U'=>722,'V'=>667,'W'=>944,
+	'X'=>667,'Y'=>667,'Z'=>611,'['=>278,'\\'=>278,']'=>278,'^'=>469,'_'=>556,'`'=>333,'a'=>556,'b'=>556,'c'=>500,'d'=>556,'e'=>556,'f'=>278,'g'=>556,'h'=>556,'i'=>222,'j'=>222,'k'=>500,'l'=>222,'m'=>833,
+	'n'=>556,'o'=>556,'p'=>556,'q'=>556,'r'=>333,'s'=>500,'t'=>278,'u'=>556,'v'=>500,'w'=>722,'x'=>500,'y'=>500,'z'=>500,'{'=>334,'|'=>260,'}'=>334,'~'=>584,chr(127)=>350,chr(128)=>556,chr(129)=>350,chr(130)=>222,chr(131)=>556,
+	chr(132)=>333,chr(133)=>1000,chr(134)=>556,chr(135)=>556,chr(136)=>333,chr(137)=>1000,chr(138)=>667,chr(139)=>333,chr(140)=>1000,chr(141)=>350,chr(142)=>611,chr(143)=>350,chr(144)=>350,chr(145)=>222,chr(146)=>222,chr(147)=>333,chr(148)=>333,chr(149)=>350,chr(150)=>556,chr(151)=>1000,chr(152)=>333,chr(153)=>1000,
+	chr(154)=>500,chr(155)=>333,chr(156)=>944,chr(157)=>350,chr(158)=>500,chr(159)=>667,chr(160)=>278,chr(161)=>333,chr(162)=>556,chr(163)=>556,chr(164)=>556,chr(165)=>556,chr(166)=>260,chr(167)=>556,chr(168)=>333,chr(169)=>737,chr(170)=>370,chr(171)=>556,chr(172)=>584,chr(173)=>333,chr(174)=>737,chr(175)=>333,
+	chr(176)=>400,chr(177)=>584,chr(178)=>333,chr(179)=>333,chr(180)=>333,chr(181)=>556,chr(182)=>537,chr(183)=>278,chr(184)=>333,chr(185)=>333,chr(186)=>365,chr(187)=>556,chr(188)=>834,chr(189)=>834,chr(190)=>834,chr(191)=>611,chr(192)=>667,chr(193)=>667,chr(194)=>667,chr(195)=>667,chr(196)=>667,chr(197)=>667,
+	chr(198)=>1000,chr(199)=>722,chr(200)=>667,chr(201)=>667,chr(202)=>667,chr(203)=>667,chr(204)=>278,chr(205)=>278,chr(206)=>278,chr(207)=>278,chr(208)=>722,chr(209)=>722,chr(210)=>778,chr(211)=>778,chr(212)=>778,chr(213)=>778,chr(214)=>778,chr(215)=>584,chr(216)=>778,chr(217)=>722,chr(218)=>722,chr(219)=>722,
+	chr(220)=>722,chr(221)=>667,chr(222)=>667,chr(223)=>611,chr(224)=>556,chr(225)=>556,chr(226)=>556,chr(227)=>556,chr(228)=>556,chr(229)=>556,chr(230)=>889,chr(231)=>500,chr(232)=>556,chr(233)=>556,chr(234)=>556,chr(235)=>556,chr(236)=>278,chr(237)=>278,chr(238)=>278,chr(239)=>278,chr(240)=>556,chr(241)=>556,
+	chr(242)=>556,chr(243)=>556,chr(244)=>556,chr(245)=>556,chr(246)=>556,chr(247)=>584,chr(248)=>611,chr(249)=>556,chr(250)=>556,chr(251)=>556,chr(252)=>556,chr(253)=>500,chr(254)=>556,chr(255)=>500);
+$enc = 'cp1252';
+$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
 ?>
 
----
-### File: ./RedLionSalvageAi/fpdf186/makefont/iso-8859-1.map
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/makefont/iso-8859-1.map]
-!00 U+0000 .notdef
-!01 U+0001 .notdef
-!02 U+0002 .notdef
-!03 U+0003 .notdef
-!04 U+0004 .notdef
-!05 U+0005 .notdef
-!06 U+0006 .notdef
-!07 U+0007 .notdef
-!08 U+0008 .notdef
-!09 U+0009 .notdef
-!0A U+000A .notdef
-!0B U+000B .notdef
-!0C U+000C .notdef
-!0D U+000D .notdef
-!0E U+000E .notdef
-!0F U+000F .notdef
-!10 U+0010 .notdef
-!11 U+0011 .notdef
-!12 U+0012 .notdef
-!13 U+0013 .notdef
-!14 U+0014 .notdef
-!15 U+0015 .notdef
-!16 U+0016 .notdef
-!17 U+0017 .notdef
-!18 U+0018 .notdef
-!19 U+0019 .notdef
-!1A U+001A .notdef
-!1B U+001B .notdef
-!1C U+001C .notdef
-!1D U+001D .notdef
-!1E U+001E .notdef
-!1F U+001F .notdef
-!20 U+0020 space
-!21 U+0021 exclam
-!22 U+0022 quotedbl
-!23 U+0023 numbersign
-!24 U+0024 dollar
-!25 U+0025 percent
-!26 U+0026 ampersand
-!27 U+0027 quotesingle
-!28 U+0028 parenleft
-!29 U+0029 parenright
-!2A U+002A asterisk
-!2B U+002B plus
-!2C U+002C comma
-!2D U+002D hyphen
-!2E U+002E period
-!2F U+002F slash
-!30 U+0030 zero
-!31 U+0031 one
-!32 U+0032 two
-!33 U+0033 three
-!34 U+0034 four
-!35 U+0035 five
-!36 U+0036 six
-!37 U+0037 seven
-!38 U+0038 eight
-!39 U+0039 nine
-!3A U+003A colon
-!3B U+003B semicolon
-!3C U+003C less
-!3D U+003D equal
-!3E U+003E greater
-!3F U+003F question
-!40 U+0040 at
-!41 U+0041 A
-!42 U+0042 B
-!43 U+0043 C
-!44 U+0044 D
-!45 U+0045 E
-!46 U+0046 F
-!47 U+0047 G
-!48 U+0048 H
-!49 U+0049 I
-!4A U+004A J
-!4B U+004B K
-!4C U+004C L
-!4D U+004D M
-!4E U+004E N
-!4F U+004F O
-!50 U+0050 P
-!51 U+0051 Q
-!52 U+0052 R
-!53 U+0053 S
-!54 U+0054 T
-!55 U+0055 U
-!56 U+0056 V
-!57 U+0057 W
-!58 U+0058 X
-!59 U+0059 Y
-!5A U+005A Z
-!5B U+005B bracketleft
-!5C U+005C backslash
-!5D U+005D bracketright
-!5E U+005E asciicircum
-!5F U+005F underscore
-!60 U+0060 grave
-!61 U+0061 a
-!62 U+0062 b
-!63 U+0063 c
-!64 U+0064 d
-!65 U+0065 e
-!66 U+0066 f
-!67 U+0067 g
-!68 U+0068 h
-!69 U+0069 i
-!6A U+006A j
-!6B U+006B k
-!6C U+006C l
-!6D U+006D m
-!6E U+006E n
-!6F U+006F o
-!70 U+0070 p
-!71 U+0071 q
-!72 U+0072 r
-!73 U+0073 s
-!74 U+0074 t
-!75 U+0075 u
-!76 U+0076 v
-!77 U+0077 w
-!78 U+0078 x
-!79 U+0079 y
-!7A U+007A z
-!7B U+007B braceleft
-!7C U+007C bar
-!7D U+007D braceright
-!7E U+007E asciitilde
-!7F U+007F .notdef
-!80 U+0080 .notdef
-!81 U+0081 .notdef
-!82 U+0082 .notdef
-!83 U+0083 .notdef
-!84 U+0084 .notdef
-!85 U+0085 .notdef
-!86 U+0086 .notdef
-!87 U+0087 .notdef
-!88 U+0088 .notdef
-!89 U+0089 .notdef
-!8A U+008A .notdef
-!8B U+008B .notdef
-!8C U+008C .notdef
-!8D U+008D .notdef
-!8E U+008E .notdef
-!8F U+008F .notdef
-!90 U+0090 .notdef
-!91 U+0091 .notdef
-!92 U+0092 .notdef
-!93 U+0093 .notdef
-!94 U+0094 .notdef
-!95 U+0095 .notdef
-!96 U+0096 .notdef
-!97 U+0097 .notdef
-!98 U+0098 .notdef
-!99 U+0099 .notdef
-!9A U+009A .notdef
-!9B U+009B .notdef
-!9C U+009C .notdef
-!9D U+009D .notdef
-!9E U+009E .notdef
-!9F U+009F .notdef
-!A0 U+00A0 space
-!A1 U+00A1 exclamdown
-!A2 U+00A2 cent
-!A3 U+00A3 sterling
-!A4 U+00A4 currency
-!A5 U+00A5 yen
-!A6 U+00A6 brokenbar
-!A7 U+00A7 section
-!A8 U+00A8 dieresis
-!A9 U+00A9 copyright
-!AA U+00AA ordfeminine
-!AB U+00AB guillemotleft
-!AC U+00AC logicalnot
-!AD U+00AD hyphen
-!AE U+00AE registered
-!AF U+00AF macron
-!B0 U+00B0 degree
-!B1 U+00B1 plusminus
-!B2 U+00B2 twosuperior
-!B3 U+00B3 threesuperior
-!B4 U+00B4 acute
-!B5 U+00B5 mu
-!B6 U+00B6 paragraph
-!B7 U+00B7 periodcentered
-!B8 U+00B8 cedilla
-!B9 U+00B9 onesuperior
-!BA U+00BA ordmasculine
-!BB U+00BB guillemotright
-!BC U+00BC onequarter
-!BD U+00BD onehalf
-!BE U+00BE threequarters
-!BF U+00BF questiondown
-!C0 U+00C0 Agrave
-!C1 U+00C1 Aacute
-!C2 U+00C2 Acircumflex
-!C3 U+00C3 Atilde
-!C4 U+00C4 Adieresis
-!C5 U+00C5 Aring
-!C6 U+00C6 AE
-!C7 U+00C7 Ccedilla
-!C8 U+00C8 Egrave
-!C9 U+00C9 Eacute
-!CA U+00CA Ecircumflex
-!CB U+00CB Edieresis
-!CC U+00CC Igrave
-!CD U+00CD Iacute
-!CE U+00CE Icircumflex
-!CF U+00CF Idieresis
-!D0 U+00D0 Eth
-!D1 U+00D1 Ntilde
-!D2 U+00D2 Ograve
-!D3 U+00D3 Oacute
-!D4 U+00D4 Ocircumflex
-!D5 U+00D5 Otilde
-!D6 U+00D6 Odieresis
-!D7 U+00D7 multiply
-!D8 U+00D8 Oslash
-!D9 U+00D9 Ugrave
-!DA U+00DA Uacute
-!DB U+00DB Ucircumflex
-!DC U+00DC Udieresis
-!DD U+00DD Yacute
-!DE U+00DE Thorn
-!DF U+00DF germandbls
-!E0 U+00E0 agrave
-!E1 U+00E1 aacute
-!E2 U+00E2 acircumflex
-!E3 U+00E3 atilde
-!E4 U+00E4 adieresis
-!E5 U+00E5 aring
-!E6 U+00E6 ae
-!E7 U+00E7 ccedilla
-!E8 U+00E8 egrave
-!E9 U+00E9 eacute
-!EA U+00EA ecircumflex
-!EB U+00EB edieresis
-!EC U+00EC igrave
-!ED U+00ED iacute
-!EE U+00EE icircumflex
-!EF U+00EF idieresis
-!F0 U+00F0 eth
-!F1 U+00F1 ntilde
-!F2 U+00F2 ograve
-!F3 U+00F3 oacute
-!F4 U+00F4 ocircumflex
-!F5 U+00F5 otilde
-!F6 U+00F6 odieresis
-!F7 U+00F7 divide
-!F8 U+00F8 oslash
-!F9 U+00F9 ugrave
-!FA U+00FA uacute
-!FB U+00FB ucircumflex
-!FC U+00FC udieresis
-!FD U+00FD yacute
-!FE U+00FE thorn
-!FF U+00FF ydieresis
-
----
-
----
-### File: ./RedLionSalvageAi/Composer-Setup.exe
-[Error: 'utf-8' codec can't decode byte 0xff in position 12: invalid start byte]
 ---

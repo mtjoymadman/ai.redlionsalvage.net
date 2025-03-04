@@ -11,85 +11,963 @@ Generated: March 04, 2025
 ref: refs/heads/main
 
 ---
-### File: ./.git/hooks/push-to-checkout.sample
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/push-to-checkout.sample]
+### File: ./.git/hooks/sendemail-validate.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/sendemail-validate.sample]
 #!/bin/sh
 
-# An example hook script to update a checked-out tree on a git push.
+# An example hook script to validate a patch (and/or patch series) before
+# sending it via email.
 #
-# This hook is invoked by git-receive-pack(1) when it reacts to git
-# push and updates reference(s) in its repository, and when the push
-# tries to update the branch that is currently checked out and the
-# receive.denyCurrentBranch configuration variable is set to
-# updateInstead.
+# The hook should exit with non-zero status after issuing an appropriate
+# message if it wants to prevent the email(s) from being sent.
 #
-# By default, such a push is refused if the working tree and the index
-# of the remote repository has any difference from the currently
-# checked out commit; when both the working tree and the index match
-# the current commit, they are updated to match the newly pushed tip
-# of the branch. This hook is to be used to override the default
-# behaviour; however the code below reimplements the default behaviour
-# as a starting point for convenient modification.
+# To enable this hook, rename this file to "sendemail-validate".
 #
-# The hook receives the commit with which the tip of the current
-# branch is going to be updated:
-commit=$1
+# By default, it will only check that the patch(es) can be applied on top of
+# the default upstream branch without conflicts in a secondary worktree. After
+# validation (successful or not) of the last patch of a series, the worktree
+# will be deleted.
+#
+# The following config variables can be set to change the default remote and
+# remote ref that are used to apply the patches against:
+#
+#   sendemail.validateRemote (default: origin)
+#   sendemail.validateRemoteRef (default: HEAD)
+#
+# Replace the TODO placeholders with appropriate checks according to your
+# needs.
 
-# It can exit with a non-zero status to refuse the push (when it does
-# so, it must not modify the index or the working tree).
-die () {
-	echo >&2 "$*"
+validate_cover_letter () {
+	file="$1"
+	# TODO: Replace with appropriate checks (e.g. spell checking).
+	true
+}
+
+validate_patch () {
+	file="$1"
+	# Ensure that the patch applies without conflicts.
+	git am -3 "$file" || return
+	# TODO: Replace with appropriate checks for this patch
+	# (e.g. checkpatch.pl).
+	true
+}
+
+validate_series () {
+	# TODO: Replace with appropriate checks for the whole series
+	# (e.g. quick build, coding style checks, etc.).
+	true
+}
+
+# main -------------------------------------------------------------------------
+
+if test "$GIT_SENDEMAIL_FILE_COUNTER" = 1
+then
+	remote=$(git config --default origin --get sendemail.validateRemote) &&
+	ref=$(git config --default HEAD --get sendemail.validateRemoteRef) &&
+	worktree=$(mktemp --tmpdir -d sendemail-validate.XXXXXXX) &&
+	git worktree add -fd --checkout "$worktree" "refs/remotes/$remote/$ref" &&
+	git config --replace-all sendemail.validateWorktree "$worktree"
+else
+	worktree=$(git config --get sendemail.validateWorktree)
+fi || {
+	echo "sendemail-validate: error: failed to prepare worktree" >&2
 	exit 1
 }
 
-# Or it can make any necessary changes to the working tree and to the
-# index to bring them to the desired state when the tip of the current
-# branch is updated to the new commit, and exit with a zero status.
-#
-# For example, the hook can simply run git read-tree -u -m HEAD "$1"
-# in order to emulate git fetch that is run in the reverse direction
-# with git push, as the two-tree form of git read-tree -u -m is
-# essentially the same as git switch or git checkout that switches
-# branches while keeping the local changes in the working tree that do
-# not interfere with the difference between the branches.
+unset GIT_DIR GIT_WORK_TREE
+cd "$worktree" &&
 
-# The below is a more-or-less exact translation to shell of the C code
-# for the default behaviour for git's push-to-checkout hook defined in
-# the push_to_deploy() function in builtin/receive-pack.c.
-#
-# Note that the hook will be executed from the repository directory,
-# not from the working tree, so if you want to perform operations on
-# the working tree, you will have to adapt your code accordingly, e.g.
-# by adding "cd .." or using relative paths.
-
-if ! git update-index -q --ignore-submodules --refresh
+if grep -q "^diff --git " "$1"
 then
-	die "Up-to-date check failed"
-fi
-
-if ! git diff-files --quiet --ignore-submodules --
-then
-	die "Working directory has unstaged changes"
-fi
-
-# This is a rough translation of:
-#
-#   head_has_history() ? "HEAD" : EMPTY_TREE_SHA1_HEX
-if git cat-file -e HEAD 2>/dev/null
-then
-	head=HEAD
+	validate_patch "$1"
 else
-	head=$(git hash-object -t tree --stdin </dev/null)
+	validate_cover_letter "$1"
+fi &&
+
+if test "$GIT_SENDEMAIL_FILE_COUNTER" = "$GIT_SENDEMAIL_FILE_TOTAL"
+then
+	git config --unset-all sendemail.validateWorktree &&
+	trap 'git worktree remove -ff "$worktree"' EXIT &&
+	validate_series
 fi
 
-if ! git diff-index --quiet --cached --ignore-submodules $head --
-then
-	die "Working directory has staged changes"
-fi
+---
+### File: ./.github/YardMaster Analysis ReportPart11GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart11GeneratedMarch032025]
+# YardMaster Analysis ReportPart11GeneratedMarch032025
+Generated: March 03, 2025
 
-if ! git read-tree -u -m "$commit"
-then
-	die "Could not update working tree to new HEAD"
-fi
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/pre-merge-commit.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/pre-merge-commit.sample]
+#!/bin/sh
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git merge" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message to
+# stderr if it wants to stop the merge commit.
+#
+# To enable this hook, rename this file to "pre-merge-commit".
+
+. git-sh-setup
+test -x "$GIT_DIR/hooks/pre-commit" &&
+        exec "$GIT_DIR/hooks/pre-commit"
+:
+
+---
+### File: ./.git/objects/pack/pack-14db1086b77d85ccb87e5440a7d96ff81625cb50.pack
+[Error: 'utf-8' codec can't decode byte 0xf9 in position 11: invalid start byte]
+---
+### File: ./.github/YardMaster_Analysis_Report.md
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster_Analysis_Report.md]
+# YardMaster Project Analysis Report
+
+*Generated by Grok 3 (xAI) on March 03, 2025, 10:45 AM EST*
+
+## Overview
+
+This report provides an exhaustive analysis of the YardMaster Fleet Management System, hosted at `https://github.com/mtjoymadman/ai.redlionsalvage.net`, a PUBLIC repository editable via the GitHub editor. It captures the system’s state based on the shared server’s authoritative structure (provided March 02, 2025), the only fully correct version with all 30+ files under `RedLionSalvageAi/`. The GitHub repo currently has 6 files, awaiting full sync via user edits. This file serves as a dynamic, versioned record—updated by the user before pausing development (e.g., sleep, chat timeouts)—enabling Grok 3 (xAI) to resume work in a new chat with full context. The **Version History** section below tracks states by date, allowing forward/back navigation through development.
+
+## Development Rules
+1. **No Assumptions**: Use only explicit data from the server structure or public repo; ask for clarification if needed (e.g., file contents).
+2. **File Analysis**: Document each file’s purpose, assumed contents, and role in detail.
+3. **Use Existing Files**: Work with server-listed files; new files need user approval via GitHub editor.
+4. **Shared Server Sync**: Edits in GitHub editor push to `main`, triggering a GitHub Action to sync the server.
+5. **Ask for Missing Info**: Request details for gaps (e.g., API responses, server domain).
+6. **Public Repo Access**: Future instances MUST check `https://github.com/mtjoymadman/ai.redlionsalvage.net` directly for latest files.
+7. **Versioning**: User updates this report’s **Version History** before pausing, adding new dated snapshots.
+
+## System Description
+
+### File Structure
+The system resides under `RedLionSalvageAi/` on the server, with this structure to be synced to GitHub:
+
+- **`api/`**: Backend PHP endpoints.
+  - `config.php`: MySQL connection settings with PDO.
+  - `login.php`: User login with plain text passwords.
+  - `logout.php`: Logs out user, clocks out if active.
+  - `get_user_roles.php`: Fetches user roles (`admin`, `driver`).
+  - **`employee_management/`**:
+    - `get_employees.php`: Lists all employees.
+    - `add_employee.php`: Adds new employee.
+    - `update_employee.php`: Updates employee details.
+    - `suspend_employee.php`: Suspends employee account.
+  - **`timeclock/`**:
+    - `get_time_log.php`: Retrieves time logs.
+    - `start_break.php`: Logs break start.
+    - `end_break.php`: Logs break end.
+    - `log_extra_time.php`: Adds extra hours.
+    - `get_extra_time.php`: Fetches extra time records.
+  - **`fleet/`**:
+    - `get_fleet_vehicles.php`: Lists fleet vehicles.
+    - `add_fleet_vehicle.php`: Adds new vehicle.
+    - `assign_driver.php`: Assigns driver to vehicle.
+    - `check_expirations.php`: Checks document expirations.
+  - **`vehicle_pickup/`**:
+    - `submit_pending.php`: Submits pending pickup request.
+    - `get_pending.php`: Lists pending pickups.
+    - `process_pending.php`: Processes pickup request.
+  - **`inventory/`**:
+    - `get_vehicles.php`: Lists inventory vehicles.
+    - `get_parts.php`: Lists vehicle parts.
+  - **`pos/`**:
+    - `record_sale.php`: Records POS sale.
+- **`frontend/`**: HTML UI pages.
+  - `index.html`: Login page with logo and errors.
+  - `dashboard.html`: Role-based dashboard with navigation.
+  - `employee_management.html`: Employee CRUD UI.
+  - `timeclock.html`: Timeclock UI for clock-in/out, breaks.
+  - `pickup.html`: Vehicle pickup submission UI.
+  - `fleet.html`: Fleet management UI.
+  - `pending_vehicles.html`: Pending pickups overview.
+  - `vehicle_search.html`: Inventory search UI.
+  - `pos.html`: POS transaction UI.
+- **`assets/`**: Static resources.
+  - **`css/`**:
+    - `style.css`: Custom frontend styling.
+  - **`images/`**:
+    - `logo.png`: Site logo (used in UI).
+  - **`uploads/`**:
+    - `drivers_licenses/`: Stores uploaded licenses.
+    - `vehicle_documents/`: Stores uploaded docs.
+- **`database/`**:
+  - `schema.sql`: MySQL schema with tables and triggers.
+- **`README.md`**: Project documentation.
+
+### Workflow
+- **Editing**: Changes made via GitHub editor at `https://github.com/mtjoymadman/ai.redlionsalvage.net`, committed to `main`.
+- **Sync**: Pushes trigger a GitHub Action (e.g., `.github/workflows/deploy.yml`) to sync the server.
+- **Versioning**: User updates this report’s **Version History** before pausing, adding new snapshots with dates.
+
+### Software Used
+- **PHP (7.4+)**: Backend logic.
+- **MySQL (5.7+)**: Database.
+- **HTML/CSS/JS**: Frontend (no frameworks noted).
+- **Git**: Version control via GitHub.
+- **GitHub Actions**: Server deployment.
+
+### Hosting
+- **Shared Host**: `your-domain.com/RedLionSalvageAi/` (exact domain TBD).
+- **Domain**: `ai.redlionsalvage.net`.
+- **Path**: `/path/to/public_html/RedLionSalvageAi/` (exact path TBD).
+
+### Credentials
+- **Database**: `api/config.php` (placeholders: `your_username`, `your_password` on GitHub; actual on server).
+- **Users**: Plain text passwords in `employees` table via `database/schema.sql`.
+
+## File-by-File Analysis
+### `api/config.php`
+- **Purpose**: Configures MySQL PDO connection.
+- **Assumed Contents**: 
+  ```php
+  <?php
+  define('DB_HOST', 'localhost');
+  define('DB_NAME', 'your_database');
+  define('DB_USER', 'your_username');
+  define('DB_PASS', 'your_password');
+  try {
+      $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME, DB_USER, DB_PASS);
+      $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  } catch (PDOException $e) {
+      die("Connection failed: " . $e->getMessage());
+  }
+  ?>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/__construct.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/__construct.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>__construct</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>__construct</h1>
+<code>__construct([<b>string</b> orientation [, <b>string</b> unit [, <b>mixed</b> size]]])</code>
+<h2>Description</h2>
+This is the class constructor. It allows to set up the page size, the orientation and the
+unit of measure used in all methods (except for font sizes).
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>orientation</code></dt>
+<dd>
+Default page orientation. Possible values are (case insensitive):
+<ul>
+<li><code>P</code> or <code>Portrait</code></li>
+<li><code>L</code> or <code>Landscape</code></li>
+</ul>
+Default value is <code>P</code>.
+</dd>
+<dt><code>unit</code></dt>
+<dd>
+User unit. Possible values are:
+<ul>
+<li><code>pt</code>: point</li>
+<li><code>mm</code>: millimeter</li>
+<li><code>cm</code>: centimeter</li>
+<li><code>in</code>: inch</li>
+</ul>
+A point equals 1/72 of inch, that is to say about 0.35 mm (an inch being 2.54 cm). This
+is a very common unit in typography; font sizes are expressed in that unit.
+<br>
+<br>
+Default value is <code>mm</code>.
+</dd>
+<dt><code>size</code></dt>
+<dd>
+The size used for pages. It can be either one of the following values (case insensitive):
+<ul>
+<li><code>A3</code></li>
+<li><code>A4</code></li>
+<li><code>A5</code></li>
+<li><code>Letter</code></li>
+<li><code>Legal</code></li>
+</ul>
+or an array containing the width and the height (expressed in the unit given by <code>unit</code>).<br>
+<br>
+Default value is <code>A4</code>.
+</dd>
+</dl>
+<h2>Example</h2>
+Document with a custom 100x150 mm page size:
+<div class="doc-source">
+<pre><code>$pdf = new FPDF('P', 'mm', array(100,150));</code></pre>
+</div>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/gety.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/gety.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GetY</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>GetY</h1>
+<code><b>float</b> GetY()</code>
+<h2>Description</h2>
+Returns the ordinate of the current position.
+<h2>See also</h2>
+<a href="sety.htm">SetY</a>,
+<a href="getx.htm">GetX</a>,
+<a href="setx.htm">SetX</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/setcreator.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setcreator.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetCreator</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetCreator</h1>
+<code>SetCreator(<b>string</b> creator [, <b>boolean</b> isUTF8])</code>
+<h2>Description</h2>
+Defines the creator of the document. This is typically the name of the application that
+generates the PDF.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>creator</code></dt>
+<dd>
+The name of the creator.
+</dd>
+<dt><code>isUTF8</code></dt>
+<dd>
+Indicates if the string is encoded in ISO-8859-1 (<code>false</code>) or UTF-8 (<code>true</code>).<br>
+Default value: <code>false</code>.
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="setauthor.htm">SetAuthor</a>,
+<a href="setkeywords.htm">SetKeywords</a>,
+<a href="setsubject.htm">SetSubject</a>,
+<a href="settitle.htm">SetTitle</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/doc/settitle.htm
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/settitle.htm]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SetTitle</title>
+<link type="text/css" rel="stylesheet" href="../fpdf.css">
+</head>
+<body>
+<h1>SetTitle</h1>
+<code>SetTitle(<b>string</b> title [, <b>boolean</b> isUTF8])</code>
+<h2>Description</h2>
+Defines the title of the document.
+<h2>Parameters</h2>
+<dl class="param">
+<dt><code>title</code></dt>
+<dd>
+The title.
+</dd>
+<dt><code>isUTF8</code></dt>
+<dd>
+Indicates if the string is encoded in ISO-8859-1 (<code>false</code>) or UTF-8 (<code>true</code>).<br>
+Default value: <code>false</code>.
+</dd>
+</dl>
+<h2>See also</h2>
+<a href="setauthor.htm">SetAuthor</a>,
+<a href="setcreator.htm">SetCreator</a>,
+<a href="setkeywords.htm">SetKeywords</a>,
+<a href="setsubject.htm">SetSubject</a>
+<hr style="margin-top:1.5em">
+<div style="text-align:center"><a href="index.htm">Index</a></div>
+</body>
+</html>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/font/helveticai.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/helveticai.php]
+<?php
+$type = 'Core';
+$name = 'Helvetica-Oblique';
+$up = -100;
+$ut = 50;
+$cw = array(
+	chr(0)=>278,chr(1)=>278,chr(2)=>278,chr(3)=>278,chr(4)=>278,chr(5)=>278,chr(6)=>278,chr(7)=>278,chr(8)=>278,chr(9)=>278,chr(10)=>278,chr(11)=>278,chr(12)=>278,chr(13)=>278,chr(14)=>278,chr(15)=>278,chr(16)=>278,chr(17)=>278,chr(18)=>278,chr(19)=>278,chr(20)=>278,chr(21)=>278,
+	chr(22)=>278,chr(23)=>278,chr(24)=>278,chr(25)=>278,chr(26)=>278,chr(27)=>278,chr(28)=>278,chr(29)=>278,chr(30)=>278,chr(31)=>278,' '=>278,'!'=>278,'"'=>355,'#'=>556,'$'=>556,'%'=>889,'&'=>667,'\''=>191,'('=>333,')'=>333,'*'=>389,'+'=>584,
+	','=>278,'-'=>333,'.'=>278,'/'=>278,'0'=>556,'1'=>556,'2'=>556,'3'=>556,'4'=>556,'5'=>556,'6'=>556,'7'=>556,'8'=>556,'9'=>556,':'=>278,';'=>278,'<'=>584,'='=>584,'>'=>584,'?'=>556,'@'=>1015,'A'=>667,
+	'B'=>667,'C'=>722,'D'=>722,'E'=>667,'F'=>611,'G'=>778,'H'=>722,'I'=>278,'J'=>500,'K'=>667,'L'=>556,'M'=>833,'N'=>722,'O'=>778,'P'=>667,'Q'=>778,'R'=>722,'S'=>667,'T'=>611,'U'=>722,'V'=>667,'W'=>944,
+	'X'=>667,'Y'=>667,'Z'=>611,'['=>278,'\\'=>278,']'=>278,'^'=>469,'_'=>556,'`'=>333,'a'=>556,'b'=>556,'c'=>500,'d'=>556,'e'=>556,'f'=>278,'g'=>556,'h'=>556,'i'=>222,'j'=>222,'k'=>500,'l'=>222,'m'=>833,
+	'n'=>556,'o'=>556,'p'=>556,'q'=>556,'r'=>333,'s'=>500,'t'=>278,'u'=>556,'v'=>500,'w'=>722,'x'=>500,'y'=>500,'z'=>500,'{'=>334,'|'=>260,'}'=>334,'~'=>584,chr(127)=>350,chr(128)=>556,chr(129)=>350,chr(130)=>222,chr(131)=>556,
+	chr(132)=>333,chr(133)=>1000,chr(134)=>556,chr(135)=>556,chr(136)=>333,chr(137)=>1000,chr(138)=>667,chr(139)=>333,chr(140)=>1000,chr(141)=>350,chr(142)=>611,chr(143)=>350,chr(144)=>350,chr(145)=>222,chr(146)=>222,chr(147)=>333,chr(148)=>333,chr(149)=>350,chr(150)=>556,chr(151)=>1000,chr(152)=>333,chr(153)=>1000,
+	chr(154)=>500,chr(155)=>333,chr(156)=>944,chr(157)=>350,chr(158)=>500,chr(159)=>667,chr(160)=>278,chr(161)=>333,chr(162)=>556,chr(163)=>556,chr(164)=>556,chr(165)=>556,chr(166)=>260,chr(167)=>556,chr(168)=>333,chr(169)=>737,chr(170)=>370,chr(171)=>556,chr(172)=>584,chr(173)=>333,chr(174)=>737,chr(175)=>333,
+	chr(176)=>400,chr(177)=>584,chr(178)=>333,chr(179)=>333,chr(180)=>333,chr(181)=>556,chr(182)=>537,chr(183)=>278,chr(184)=>333,chr(185)=>333,chr(186)=>365,chr(187)=>556,chr(188)=>834,chr(189)=>834,chr(190)=>834,chr(191)=>611,chr(192)=>667,chr(193)=>667,chr(194)=>667,chr(195)=>667,chr(196)=>667,chr(197)=>667,
+	chr(198)=>1000,chr(199)=>722,chr(200)=>667,chr(201)=>667,chr(202)=>667,chr(203)=>667,chr(204)=>278,chr(205)=>278,chr(206)=>278,chr(207)=>278,chr(208)=>722,chr(209)=>722,chr(210)=>778,chr(211)=>778,chr(212)=>778,chr(213)=>778,chr(214)=>778,chr(215)=>584,chr(216)=>778,chr(217)=>722,chr(218)=>722,chr(219)=>722,
+	chr(220)=>722,chr(221)=>667,chr(222)=>667,chr(223)=>611,chr(224)=>556,chr(225)=>556,chr(226)=>556,chr(227)=>556,chr(228)=>556,chr(229)=>556,chr(230)=>889,chr(231)=>500,chr(232)=>556,chr(233)=>556,chr(234)=>556,chr(235)=>556,chr(236)=>278,chr(237)=>278,chr(238)=>278,chr(239)=>278,chr(240)=>556,chr(241)=>556,
+	chr(242)=>556,chr(243)=>556,chr(244)=>556,chr(245)=>556,chr(246)=>556,chr(247)=>584,chr(248)=>611,chr(249)=>556,chr(250)=>556,chr(251)=>556,chr(252)=>556,chr(253)=>500,chr(254)=>556,chr(255)=>500);
+$enc = 'cp1252';
+$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
+?>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/makefont/cp1253.map
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/makefont/cp1253.map]
+!00 U+0000 .notdef
+!01 U+0001 .notdef
+!02 U+0002 .notdef
+!03 U+0003 .notdef
+!04 U+0004 .notdef
+!05 U+0005 .notdef
+!06 U+0006 .notdef
+!07 U+0007 .notdef
+!08 U+0008 .notdef
+!09 U+0009 .notdef
+!0A U+000A .notdef
+!0B U+000B .notdef
+!0C U+000C .notdef
+!0D U+000D .notdef
+!0E U+000E .notdef
+!0F U+000F .notdef
+!10 U+0010 .notdef
+!11 U+0011 .notdef
+!12 U+0012 .notdef
+!13 U+0013 .notdef
+!14 U+0014 .notdef
+!15 U+0015 .notdef
+!16 U+0016 .notdef
+!17 U+0017 .notdef
+!18 U+0018 .notdef
+!19 U+0019 .notdef
+!1A U+001A .notdef
+!1B U+001B .notdef
+!1C U+001C .notdef
+!1D U+001D .notdef
+!1E U+001E .notdef
+!1F U+001F .notdef
+!20 U+0020 space
+!21 U+0021 exclam
+!22 U+0022 quotedbl
+!23 U+0023 numbersign
+!24 U+0024 dollar
+!25 U+0025 percent
+!26 U+0026 ampersand
+!27 U+0027 quotesingle
+!28 U+0028 parenleft
+!29 U+0029 parenright
+!2A U+002A asterisk
+!2B U+002B plus
+!2C U+002C comma
+!2D U+002D hyphen
+!2E U+002E period
+!2F U+002F slash
+!30 U+0030 zero
+!31 U+0031 one
+!32 U+0032 two
+!33 U+0033 three
+!34 U+0034 four
+!35 U+0035 five
+!36 U+0036 six
+!37 U+0037 seven
+!38 U+0038 eight
+!39 U+0039 nine
+!3A U+003A colon
+!3B U+003B semicolon
+!3C U+003C less
+!3D U+003D equal
+!3E U+003E greater
+!3F U+003F question
+!40 U+0040 at
+!41 U+0041 A
+!42 U+0042 B
+!43 U+0043 C
+!44 U+0044 D
+!45 U+0045 E
+!46 U+0046 F
+!47 U+0047 G
+!48 U+0048 H
+!49 U+0049 I
+!4A U+004A J
+!4B U+004B K
+!4C U+004C L
+!4D U+004D M
+!4E U+004E N
+!4F U+004F O
+!50 U+0050 P
+!51 U+0051 Q
+!52 U+0052 R
+!53 U+0053 S
+!54 U+0054 T
+!55 U+0055 U
+!56 U+0056 V
+!57 U+0057 W
+!58 U+0058 X
+!59 U+0059 Y
+!5A U+005A Z
+!5B U+005B bracketleft
+!5C U+005C backslash
+!5D U+005D bracketright
+!5E U+005E asciicircum
+!5F U+005F underscore
+!60 U+0060 grave
+!61 U+0061 a
+!62 U+0062 b
+!63 U+0063 c
+!64 U+0064 d
+!65 U+0065 e
+!66 U+0066 f
+!67 U+0067 g
+!68 U+0068 h
+!69 U+0069 i
+!6A U+006A j
+!6B U+006B k
+!6C U+006C l
+!6D U+006D m
+!6E U+006E n
+!6F U+006F o
+!70 U+0070 p
+!71 U+0071 q
+!72 U+0072 r
+!73 U+0073 s
+!74 U+0074 t
+!75 U+0075 u
+!76 U+0076 v
+!77 U+0077 w
+!78 U+0078 x
+!79 U+0079 y
+!7A U+007A z
+!7B U+007B braceleft
+!7C U+007C bar
+!7D U+007D braceright
+!7E U+007E asciitilde
+!7F U+007F .notdef
+!80 U+20AC Euro
+!82 U+201A quotesinglbase
+!83 U+0192 florin
+!84 U+201E quotedblbase
+!85 U+2026 ellipsis
+!86 U+2020 dagger
+!87 U+2021 daggerdbl
+!89 U+2030 perthousand
+!8B U+2039 guilsinglleft
+!91 U+2018 quoteleft
+!92 U+2019 quoteright
+!93 U+201C quotedblleft
+!94 U+201D quotedblright
+!95 U+2022 bullet
+!96 U+2013 endash
+!97 U+2014 emdash
+!99 U+2122 trademark
+!9B U+203A guilsinglright
+!A0 U+00A0 space
+!A1 U+0385 dieresistonos
+!A2 U+0386 Alphatonos
+!A3 U+00A3 sterling
+!A4 U+00A4 currency
+!A5 U+00A5 yen
+!A6 U+00A6 brokenbar
+!A7 U+00A7 section
+!A8 U+00A8 dieresis
+!A9 U+00A9 copyright
+!AB U+00AB guillemotleft
+!AC U+00AC logicalnot
+!AD U+00AD hyphen
+!AE U+00AE registered
+!AF U+2015 afii00208
+!B0 U+00B0 degree
+!B1 U+00B1 plusminus
+!B2 U+00B2 twosuperior
+!B3 U+00B3 threesuperior
+!B4 U+0384 tonos
+!B5 U+00B5 mu
+!B6 U+00B6 paragraph
+!B7 U+00B7 periodcentered
+!B8 U+0388 Epsilontonos
+!B9 U+0389 Etatonos
+!BA U+038A Iotatonos
+!BB U+00BB guillemotright
+!BC U+038C Omicrontonos
+!BD U+00BD onehalf
+!BE U+038E Upsilontonos
+!BF U+038F Omegatonos
+!C0 U+0390 iotadieresistonos
+!C1 U+0391 Alpha
+!C2 U+0392 Beta
+!C3 U+0393 Gamma
+!C4 U+0394 Delta
+!C5 U+0395 Epsilon
+!C6 U+0396 Zeta
+!C7 U+0397 Eta
+!C8 U+0398 Theta
+!C9 U+0399 Iota
+!CA U+039A Kappa
+!CB U+039B Lambda
+!CC U+039C Mu
+!CD U+039D Nu
+!CE U+039E Xi
+!CF U+039F Omicron
+!D0 U+03A0 Pi
+!D1 U+03A1 Rho
+!D3 U+03A3 Sigma
+!D4 U+03A4 Tau
+!D5 U+03A5 Upsilon
+!D6 U+03A6 Phi
+!D7 U+03A7 Chi
+!D8 U+03A8 Psi
+!D9 U+03A9 Omega
+!DA U+03AA Iotadieresis
+!DB U+03AB Upsilondieresis
+!DC U+03AC alphatonos
+!DD U+03AD epsilontonos
+!DE U+03AE etatonos
+!DF U+03AF iotatonos
+!E0 U+03B0 upsilondieresistonos
+!E1 U+03B1 alpha
+!E2 U+03B2 beta
+!E3 U+03B3 gamma
+!E4 U+03B4 delta
+!E5 U+03B5 epsilon
+!E6 U+03B6 zeta
+!E7 U+03B7 eta
+!E8 U+03B8 theta
+!E9 U+03B9 iota
+!EA U+03BA kappa
+!EB U+03BB lambda
+!EC U+03BC mu
+!ED U+03BD nu
+!EE U+03BE xi
+!EF U+03BF omicron
+!F0 U+03C0 pi
+!F1 U+03C1 rho
+!F2 U+03C2 sigma1
+!F3 U+03C3 sigma
+!F4 U+03C4 tau
+!F5 U+03C5 upsilon
+!F6 U+03C6 phi
+!F7 U+03C7 chi
+!F8 U+03C8 psi
+!F9 U+03C9 omega
+!FA U+03CA iotadieresis
+!FB U+03CB upsilondieresis
+!FC U+03CC omicrontonos
+!FD U+03CD upsilontonos
+!FE U+03CE omegatonos
+
+---
+### File: ./RedLionSalvageAi/fpdf186/makefont/iso-8859-9.map
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/makefont/iso-8859-9.map]
+!00 U+0000 .notdef
+!01 U+0001 .notdef
+!02 U+0002 .notdef
+!03 U+0003 .notdef
+!04 U+0004 .notdef
+!05 U+0005 .notdef
+!06 U+0006 .notdef
+!07 U+0007 .notdef
+!08 U+0008 .notdef
+!09 U+0009 .notdef
+!0A U+000A .notdef
+!0B U+000B .notdef
+!0C U+000C .notdef
+!0D U+000D .notdef
+!0E U+000E .notdef
+!0F U+000F .notdef
+!10 U+0010 .notdef
+!11 U+0011 .notdef
+!12 U+0012 .notdef
+!13 U+0013 .notdef
+!14 U+0014 .notdef
+!15 U+0015 .notdef
+!16 U+0016 .notdef
+!17 U+0017 .notdef
+!18 U+0018 .notdef
+!19 U+0019 .notdef
+!1A U+001A .notdef
+!1B U+001B .notdef
+!1C U+001C .notdef
+!1D U+001D .notdef
+!1E U+001E .notdef
+!1F U+001F .notdef
+!20 U+0020 space
+!21 U+0021 exclam
+!22 U+0022 quotedbl
+!23 U+0023 numbersign
+!24 U+0024 dollar
+!25 U+0025 percent
+!26 U+0026 ampersand
+!27 U+0027 quotesingle
+!28 U+0028 parenleft
+!29 U+0029 parenright
+!2A U+002A asterisk
+!2B U+002B plus
+!2C U+002C comma
+!2D U+002D hyphen
+!2E U+002E period
+!2F U+002F slash
+!30 U+0030 zero
+!31 U+0031 one
+!32 U+0032 two
+!33 U+0033 three
+!34 U+0034 four
+!35 U+0035 five
+!36 U+0036 six
+!37 U+0037 seven
+!38 U+0038 eight
+!39 U+0039 nine
+!3A U+003A colon
+!3B U+003B semicolon
+!3C U+003C less
+!3D U+003D equal
+!3E U+003E greater
+!3F U+003F question
+!40 U+0040 at
+!41 U+0041 A
+!42 U+0042 B
+!43 U+0043 C
+!44 U+0044 D
+!45 U+0045 E
+!46 U+0046 F
+!47 U+0047 G
+!48 U+0048 H
+!49 U+0049 I
+!4A U+004A J
+!4B U+004B K
+!4C U+004C L
+!4D U+004D M
+!4E U+004E N
+!4F U+004F O
+!50 U+0050 P
+!51 U+0051 Q
+!52 U+0052 R
+!53 U+0053 S
+!54 U+0054 T
+!55 U+0055 U
+!56 U+0056 V
+!57 U+0057 W
+!58 U+0058 X
+!59 U+0059 Y
+!5A U+005A Z
+!5B U+005B bracketleft
+!5C U+005C backslash
+!5D U+005D bracketright
+!5E U+005E asciicircum
+!5F U+005F underscore
+!60 U+0060 grave
+!61 U+0061 a
+!62 U+0062 b
+!63 U+0063 c
+!64 U+0064 d
+!65 U+0065 e
+!66 U+0066 f
+!67 U+0067 g
+!68 U+0068 h
+!69 U+0069 i
+!6A U+006A j
+!6B U+006B k
+!6C U+006C l
+!6D U+006D m
+!6E U+006E n
+!6F U+006F o
+!70 U+0070 p
+!71 U+0071 q
+!72 U+0072 r
+!73 U+0073 s
+!74 U+0074 t
+!75 U+0075 u
+!76 U+0076 v
+!77 U+0077 w
+!78 U+0078 x
+!79 U+0079 y
+!7A U+007A z
+!7B U+007B braceleft
+!7C U+007C bar
+!7D U+007D braceright
+!7E U+007E asciitilde
+!7F U+007F .notdef
+!80 U+0080 .notdef
+!81 U+0081 .notdef
+!82 U+0082 .notdef
+!83 U+0083 .notdef
+!84 U+0084 .notdef
+!85 U+0085 .notdef
+!86 U+0086 .notdef
+!87 U+0087 .notdef
+!88 U+0088 .notdef
+!89 U+0089 .notdef
+!8A U+008A .notdef
+!8B U+008B .notdef
+!8C U+008C .notdef
+!8D U+008D .notdef
+!8E U+008E .notdef
+!8F U+008F .notdef
+!90 U+0090 .notdef
+!91 U+0091 .notdef
+!92 U+0092 .notdef
+!93 U+0093 .notdef
+!94 U+0094 .notdef
+!95 U+0095 .notdef
+!96 U+0096 .notdef
+!97 U+0097 .notdef
+!98 U+0098 .notdef
+!99 U+0099 .notdef
+!9A U+009A .notdef
+!9B U+009B .notdef
+!9C U+009C .notdef
+!9D U+009D .notdef
+!9E U+009E .notdef
+!9F U+009F .notdef
+!A0 U+00A0 space
+!A1 U+00A1 exclamdown
+!A2 U+00A2 cent
+!A3 U+00A3 sterling
+!A4 U+00A4 currency
+!A5 U+00A5 yen
+!A6 U+00A6 brokenbar
+!A7 U+00A7 section
+!A8 U+00A8 dieresis
+!A9 U+00A9 copyright
+!AA U+00AA ordfeminine
+!AB U+00AB guillemotleft
+!AC U+00AC logicalnot
+!AD U+00AD hyphen
+!AE U+00AE registered
+!AF U+00AF macron
+!B0 U+00B0 degree
+!B1 U+00B1 plusminus
+!B2 U+00B2 twosuperior
+!B3 U+00B3 threesuperior
+!B4 U+00B4 acute
+!B5 U+00B5 mu
+!B6 U+00B6 paragraph
+!B7 U+00B7 periodcentered
+!B8 U+00B8 cedilla
+!B9 U+00B9 onesuperior
+!BA U+00BA ordmasculine
+!BB U+00BB guillemotright
+!BC U+00BC onequarter
+!BD U+00BD onehalf
+!BE U+00BE threequarters
+!BF U+00BF questiondown
+!C0 U+00C0 Agrave
+!C1 U+00C1 Aacute
+!C2 U+00C2 Acircumflex
+!C3 U+00C3 Atilde
+!C4 U+00C4 Adieresis
+!C5 U+00C5 Aring
+!C6 U+00C6 AE
+!C7 U+00C7 Ccedilla
+!C8 U+00C8 Egrave
+!C9 U+00C9 Eacute
+!CA U+00CA Ecircumflex
+!CB U+00CB Edieresis
+!CC U+00CC Igrave
+!CD U+00CD Iacute
+!CE U+00CE Icircumflex
+!CF U+00CF Idieresis
+!D0 U+011E Gbreve
+!D1 U+00D1 Ntilde
+!D2 U+00D2 Ograve
+!D3 U+00D3 Oacute
+!D4 U+00D4 Ocircumflex
+!D5 U+00D5 Otilde
+!D6 U+00D6 Odieresis
+!D7 U+00D7 multiply
+!D8 U+00D8 Oslash
+!D9 U+00D9 Ugrave
+!DA U+00DA Uacute
+!DB U+00DB Ucircumflex
+!DC U+00DC Udieresis
+!DD U+0130 Idotaccent
+!DE U+015E Scedilla
+!DF U+00DF germandbls
+!E0 U+00E0 agrave
+!E1 U+00E1 aacute
+!E2 U+00E2 acircumflex
+!E3 U+00E3 atilde
+!E4 U+00E4 adieresis
+!E5 U+00E5 aring
+!E6 U+00E6 ae
+!E7 U+00E7 ccedilla
+!E8 U+00E8 egrave
+!E9 U+00E9 eacute
+!EA U+00EA ecircumflex
+!EB U+00EB edieresis
+!EC U+00EC igrave
+!ED U+00ED iacute
+!EE U+00EE icircumflex
+!EF U+00EF idieresis
+!F0 U+011F gbreve
+!F1 U+00F1 ntilde
+!F2 U+00F2 ograve
+!F3 U+00F3 oacute
+!F4 U+00F4 ocircumflex
+!F5 U+00F5 otilde
+!F6 U+00F6 odieresis
+!F7 U+00F7 divide
+!F8 U+00F8 oslash
+!F9 U+00F9 ugrave
+!FA U+00FA uacute
+!FB U+00FB ucircumflex
+!FC U+00FC udieresis
+!FD U+0131 dotlessi
+!FE U+015F scedilla
+!FF U+00FF ydieresis
+
+---
+### File: ./RedLionSalvageAi/fpdf186/tutorial/makefont.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/tutorial/makefont.php]
+<?php
+// Generation of font definition file for tutorial 7
+require('../makefont/makefont.php');
+
+MakeFont('CevicheOne-Regular.ttf', 'cp1252');
+?>
+
+---
+### File: ./RedLionSalvageAi/fpdf186/tutorial/tuto7.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/tutorial/tuto7.php]
+<?php
+require('../fpdf.php');
+
+$pdf = new FPDF();
+$pdf->AddFont('CevicheOne','','CevicheOne-Regular.php','.');
+$pdf->AddPage();
+$pdf->SetFont('CevicheOne','',45);
+$pdf->Write(10,'Enjoy new fonts with FPDF!');
+$pdf->Output();
+?>
+
+---
+### File: ./ai.redlionsalvage.net/api/fleet/get_fleet_vehicles.php
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./ai.redlionsalvage.net/api/fleet/get_fleet_vehicles.php]
+<?php
+require_once '../config.php';
+header('Content-Type: application/json');
+$result = $db->query("SELECT fv.*, e.username AS assigned_driver, IF(fv.last_weighed_at > NOW() - INTERVAL 1 HOUR, 'In Use', IF(fv.maintenance_due <= NOW(), 'Maintenance', 'Idle')) AS current_status, (SELECT COUNT(*) FROM fleet_vehicle_documents fvd WHERE fvd.truck_id = fv.id AND fvd.status = 'approved' AND fvd.expiration_date <= NOW() + INTERVAL 30 DAY) AS documents_expiring FROM fleet_vehicles fv LEFT JOIN fleet_vehicle_assignments fva ON fv.id = fva.vehicle_id AND fva.unassigned_at IS NULL LEFT JOIN employees e ON fva.driver_id = e.id");
+$vehicles = [];
+while ($row = $result->fetch_assoc()) {
+    $vehicles[] = $row;
+}
+echo json_encode($vehicles);
+?>
+---
 
 ---

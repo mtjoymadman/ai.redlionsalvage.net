@@ -34,13 +34,8 @@ test "" = "$(grep '^Signed-off-by: ' "$1" |
 }
 
 ---
-### File: ./.git/info/exclude
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/info/exclude]
-# git ls-files --others --exclude-from=.git/info/exclude
-# Lines that start with '#' are comments.
-# For a project mostly in C, the following would be a good set of
-# exclude patterns (uncomment them if you want to use them):
-# *.[oa]
-# *~
+### File: ./.git/logs/HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/HEAD]
+0000000000000000000000000000000000000000 e45c7cd472ac2539f528a483dfbcd9b673a1630c runner <runner@fv-az1334-603.m3skpk2sd2iurbdokvelndmksc.dx.internal.cloudapp.net> 1741050760 +0000	checkout: moving from master to main
 
 ---

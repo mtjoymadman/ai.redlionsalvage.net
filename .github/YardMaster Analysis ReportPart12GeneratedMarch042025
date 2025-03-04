@@ -63,12 +63,14 @@ done
 exit 0
 
 ---
-### File: ./.git/objects/pack/pack-5f676f4dc14198d6b74724292e57b3e48a64dfaf.rev
-[Error: 'utf-8' codec can't decode byte 0xb1 in position 15: invalid start byte]
+### File: ./.git/refs/heads/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/refs/heads/main]
+e45c7cd472ac2539f528a483dfbcd9b673a1630c
+
 ---
-### File: ./.github/YardMaster Analysis ReportPart6GeneratedMarch032025
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart6GeneratedMarch032025]
-# YardMaster Analysis ReportPart6GeneratedMarch032025
+### File: ./.github/YardMaster Analysis ReportPart2GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart2GeneratedMarch032025]
+# YardMaster Analysis ReportPart2GeneratedMarch032025
 Generated: March 03, 2025
 
 ## Repository Structure
@@ -76,47 +78,96 @@ Generated: March 03, 2025
 
 ## File Contents
 
-### File: ./.git/hooks/commit-msg.sample
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/commit-msg.sample]
+### File: ./.git/HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/HEAD]
+ref: refs/heads/main
+
+---
+### File: ./.git/hooks/push-to-checkout.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/push-to-checkout.sample]
 #!/bin/sh
-#
-# An example hook script to check the commit log message.
-# Called by "git commit" with one argument, the name of the file
-# that has the commit message.  The hook should exit with non-zero
-# status after issuing an appropriate message if it wants to stop the
-# commit.  The hook is allowed to edit the commit message file.
-#
-# To enable this hook, rename this file to "commit-msg".
 
-# Uncomment the below to add a Signed-off-by line to the message.
-# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
-# hook is more suited to it.
+# An example hook script to update a checked-out tree on a git push.
 #
-# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+# This hook is invoked by git-receive-pack(1) when it reacts to git
+# push and updates reference(s) in its repository, and when the push
+# tries to update the branch that is currently checked out and the
+# receive.denyCurrentBranch configuration variable is set to
+# updateInstead.
+#
+# By default, such a push is refused if the working tree and the index
+# of the remote repository has any difference from the currently
+# checked out commit; when both the working tree and the index match
+# the current commit, they are updated to match the newly pushed tip
+# of the branch. This hook is to be used to override the default
+# behaviour; however the code below reimplements the default behaviour
+# as a starting point for convenient modification.
+#
+# The hook receives the commit with which the tip of the current
+# branch is going to be updated:
+commit=$1
 
-# This example catches duplicate Signed-off-by lines.
-
-test "" = "$(grep '^Signed-off-by: ' "$1" |
-	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
-	echo >&2 Duplicate Signed-off-by lines.
+# It can exit with a non-zero status to refuse the push (when it does
+# so, it must not modify the index or the working tree).
+die () {
+	echo >&2 "$*"
 	exit 1
 }
 
----
-### File: ./.git/info/exclude
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/info/exclude]
-# git ls-files --others --exclude-from=.git/info/exclude
-# Lines that start with '#' are comments.
-# For a project mostly in C, the following would be a good set of
-# exclude patterns (uncomment them if you want to use them):
-# *.[oa]
-# *~
+# Or it can make any necessary changes to the working tree and to the
+# index to bring them to the desired state when the tip of the current
+# branch is updated to the new commit, and exit with a zero status.
+#
+# For example, the hook can simply run git read-tree -u -m HEAD "$1"
+# in order to emulate git fetch that is run in the reverse direction
+# with git push, as the two-tree form of git read-tree -u -m is
+# essentially the same as git switch or git checkout that switches
+# branches while keeping the local changes in the working tree that do
+# not interfere with the difference between the branches.
+
+# The below is a more-or-less exact translation to shell of the C code
+# for the default behaviour for git's push-to-checkout hook defined in
+# the push_to_deploy() function in builtin/receive-pack.c.
+#
+# Note that the hook will be executed from the repository directory,
+# not from the working tree, so if you want to perform operations on
+# the working tree, you will have to adapt your code accordingly, e.g.
+# by adding "cd .." or using relative paths.
+
+if ! git update-index -q --ignore-submodules --refresh
+then
+	die "Up-to-date check failed"
+fi
+
+if ! git diff-files --quiet --ignore-submodules --
+then
+	die "Working directory has unstaged changes"
+fi
+
+# This is a rough translation of:
+#
+#   head_has_history() ? "HEAD" : EMPTY_TREE_SHA1_HEX
+if git cat-file -e HEAD 2>/dev/null
+then
+	head=HEAD
+else
+	head=$(git hash-object -t tree --stdin </dev/null)
+fi
+
+if ! git diff-index --quiet --cached --ignore-submodules $head --
+then
+	die "Working directory has staged changes"
+fi
+
+if ! git read-tree -u -m "$commit"
+then
+	die "Could not update working tree to new HEAD"
+fi
 
 ---
-### File: ./.github/YardMaster Analysis ReportPart5GeneratedMarch032025
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart5GeneratedMarch032025]
-# YardMaster Analysis ReportPart5GeneratedMarch032025
+### File: ./.github/YardMaster Analysis ReportPart1GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart1GeneratedMarch032025]
+# YardMaster Analysis ReportPart1GeneratedMarch032025
 Generated: March 03, 2025
 
 ## Repository Structure
@@ -124,309 +175,62 @@ Generated: March 03, 2025
 
 ## File Contents
 
-### File: ./.git/hooks/applypatch-msg.sample
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/applypatch-msg.sample]
+### File: ./.git/FETCH_HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/FETCH_HEAD]
+2d8947b0cf06a8a245724342ec2816295b2fc81f		'2d8947b0cf06a8a245724342ec2816295b2fc81f' of https://github.com/mtjoymadman/ai.redlionsalvage.net
+
+---
+### File: ./.git/hooks/prepare-commit-msg.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/prepare-commit-msg.sample]
 #!/bin/sh
 #
-# An example hook script to check the commit log message taken by
-# applypatch from an e-mail message.
+# An example hook script to prepare the commit log message.
+# Called by "git commit" with the name of the file that has the
+# commit message, followed by the description of the commit
+# message's source.  The hook's purpose is to edit the commit
+# message file.  If the hook fails with a non-zero status,
+# the commit is aborted.
 #
-# The hook should exit with non-zero status after issuing an
-# appropriate message if it wants to stop the commit.  The hook is
-# allowed to edit the commit message file.
+# To enable this hook, rename this file to "prepare-commit-msg".
+
+# This hook includes three examples. The first one removes the
+# "# Please enter the commit message..." help message.
 #
-# To enable this hook, rename this file to "applypatch-msg".
+# The second includes the output of "git diff --name-status -r"
+# into the message, just before the "git status" output.  It is
+# commented because it doesn't cope with --amend or with squashed
+# commits.
+#
+# The third example adds a Signed-off-by line to the message, that can
+# still be edited.  This is rarely a good idea.
 
-. git-sh-setup
-commitmsg="$(git rev-parse --git-path hooks/commit-msg)"
-test -x "$commitmsg" && exec "$commitmsg" ${1+"$@"}
-:
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
 
----
-### File: ./.git/index
-[Error: 'utf-8' codec can't decode byte 0xc6 in position 13: invalid continuation byte]
----
+/usr/bin/perl -i.bak -ne 'print unless(m/^. Please enter the commit message/..m/^#$/)' "$COMMIT_MSG_FILE"
 
----
-### File: ./RedLionSalvageAi/ai.redlionsalvage.net-error.log (1).txt
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/ai.redlionsalvage.net-error.log (1).txt]
-[Sat Mar 01 02:15:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:15:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:15:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:13 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:16:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:24 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:16:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:02 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:29 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:19:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:23 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:28 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:30 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:30 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:59 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:28:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:28:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:29:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:31:55 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:31:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:32:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:32:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:32:14 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:32:17 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:35:38 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:35:38 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:35:49 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:35:50 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:35:52 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:35:52 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:35:53 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:36:19 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:36:19 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:36:19 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:39:08 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:39:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:39:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:39:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:45:40 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:45:41 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:45:54 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:45:54 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:45:56 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:45:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:45:57 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:00 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:07 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:07 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:09 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:46:09 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:09 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:12 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:46:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:46:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:31 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:32 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:49 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:49 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:51 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:53:51 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:52 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:53:58 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:54:05 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:54:05 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:54:08 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:54:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:54:08 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:54:10 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:54:10 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:54:11 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:43 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:45 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:58:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:54 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:56 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:58:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:58:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:59:01 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:59:16 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:59:16 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:59:22 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 02:59:22 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 02:59:22 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:06 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:06 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:13 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:15 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 03:03:15 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:15 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:18 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 03:03:18 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:18 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:20 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 03:03:20 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:21 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:23 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:25 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:27 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:39 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:39 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:41 2025] [error] mod_fcgid: stderr: PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/www/ai.redlionsalvage.net/api/get_user_roles.php on line 2) in /home/www/ai.redlionsalvage.net/api/config.php on line 2
-[Sat Mar 01 03:03:41 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:41 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:45 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:50 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:51 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:56 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:03:59 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:04:02 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:04:04 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
-[Sat Mar 01 03:04:12 2025] [error] mod_fcgid: stderr: config.php: MySQL timezone set to -05:00 (EST)
+# case "$COMMIT_SOURCE,$SHA1" in
+#  ,|template,)
+#    /usr/bin/perl -i.bak -pe '
+#       print "\n" . `git diff --cached --name-status -r`
+# 	 if /^#/ && $first++ == 0' "$COMMIT_MSG_FILE" ;;
+#  *) ;;
+# esac
+
+# SOB=$(git var GIT_COMMITTER_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# git interpret-trailers --in-place --trailer "$SOB" "$COMMIT_MSG_FILE"
+# if test -z "$COMMIT_SOURCE"
+# then
+#   /usr/bin/perl -i.bak -pe 'print "\n" if !$first_line++' "$COMMIT_MSG_FILE"
+# fi
 
 ---
-### File: ./RedLionSalvageAi/fpdf186/doc/footer.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/footer.htm]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Footer</title>
-<link type="text/css" rel="stylesheet" href="../fpdf.css">
-</head>
-<body>
-<h1>Footer</h1>
-<code>Footer()</code>
-<h2>Description</h2>
-This method is used to render the page footer. It is automatically called by AddPage() and
-Close() and should not be called directly by the application. The implementation in FPDF is
-empty, so you have to subclass it and override the method if you want a specific processing.
-<h2>Example</h2>
-<div class="doc-source">
-<pre><code>class PDF extends FPDF
-{
-    function Footer()
-    {
-        // Go to 1.5 cm from bottom
-        $this-&gt;SetY(-15);
-        // Select Arial italic 8
-        $this-&gt;SetFont('Arial', 'I', 8);
-        // Print centered page number
-        $this-&gt;Cell(0, 10, 'Page '.$this-&gt;PageNo(), 0, 0, 'C');
-    }
-}</code></pre>
-</div>
-<h2>See also</h2>
-<a href="header.htm">Header</a>
-<hr style="margin-top:1.5em">
-<div style="text-align:center"><a href="index.htm">Index</a></div>
-</body>
-</html>
+### File: ./.git/shallow
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/shallow]
+2d8947b0cf06a8a245724342ec2816295b2fc81f
 
 ---
-### File: ./RedLionSalvageAi/fpdf186/doc/pageno.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/pageno.htm]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>PageNo</title>
-<link type="text/css" rel="stylesheet" href="../fpdf.css">
-</head>
-<body>
-<h1>PageNo</h1>
-<code><b>int</b> PageNo()</code>
-<h2>Description</h2>
-Returns the current page number.
-<h2>See also</h2>
-<a href="aliasnbpages.htm">AliasNbPages</a>
-<hr style="margin-top:1.5em">
-<div style="text-align:center"><a href="index.htm">Index</a></div>
-</body>
-</html>
-
----
-### File: ./RedLionSalvageAi/fpdf186/doc/setlink.htm
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/doc/setlink.htm]
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>SetLink</title>
-<link type="text/css" rel="stylesheet" href="../fpdf.css">
-</head>
-<body>
-<h1>SetLink</h1>
-<code>SetLink(<b>int</b> link [, <b>float</b> y [, <b>int</b> page]])</code>
-<h2>Description</h2>
-Defines the page and position a link points to.
-<h2>Parameters</h2>
-<dl class="param">
-<dt><code>link</code></dt>
-<dd>
-The link identifier returned by AddLink().
-</dd>
-<dt><code>y</code></dt>
-<dd>
-Ordinate of target position; <code>-1</code> indicates the current position.
-The default value is <code>0</code> (top of page).
-</dd>
-<dt><code>page</code></dt>
-<dd>
-Number of target page; <code>-1</code> indicates the current page. This is the default value.
-</dd>
-</dl>
-<h2>See also</h2>
-<a href="addlink.htm">AddLink</a>
-<hr style="margin-top:1.5em">
-<div style="text-align:center"><a href="index.htm">Index</a></div>
-</body>
-</html>
-
----
-### File: ./RedLionSalvageAi/fpdf186/font/courierbi.php
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/font/courierbi.php]
-<?php
-$type = 'Core';
-$name = 'Courier-BoldOblique';
-$up = -100;
-$ut = 50;
-for($i=0;$i<=255;$i++)
-	$cw[chr($i)] = 600;
-$enc = 'cp1252';
-$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
-?>
-
----
-### File: ./RedLionSalvageAi/fpdf186/install.txt
-[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./RedLionSalvageAi/fpdf186/install.txt]
-The FPDF library is made up of the following elements:
-
-- the main file, fpdf.php, which contains the class
-- the font definition files located in the font directory
-
-The font definition files are necessary as soon as you want to output some text in a document.
-If they are not accessible, the SetFont() method will produce the following error:
-
-FPDF error: Could not include font definition file
-
-
-Remarks:
-
-- Only the files corresponding to the fonts actually used are necessary
-- The tutorials provided in this package are ready to be executed
 
 ---
 
