@@ -9,6 +9,7 @@ ai.redlionsalvage.net/
 ├── composer.json  
 ├── composer.lock  
 ├── index.php  
+├── test_deployment.txt  
 ├── .github/  
 │   ├── workflows/  
 │   │   ├── deploy.yml  
@@ -87,7 +88,7 @@ ai.redlionsalvage.net/
 ## File Contents  
 
 ### Shared Server Environment
-Generated from `phpinfo()` on March 05, 2025:
+Generated from `phpinfo()` on March 05, 2025, updated March 06, 2025:
 - **PHP Version**: 8.3.17
 - **System**: Linux `web26.us.cloudlogin.co`, kernel 5.10.233-xeon-hst #1 SMP Fri Jan 10 12:38:21 UTC 2025 x86_64
 - **Server API**: CGI/FastCGI
@@ -101,9 +102,15 @@ Generated from `phpinfo()` on March 05, 2025:
   - PHP.ini Path: `/home/sys/php8.3/php.ini`
   - Upload Limits: `upload_max_filesize=100M`, `post_max_size=8M`
   - Default Socket: `/var/run/mysqld/mysqld.sock`
+- **Deployment Details**:
+  - **FTP Host**: `web26.us.cloudlogin.co` (confirmed via run #163, March 06, 2025)
+  - **FTP Path**: `/home/salvageyard/public_html/ai.redlionsalvage.net` (username `salvageyard`, confirmed via run #165)
+  - **Secrets**: `FTP_HOST`, `FTP_USERNAME` (length 33, e.g., `salvageyard@ai.redlionsalvage.net`), `FTP_PASSWORD` (length 8)
+  - **Method**: `lftp` with passive mode, excludes `.git*`, `.github/`, `.gitignore`, `composer.lock`
+  - **Status**: Deployment succeeded in run #165 (March 06, 2025, 3m 27s)
 - **Notes**: 
-  - No SSH support (no `ssh2` module)—deployment must use FTP or HTTP.
-  - FTP host should be `web26.us.cloudlogin.co`, not `ai.redlionsalvage.net`, for direct server access.
+  - No SSH support (no `ssh2` module)—initial SSH attempts failed (run #160).
+  - FTP deployment fixed by installing `lftp` (run #165) after hostname correction from `ai.redlionsalvage.net`.
 
 ### File: .github/workflows/deploy.yml  
 [Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/.github/workflows/deploy.yml]  
@@ -117,14 +124,24 @@ jobs:
     runs-on: ubuntu-latest  
     steps:  
       - uses: actions/checkout@v2  
-      - name: Deploy to Server  
-        env:  
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}  
+      - name: Install lftp  
         run: |  
-          echo "$DEPLOY_KEY" > deploy_key  
-          chmod 600 deploy_key  
-          rsync -avz --exclude '.git' -e "ssh -i deploy_key -o StrictHostKeyChecking=no" ./ user@ai.redlionsalvage.net:/var/www/ai.redlionsalvage.net  
-          rm deploy_key  
+          sudo apt-get update  
+          sudo apt-get install -y lftp  
+      - name: Deploy to Server via FTP  
+        env:  
+          FTP_HOST: ${{ secrets.FTP_HOST }}  
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}  
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}  
+          FTP_REMOTE_DIR: /home/salvageyard/public_html/ai.redlionsalvage.net  
+        run: |  
+          echo "Deploying to $FTP_HOST"  
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "$FTP_HOST" <<EOF  
+          set ftp:passive-mode true  
+          mirror -R --exclude-glob .git* --exclude-glob .github/ --exclude .gitignore --exclude composer.lock ./ $FTP_REMOTE_DIR  
+          quit  
+          EOF  
+          echo "Deployment complete"  
 ---
 
 ### File: api/auth.php  
