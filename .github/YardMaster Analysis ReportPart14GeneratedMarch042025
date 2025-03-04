@@ -1,0 +1,265 @@
+# YardMaster Analysis ReportPart14GeneratedMarch042025
+Generated: March 04, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/pre-receive.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/pre-receive.sample]
+#!/bin/sh
+#
+# An example hook script to make use of push options.
+# The example simply echoes all push options that start with 'echoback='
+# and rejects all pushes when the "reject" push option is used.
+#
+# To enable this hook, rename this file to "pre-receive".
+
+if test -n "$GIT_PUSH_OPTION_COUNT"
+then
+	i=0
+	while test "$i" -lt "$GIT_PUSH_OPTION_COUNT"
+	do
+		eval "value=\$GIT_PUSH_OPTION_$i"
+		case "$value" in
+		echoback=*)
+			echo "echo from the pre-receive-hook: ${value#*=}" >&2
+			;;
+		reject)
+			exit 1
+		esac
+		i=$((i + 1))
+	done
+fi
+
+---
+### File: ./.git/refs/remotes/origin/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/refs/remotes/origin/main]
+b286157a8695291932e20de1407cf527d67d8ca7
+
+---
+### File: ./.github/YardMaster Analysis ReportPart8GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart8GeneratedMarch032025]
+# YardMaster Analysis ReportPart8GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/post-update.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/post-update.sample]
+#!/bin/sh
+#
+# An example hook script to prepare a packed repository for use over
+# dumb transports.
+#
+# To enable this hook, rename this file to "post-update".
+
+exec git update-server-info
+
+---
+### File: ./.git/logs/refs/heads/main
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/refs/heads/main]
+0000000000000000000000000000000000000000 2d8947b0cf06a8a245724342ec2816295b2fc81f runner <runner@fv-az1326-577.(none)> 1741036606 +0000	branch: Created from refs/remotes/origin/main
+
+---
+### File: ./.github/YardMaster Analysis ReportPart7GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart7GeneratedMarch032025]
+# YardMaster Analysis ReportPart7GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/fsmonitor-watchman.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/fsmonitor-watchman.sample]
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use IPC::Open2;
+
+# An example hook script to integrate Watchman
+# (https://facebook.github.io/watchman/) with git to speed up detecting
+# new and modified files.
+#
+# The hook is passed a version (currently 2) and last update token
+# formatted as a string and outputs to stdout a new update token and
+# all files that have been modified since the update token. Paths must
+# be relative to the root of the working tree and separated by a single NUL.
+#
+# To enable this hook, rename this file to "query-watchman" and set
+# 'git config core.fsmonitor .git/hooks/query-watchman'
+#
+my ($version, $last_update_token) = @ARGV;
+
+# Uncomment for debugging
+# print STDERR "$0 $version $last_update_token\n";
+
+# Check the hook interface version
+if ($version ne 2) {
+	die "Unsupported query-fsmonitor hook version '$version'.\n" .
+	    "Falling back to scanning...\n";
+}
+
+my $git_work_tree = get_working_dir();
+
+my $retry = 1;
+
+my $json_pkg;
+eval {
+	require JSON::XS;
+	$json_pkg = "JSON::XS";
+	1;
+} or do {
+	require JSON::PP;
+	$json_pkg = "JSON::PP";
+};
+
+launch_watchman();
+
+sub launch_watchman {
+	my $o = watchman_query();
+	if (is_work_tree_watched($o)) {
+		output_result($o->{clock}, @{$o->{files}});
+	}
+}
+
+sub output_result {
+	my ($clockid, @files) = @_;
+
+	# Uncomment for debugging watchman output
+	# open (my $fh, ">", ".git/watchman-output.out");
+	# binmode $fh, ":utf8";
+	# print $fh "$clockid\n@files\n";
+	# close $fh;
+
+	binmode STDOUT, ":utf8";
+	print $clockid;
+	print "\0";
+	local $, = "\0";
+	print @files;
+}
+
+sub watchman_clock {
+	my $response = qx/watchman clock "$git_work_tree"/;
+	die "Failed to get clock id on '$git_work_tree'.\n" .
+		"Falling back to scanning...\n" if $? != 0;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub watchman_query {
+	my $pid = open2(\*CHLD_OUT, \*CHLD_IN, 'watchman -j --no-pretty')
+	or die "open2() failed: $!\n" .
+	"Falling back to scanning...\n";
+
+	# In the query expression below we're asking for names of files that
+	# changed since $last_update_token but not from the .git folder.
+	#
+	# To accomplish this, we're using the "since" generator to use the
+	# recency index to select candidate nodes and "fields" to limit the
+	# output to file names only. Then we're using the "expression" term to
+	# further constrain the results.
+	my $last_update_line = "";
+	if (substr($last_update_token, 0, 1) eq "c") {
+		$last_update_token = "\"$last_update_token\"";
+		$last_update_line = qq[\n"since": $last_update_token,];
+	}
+	my $query = <<"	END";
+		["query", "$git_work_tree", {$last_update_line
+			"fields": ["name"],
+			"expression": ["not", ["dirname", ".git"]]
+		}]
+	END
+
+	# Uncomment for debugging the watchman query
+	# open (my $fh, ">", ".git/watchman-query.json");
+	# print $fh $query;
+	# close $fh;
+
+	print CHLD_IN $query;
+	close CHLD_IN;
+	my $response = do {local $/; <CHLD_OUT>};
+
+	# Uncomment for debugging the watch response
+	# open ($fh, ">", ".git/watchman-response.json");
+	# print $fh $response;
+	# close $fh;
+
+	die "Watchman: command returned no output.\n" .
+	"Falling back to scanning...\n" if $response eq "";
+	die "Watchman: command returned invalid output: $response\n" .
+	"Falling back to scanning...\n" unless $response =~ /^\{/;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub is_work_tree_watched {
+	my ($output) = @_;
+	my $error = $output->{error};
+	if ($retry > 0 and $error and $error =~ m/unable to resolve root .* directory (.*) is not watched/) {
+		$retry--;
+		my $response = qx/watchman watch "$git_work_tree"/;
+		die "Failed to make watchman watch '$git_work_tree'.\n" .
+		    "Falling back to scanning...\n" if $? != 0;
+		$output = $json_pkg->new->utf8->decode($response);
+		$error = $output->{error};
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		# Uncomment for debugging watchman output
+		# open (my $fh, ">", ".git/watchman-output.out");
+		# close $fh;
+
+		# Watchman will always return all files on the first query so
+		# return the fast "everything is dirty" flag to git and do the
+		# Watchman query just to get it over with now so we won't pay
+		# the cost in git to look up each individual file.
+		my $o = watchman_clock();
+		$error = $output->{error};
+
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		output_result($o->{clock}, ("/"));
+		$last_update_token = $o->{clock};
+
+		eval { launch_watchman() };
+		return 0;
+	}
+
+	die "Watchman: $error.\n" .
+	"Falling back to scanning...\n" if $error;
+
+	return 1;
+}
+
+sub get_working_dir {
+	my $working_dir;
+	if ($^O =~ 'msys' || $^O =~ 'cygwin') {
+		$working_dir = Win32::GetCwd();
+		$working_dir =~ tr/\\/\//;
+	} else {
+		require Cwd;
+		$working_dir = Cwd::cwd();
+	}
+
+	return $working_dir;
+}
+
+---
+### File: ./.git/logs/HEAD
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/logs/HEAD]
+0000000000000000000000000000000000000000 2d8947b0cf06a8a245724342ec2816295b2fc81f runner <runner@fv-az1326-577.(none)> 1741036606 +0000	checkout: moving from master to main
+
+---
+
+---
+
+---

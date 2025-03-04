@@ -1,0 +1,62 @@
+# YardMaster Analysis ReportPart11GeneratedMarch042025
+Generated: March 04, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/pre-merge-commit.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/pre-merge-commit.sample]
+#!/bin/sh
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git merge" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message to
+# stderr if it wants to stop the merge commit.
+#
+# To enable this hook, rename this file to "pre-merge-commit".
+
+. git-sh-setup
+test -x "$GIT_DIR/hooks/pre-commit" &&
+        exec "$GIT_DIR/hooks/pre-commit"
+:
+
+---
+### File: ./.git/objects/pack/pack-5f676f4dc14198d6b74724292e57b3e48a64dfaf.pack
+[Error: 'utf-8' codec can't decode byte 0xff in position 11: invalid start byte]
+---
+### File: ./.github/YardMaster Analysis ReportPart5GeneratedMarch032025
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.github/YardMaster Analysis ReportPart5GeneratedMarch032025]
+# YardMaster Analysis ReportPart5GeneratedMarch032025
+Generated: March 03, 2025
+
+## Repository Structure
+[Full structure here - truncated for brevity]
+
+## File Contents
+
+### File: ./.git/hooks/applypatch-msg.sample
+[Fetched from https://raw.githubusercontent.com/mtjoymadman/ai.redlionsalvage.net/main/./.git/hooks/applypatch-msg.sample]
+#!/bin/sh
+#
+# An example hook script to check the commit log message taken by
+# applypatch from an e-mail message.
+#
+# The hook should exit with non-zero status after issuing an
+# appropriate message if it wants to stop the commit.  The hook is
+# allowed to edit the commit message file.
+#
+# To enable this hook, rename this file to "applypatch-msg".
+
+. git-sh-setup
+commitmsg="$(git rev-parse --git-path hooks/commit-msg)"
+test -x "$commitmsg" && exec "$commitmsg" ${1+"$@"}
+:
+
+---
+### File: ./.git/index
+[Error: 'utf-8' codec can't decode byte 0xc6 in position 13: invalid continuation byte]
+---
+
+---
