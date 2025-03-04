@@ -28,10 +28,11 @@ jobs:
         run: |
           python generate_report.py
 
-      - name: Commit and Push Changes
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add .github/YardMaster\ Analysis\ ReportPart*
-          git diff --staged --quiet || git commit -m "Update report parts with latest changes - $(date +%Y-%m-%d)"
-          git push
+   - name: Commit and Push Changes
+  run: |
+    git config --global user.name "GitHub Action"
+    git config --global user.email "action@github.com"
+    git add .github/YardMaster\ Analysis\ ReportPart*
+    git pull --rebase origin main  # Syncs remote changes
+    git diff --staged --quiet || git commit -m "Update report parts with latest changes - $(date +%Y-%m-%d)"
+    git push
